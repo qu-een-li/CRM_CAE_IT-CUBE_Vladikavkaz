@@ -1,18 +1,12 @@
-import random
-import datetime
-import requests
-
-from flask import Flask, render_template, request, redirect, make_response, session
+from flask import Flask, render_template, request, redirect
 from config import KEY_CSRF
 from registrationform import RegistrationForm
 from data import db_session
-from data.students import Student
-from data.ways import Way
-from flask_login import LoginManager, login_user, logout_user
-from flask import jsonify
-from data.search_stud import SearchForm
+from data.student import Student
+from flask_login import LoginManager
+from forms.search_stud import SearchForm
 
-from api.api_regions import regions_api, get_regions_data
+from api.api_regions import regions_api
 from api.api_cities import cities_api, get_cities_data
 from api.api_schools import schools_api, get_schools_data
 
