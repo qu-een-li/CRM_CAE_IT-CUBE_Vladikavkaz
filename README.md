@@ -5,11 +5,20 @@ http://158.160.104.26:8080/
 
 Важные ссылки
 Папка проекта с документами 
+
 https://drive.google.com/drive/folders/1Djv-nK3yAf257FGMJqcDqXTqzmPxilBi?usp=sharing
-Таблица эффективности преподавателя
+
+
+Таблица эффективности преподавателя\
+
 https://drive.google.com/drive/folders/1LgF_OGrRa0zWhbWyTRgMPN4dmw5yaP3E
+
+
 Телемост для встреч
+
 https://telemost.yandex.ru/j/71768220253044
+
+
 
 
 ### Техническое задание (ТЗ) на разработку веб-приложения для автоматизации учёта учащихся в ЦДО it-cube «DRS»
