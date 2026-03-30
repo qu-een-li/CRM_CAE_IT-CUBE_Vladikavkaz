@@ -7,7 +7,8 @@ from .db_session import SqlAlchemyBase
 
 class Student(SqlAlchemyBase):
     __tablename__ = 'students'
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
+    id = sqlalchemy.Column(
+        sqlalchemy.Integer, primary_key=True, autoincrement=True)
     name_student = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     name_parent = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     birthday = sqlalchemy.Column(sqlalchemy.String, nullable=True)

@@ -3,9 +3,12 @@ from config import KEY_CSRF
 from registrationform import RegistrationForm
 from data import db_session
 from data.student import Student
+from data.group import Group
+from data.teacher import Teacher
+from data.schedule import Schedule
 from flask_login import LoginManager
 from forms.search_stud import SearchForm
-
+from forms.add_schedule import AddScheduleForm
 from api.api_regions import regions_api
 from api.api_cities import cities_api, get_cities_data
 from api.api_schools import schools_api, get_schools_data
@@ -85,13 +88,16 @@ def search():
         session = db_session.create_session()
         query = session.query(Student)
         if form.name_student.data:
-            query = query.filter(Student.name_student.ilike(f'%{form.name_student.data}%'))
+            query = query.filter(Student.name_student.ilike(
+                f'%{form.name_student.data}%'))
         if form.name_parent.data:
-            query = query.filter(Student.name_parent.ilike(f'%{form.name_parent.data}%'))
+            query = query.filter(Student.name_parent.ilike(
+                f'%{form.name_parent.data}%'))
         if form.birthday.data:
             query = query.filter(Student.birthday == form.birthday.data)
         if form.document.data:
-            query = query.filter(Student.document.ilike(f'%{form.document.data}%'))
+            query = query.filter(
+                Student.document.ilike(f'%{form.document.data}%'))
         if form.region.data:
             city_title = next((city["title"] for city in get_cities_data(int(form.region.data))
                                if str(city["id"]) == form.city.data), "")
@@ -103,13 +109,17 @@ def search():
         if form.PFDO.data:
             query = query.filter(Student.PFDO == form.PFDO.data)
         if form.parent_phone.data:
-            query = query.filter(Student.parent_phone.ilike(f'%{form.parent_phone.data}%'))
+            query = query.filter(Student.parent_phone.ilike(
+                f'%{form.parent_phone.data}%'))
         if form.student_phone.data:
-            query = query.filter(Student.student_phone.ilike(f'%{form.student_phone.data}%'))
+            query = query.filter(Student.student_phone.ilike(
+                f'%{form.student_phone.data}%'))
         if form.school_class.data:
-            query = query.filter(Student.school_class == form.school_class.data)
+            query = query.filter(Student.school_class ==
+                                 form.school_class.data)
         if form.adres_of_living.data:
-            query = query.filter(Student.adres_of_living.ilike(f'%{form.adres_of_living.data}%'))
+            query = query.filter(Student.adres_of_living.ilike(
+                f'%{form.adres_of_living.data}%'))
         students = query.all()
         return render_template("students.html", students=students)
     return render_template("search.html", form=form)
@@ -154,6 +164,26 @@ def edit_student(student_id):
         return redirect('/students')
 
     return render_template("edit_student.html", form=form, student_id=student_id, current_city=curr_city, current_school=curr_school)
+
+
+def get_full_teachers_initials_by_column(teacher: Teacher):
+    return f'{teacher.name} {teacher.patronymic} {teacher.surename}'
+
+
+@app.route('/add_schedule', methods=['GET', 'POST'])
+def add_schedule():
+    form = AddScheduleForm()
+    db_sess = db_session.create_session()
+    form.group.choices = [(group.id, f'"{group.name_of_group}" c {get_full_teachers_initials_by_column(group.teacher)}')
+                          for group in db_sess.query(Group).all()]
+    if form.validate_on_submit():
+        schedule = Schedule()
+        schedule.date = form.datetime.data.date
+        schedule.start_time = form.datetime.data.time
+        schedule.end_time = form.datetime.data.time + \
+            form.duration.data.hour * 60 + form.duration.data.minute
+        db_sess.add(schedule)
+    return render_template('add_schedule.html', form=form)
 
 
 if __name__ == '__main__':

@@ -8,6 +8,6 @@ class Schedule(SqlAlchemyBase):
                    autoincrement=True, nullable=False)
     group_id = sq.Column(sq.Integer, sq.ForeignKey(
         'groups.id'), nullable=False)
-    data = sq.column(sq.Date, nullable=False)
+    date = sq.Column(sq.Date, nullable=False)
     start_time = sq.Column(sq.Time, nullable=False)
     end_time = sq.Column(sq.Time, nullable=False)

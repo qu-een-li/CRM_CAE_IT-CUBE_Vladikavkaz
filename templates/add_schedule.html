@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Добавление события в расписание| IT-Куб Владикавказ{% endblock %}
+
+{% block page_title %}Добавление нового события{% endblock %}
+{% block page_subtitle %}Заполните все необходимые поля{% endblock %}
+
+{% block extra_css %}
+<style>
+    .registration-container {
+        background-color: white;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+    }
+    .btn-register {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white;
+    }
+    .btn-register:hover {
+        background-color: #bb2d3b;
+        border-color: #b02a37;
+    }
+    .invalid-feedback {
+        display: block;
+    }
+    .form-select {
+        width: 100%;
+        min-width: 100%;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="registration-container">
+        <h2 class="mb-4 text-center"><i class="bi bi-calendar2-week text-danger"></i>Форма создания события
+        </h2>
+
+        {% if message %}
+        <div class="alert alert-warning">
+            {{ message }}
+        </div>
+        {% endif %}
+
+        <form action="/add_schedule" method="post" novalidate class="needs-validation">
+            {{ form.hidden_tag() }}
+            <div class="mb-3">
+                <div>
+                    <label for="group" class="form-label">Занятие</label>
+                    {{ form.group(class="form-select")}}
+                    {% for error in form.group.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6 mb-3">
+                    <label for="datetime" class="form-label">Дата и время начала</label>
+                    {{ form.datetime(class="form-control") }}
+                    {% for error in form.datetime.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="duration" class="form-label">Длительность</label>
+                    {{ form.duration(class="form-control") }}
+                    {% for error in form.duration.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            </div>
+            <div class="d-flex justify-content-between pt-3">
+                <button type="reset" class="btn btn-outline-secondary">Сбросить</button>
+                {{ form.submit(class="btn btn-register") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
