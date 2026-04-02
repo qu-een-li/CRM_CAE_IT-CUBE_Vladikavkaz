@@ -12,7 +12,7 @@ from forms.add_schedule import AddScheduleForm
 from api.api_regions import regions_api
 from api.api_cities import cities_api, get_cities_data
 from api.api_schools import schools_api, get_schools_data
-
+from datetime import datetime, timedelta
 app = Flask(__name__)
 app.config['SECRET_KEY'] = KEY_CSRF
 
@@ -177,12 +177,25 @@ def add_schedule():
     form.group.choices = [(group.id, f'"{group.name_of_group}" c {get_full_teachers_initials_by_column(group.teacher)}')
                           for group in db_sess.query(Group).all()]
     if form.validate_on_submit():
+        is_there_problem = False
         schedule = Schedule()
-        schedule.date = form.datetime.data.date
-        schedule.start_time = form.datetime.data.time
-        schedule.end_time = form.datetime.data.time + \
-            form.duration.data.hour * 60 + form.duration.data.minute
-        db_sess.add(schedule)
+        schedule.group_id = int(form.group.data)
+        schedule.date = form.datetime.data.date()
+        dt = form.datetime.data
+        duration = timedelta(hours=form.duration.data.hour,
+                             minutes=form.duration.data.minute)
+        end_dt = duration + dt
+        schedule.start_time = dt.time()
+        schedule.end_time = end_dt.time()
+        print(dt.hour * 60 + dt.minute + duration.seconds / 60)
+        # проверка, что занятие кончиться в тот же день когда и началось
+        if dt.hour * 60 + dt.minute + duration.seconds / 60 >= 24 * 60:
+            form.duration.errors.append(
+                "the lesson may not start and end on different days")
+            is_there_problem = True
+        if not is_there_problem:
+            db_sess.add(schedule)
+            db_sess.commit()
     return render_template('add_schedule.html', form=form)
 
 
