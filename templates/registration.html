@@ -215,5 +215,25 @@
             }
         });
     });
+document.querySelector('form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    fetch('/add', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const newContent = doc.querySelector('.registration-container');
+        if (newContent) {
+            document.querySelector('.registration-container').innerHTML = newContent.innerHTML;
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
 </script>
 {% endblock %}
