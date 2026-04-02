@@ -1,38 +1,11 @@
-from flask import Flask, render_template, request, redirect
-from config import KEY_CSRF
+from flask import render_template, request, redirect
 from registrationform import RegistrationForm
 from data import db_session
 from data.student import Student
-from data.group import Group
-from data.teacher import Teacher
-from data.schedule import Schedule
-from flask_login import LoginManager
 from forms.search_stud import SearchForm
-from forms.add_schedule import AddScheduleForm
-from api.api_regions import regions_api
-from api.api_cities import cities_api, get_cities_data
-from api.api_schools import schools_api, get_schools_data
-from datetime import datetime, timedelta
-app = Flask(__name__)
-app.config['SECRET_KEY'] = KEY_CSRF
-
-app.register_blueprint(regions_api)
-app.register_blueprint(cities_api)
-app.register_blueprint(schools_api)
-
-login_manager = LoginManager()
-login_manager.init_app(app)
-
-
-@login_manager.user_loader
-def load_user(user_id):
-    db_sess = db_session.create_session()
-    return db_sess.query(Student).get(user_id)
-
-
-@app.route('/')
-def index():
-    return render_template("index.html")
+from api.api_cities import get_cities_data
+from api.api_schools import get_schools_data
+from application import app
 
 
 @app.route('/students', methods=['GET'])
@@ -164,41 +137,3 @@ def edit_student(student_id):
         return redirect('/students')
 
     return render_template("edit_student.html", form=form, student_id=student_id, current_city=curr_city, current_school=curr_school)
-
-
-def get_full_teachers_initials_by_column(teacher: Teacher):
-    return f'{teacher.name} {teacher.patronymic} {teacher.surename}'
-
-
-@app.route('/add_schedule', methods=['GET', 'POST'])
-def add_schedule():
-    form = AddScheduleForm()
-    db_sess = db_session.create_session()
-    form.group.choices = [(group.id, f'"{group.name_of_group}" c {get_full_teachers_initials_by_column(group.teacher)}')
-                          for group in db_sess.query(Group).all()]
-    if form.validate_on_submit():
-        is_there_problem = False
-        schedule = Schedule()
-        schedule.group_id = int(form.group.data)
-        schedule.date = form.datetime.data.date()
-        dt = form.datetime.data
-        duration = timedelta(hours=form.duration.data.hour,
-                             minutes=form.duration.data.minute)
-        end_dt = duration + dt
-        schedule.start_time = dt.time()
-        schedule.end_time = end_dt.time()
-        print(dt.hour * 60 + dt.minute + duration.seconds / 60)
-        # проверка, что занятие кончиться в тот же день когда и началось
-        if dt.hour * 60 + dt.minute + duration.seconds / 60 >= 24 * 60:
-            form.duration.errors.append(
-                "the lesson may not start and end on different days")
-            is_there_problem = True
-        if not is_there_problem:
-            db_sess.add(schedule)
-            db_sess.commit()
-    return render_template('add_schedule.html', form=form)
-
-
-if __name__ == '__main__':
-    db_session.global_init("db/reg_form.db")
-    app.run(port=8080, host='127.0.0.1')
