@@ -16,3 +16,4 @@ class Group(SqlAlchemyBase):
     )
     description = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     duration = sqlalchemy.Column(sqlalchemy.Time, nullable=False)
+    teacher = orm.relationship('Teacher')
