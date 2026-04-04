@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect
 from config import KEY_CSRF
-from registrationform import RegistrationForm
+from forms.registrationform import RegistrationForm
 from data import db_session
 from data.student import Student
 from flask_login import LoginManager
