@@ -1,0 +1,37 @@
+{% for day in days %}
+<table class="table table-hover mb-5">
+    <thead>
+        <tr>
+            <!-- Выводим дату дня из Python -->
+            <th colspan="4" class="text-center" style="background-color:rgb(54, 54, 54); color:aliceblue">
+                {{ day.date_string }}
+            </th>
+        </tr>
+        {%if day.events%}
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Название</th>
+            <th scope="col">Описание</th>
+            <th scope="col">Преподаватель</th>
+        </tr>
+        {%else%}
+        <tr>
+            <th colspan="4" class="text-center" scope="col" style="background-color:rgb(207, 207, 207);">Нет событий</th>
+        </tr>
+        {%endif%}
+    </thead>
+    <tbody>
+        {% for event in day.events %}
+        <tr>
+            <th scope="row">{{ loop.index }}</th>
+            <td>{{ event.title }}</td>
+            <td>{{ event.description }}</td>
+            <td>{{ event.teacher }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endfor %}
+
+<!-- Передаем JS следующую дату для запроса -->
+<div id="next-date-marker" data-next="{{ next_date }}"></div>
