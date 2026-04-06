@@ -1,6 +1,6 @@
 from app import app
 from data import db_session
-from routes import main, students, search, schedule
+from routes import main, students, search, schedule, group
 
 
 if __name__ == '__main__':
