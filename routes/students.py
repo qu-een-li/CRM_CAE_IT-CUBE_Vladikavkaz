@@ -1,5 +1,5 @@
 from app import app
-from flask import render_template, request, redirect
+from flask import render_template, request, redirect, flash
 from config import KEY_CSRF
 from forms.registrationform import RegistrationForm
 from data import db_session
@@ -50,6 +50,7 @@ def add():
                        adres_of_living=form.adres_of_living.data)
         session.add(user)
         session.commit()
+        flash('Ученик успешно зарегистрирован', 'success')
         return redirect("/add")
     return render_template("registration.html", form=form)
 

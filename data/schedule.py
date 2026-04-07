@@ -18,7 +18,7 @@ class Schedule(SqlAlchemyBase):
     is_rescheduled = sq.Column(sq.Boolean, default=False)
     rescheduled_to_date = sq.Column(sq.Date, nullable=True)
 
-    group = orm.relationship("Group", back_populates="schedule")
-    auditorium = orm.relationship("Auditorium")
-    attendances = orm.relationship("Attendance", back_populates="schedule",
-                                   cascade="all, delete-orphan")  # если бдует отменено занятие, то и посещаемость аннулируется
+    # group = orm.relationship("Group", back_populates="schedule")
+    # auditorium = orm.relationship("Auditorium")
+    # attendances = orm.relationship("Attendance", back_populates="schedule",
+    #                                cascade="all, delete-orphan")  # если бдует отменено занятие, то и посещаемость аннулируется

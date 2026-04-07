@@ -48,6 +48,16 @@
             {{ message }}
         </div>
         {% endif %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
         <form action="/add" method="post" novalidate class="needs-validation">
             {{ form.hidden_tag() }}
@@ -71,7 +81,10 @@
 
             <div class="mb-3">
                 <label for="birthday" class="form-label">Дата рождения</label>
-                {{ form.birthday(class="form-control", placeholder="ДД.ММ.ГГГГ") }}
+                <div class="date-input-wrapper">
+                    {{ form.birthday(class="form-control", id="student-birthday", placeholder="ДД.ММ.ГГГГ") }}
+                    <i class="bi bi-calendar3 calendar-icon" id="student-birthday-icon"></i>
+                </div>
                 {% for error in form.birthday.errors %}
                 <div class="invalid-feedback">{{ error }}</div>
                 {% endfor %}
@@ -113,14 +126,14 @@
             <div class="row mb-3">
                 <div class="col-md-6 mb-3">
                     <label for="parent_phone" class="form-label">Телефон родителя</label>
-                    {{ form.parent_phone(class="form-control") }}
+                    {{ form.parent_phone(class="form-control", type="tel", placeholder="+7 XXX XXX-XX-XX") }}
                     {% for error in form.parent_phone.errors %}
                     <div class="invalid-feedback">{{ error }}</div>
                     {% endfor %}
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="student_phone" class="form-label">Телефон ученика</label>
-                    {{ form.student_phone(class="form-control") }}
+                    {{ form.student_phone(class="form-control", type="tel", placeholder="+7 XXX XXX-XX-XX") }}
                     {% for error in form.student_phone.errors %}
                     <div class="invalid-feedback">{{ error }}</div>
                     {% endfor %}
@@ -163,6 +176,27 @@
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const studentBirthdayInput = document.getElementById('student-birthday');
+        const studentPicker = flatpickr(studentBirthdayInput, {
+            locale: "ru",
+            dateFormat: "d.m.Y",
+            maxDate: "today",
+            allowInput: true,
+            clickOpens: true,
+            onClose: function(selectedDates, dateStr, instance) {
+                if (selectedDates.length > 0) {
+                    const date = selectedDates[0];
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const year = date.getFullYear();
+                    instance.input.value = `${day}.${month}.${year}`;
+                }
+            }
+        });
+        document.getElementById('student-birthday-icon').addEventListener('click', function() {
+            studentPicker.open();
+        });
+
         const regionSelect = document.querySelector('#region');
         const citySelect = document.querySelector('#city');
         const schoolSelect = document.querySelector('#school');

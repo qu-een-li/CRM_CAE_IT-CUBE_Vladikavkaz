@@ -29,9 +29,9 @@ class Group(SqlAlchemyBase):
     add_days = sqlalchemy.Column(sqlalchemy.JSON, nullable=True)
 
 
-    study_period = orm.relationship("Study_period")
-    teacher = orm.relationship('Teacher')
-    direction = orm.relationship("Direction")
-    auditorium = orm.relationship("Auditorium")
-    students = orm.relationship("Student_in_Group", back_populates="group")
-    schedule = orm.relationship("Schedule", back_populates="group", cascade="all, delete-orphan") # если будет отменена группа, то и расписание отменится
+    # study_period = orm.relationship("Study_period")
+    # teacher = orm.relationship('Teacher')
+    # direction = orm.relationship("Direction")
+    # auditorium = orm.relationship("Auditorium")
+    # students = orm.relationship("Student_in_Group", back_populates="group")
+    # schedule = orm.relationship("Schedule", back_populates="group", cascade="all, delete-orphan") # если будет отменена группа, то и расписание отменится
