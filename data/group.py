@@ -12,6 +12,8 @@ class Group(SqlAlchemyBase):
     name_of_group = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     teacher_id = sqlalchemy.Column(
         sqlalchemy.Integer, sqlalchemy.ForeignKey("teachers.id"), nullable=False)
+    direction_id = sqlalchemy.Column(
+        sqlalchemy.Integer, sqlalchemy.ForeignKey("directions.id"), nullable=False)
     study_period_id = sqlalchemy.Column(
         sqlalchemy.Integer, sqlalchemy.ForeignKey("study_periods.id"), nullable=False)
     level_of_education = sqlalchemy.Column(
