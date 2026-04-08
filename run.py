@@ -1,6 +1,6 @@
 from app import app
 from data import db_session
-from routes import main, students, search, schedule
+from routes import main, students, search, schedule, groups
 import locale
 locale.setlocale(locale.LC_TIME, 'Russian_Russia.1251')
 

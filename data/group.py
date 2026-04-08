@@ -1,7 +1,7 @@
 import datetime
 import sqlalchemy
 from sqlalchemy import orm
-
+from data.student_in_group import student_in_group
 from .db_session import SqlAlchemyBase
 
 
@@ -24,3 +24,6 @@ class Group(SqlAlchemyBase):
     teacher = orm.relationship('Teacher')
     schedules = orm.relationship('Schedule', back_populates='group')
     study_period = orm.relationship('study_period')
+    direction = orm.relationship("Direction", back_populates='groups')
+    students = orm.relationship(
+        "Student", secondary=student_in_group, back_populates='groups')
