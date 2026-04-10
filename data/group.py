@@ -26,7 +26,7 @@ class Group(SqlAlchemyBase):
     duration = sqlalchemy.Column(sqlalchemy.Time, nullable=False)
     teacher = orm.relationship("Teacher")
     schedules = orm.relationship("Schedule", back_populates="group")
-    study_period = orm.relationship("study_period")
+    study_period = orm.relationship("Study_period")
     direction = orm.relationship("Direction", back_populates="groups")
     students = orm.relationship("Student", secondary=student_in_group, back_populates="groups")
     # после выбора типа группы это ьудет только для семестровых и только для мастер-классов

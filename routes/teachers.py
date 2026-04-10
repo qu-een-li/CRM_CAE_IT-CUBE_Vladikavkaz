@@ -5,14 +5,17 @@ from data import db_session
 from data.teacher import Teacher
 from forms.teacher_form import TeacherForm
 import os
+from datetime import datetime
 from config import UPLOAD_FOLDER
 from werkzeug.utils import secure_filename
 
 
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
+
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -35,11 +38,14 @@ def add_teacher():
                 photo.save(os.path.join(UPLOAD_FOLDER, photo_filename))
 
         teacher = Teacher(
-            surename=form.surename.data, name=form.name.data,
-            patronymic=form.patronymic.data, phone=form.phone.data,
-            email=form.email.data, birthday=form.birthday.data,
-            status=form.status.data, personal_photos=photo_filename
+            surename=form.surename.data,
+            name=form.name.data,
+            patronymic=form.patronymic.data,
+            phone=form.phone.data,
+            email=form.email.data,
+            status=form.status.data,
         )
+        teacher.birthday = datetime.strptime(form.birthday.data, "%d.%m.%Y").date()
 
         session.add(teacher)
         session.commit()
@@ -48,4 +54,3 @@ def add_teacher():
         return redirect("/add_teacher")
 
     return render_template("add_teacher.html", form=form)
-

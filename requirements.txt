@@ -3,3 +3,4 @@ Flask~=3.1.0
 SQLAlchemy~=2.0.40
 WTForms~=3.2.1
 Flask-Login~=0.6.3
+email-validator~=2.3.0
