@@ -1,11 +1,14 @@
 import sqlalchemy
 from .db_session import SqlAlchemyBase
+from sqlalchemy import orm
 
 
 class Direction(SqlAlchemyBase):
     __tablename__ = "directions"
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True, nullable=False)
+    id = sqlalchemy.Column(
+        sqlalchemy.Integer, primary_key=True, autoincrement=True, nullable=False)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    groups = orm.relationship('Group', back_populates='direction')
 
     @staticmethod
     def init_data(db_session):

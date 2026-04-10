@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}группы в направлении| IT-Куб Владикавказ{% endblock %}
+
+{% block page_title %}Список групп и участников в них{% endblock %}
+{% block page_subtitle %}Все доступные группы и их участники в направлении "{{direction_name}}"{% endblock %}
+
+{% block content %}
+<table style="width:95%;height:100%;border-collapse: collapse;" class="table table-bordered table-dark table-hover">
+  <colgroup>
+    <col style="width: 50px;">
+  </colgroup>
+  <caption>
+    Содержание направления "{{direction_name}}"
+  </caption>
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+
+        {%for header in table_data[0]%}
+      <th scope="col" style="text-align:center;">{{header}}</th>
+        {%endfor%}
+    </tr>
+  </thead>
+  <tbody>
+    {%for row in table_data[1:]%}
+    <tr>
+      <th scope="row">{{loop.index}}</th>
+      {%for cell_data in row%}
+      <td style="text-align:center;">{{cell_data}}</td>
+      {%endfor%}
+    </tr>
+    {%endfor%}
+  </tbody>
+</table>
+{% endblock %}

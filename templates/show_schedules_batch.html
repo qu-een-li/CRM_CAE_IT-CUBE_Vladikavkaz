@@ -9,24 +9,25 @@
         </tr>
         {%if day.events%}
         <tr>
-            <th scope="col">#</th>
-            <th scope="col">Название</th>
-            <th scope="col">Описание</th>
-            <th scope="col">Преподаватель</th>
+            <th scope="col">Начало-Конец</th>
+            <th scope="col">Понедельник</th>
+            <th scope="col">Вторник</th>
+            <th scope="col">Среда</th>
+            <th scope="col">Четверг</th>
+            <th scope="col">Пятница</th>
+            <th scope="col">Суббота</th>
+            <th scope="col">Воскресенье</th>
         </tr>
         {%else%}
         <tr>
-            <th colspan="4" class="text-center" scope="col" style="background-color:rgb(207, 207, 207);">Нет событий</th>
+            <th colspan="8" class="text-center" scope="col" style="background-color:rgb(207, 207, 207);">Нет событий</th>
         </tr>
         {%endif%}
     </thead>
     <tbody>
-        {% for event in day.events %}
+        {% for row in matrix %}
         <tr>
-            <th scope="row">{{ loop.index }}</th>
-            <td>{{ event.title }}</td>
-            <td>{{ event.description }}</td>
-            <td>{{ event.teacher }}</td>
+            {% for elem in row%}
         </tr>
         {% endfor %}
     </tbody>
