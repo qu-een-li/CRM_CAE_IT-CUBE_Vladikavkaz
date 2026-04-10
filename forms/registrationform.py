@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, EmailField, IntegerField, SelectField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Regexp
 
 from api.api_regions import get_regions_data
 from api.api_cities import get_cities_data
@@ -18,8 +18,15 @@ class RegistrationForm(FlaskForm):
     city = SelectField('Город', choices=[], validators=[DataRequired()])
     school = SelectField('Школа', choices=[], validators=[DataRequired()])
     PFDO = IntegerField('ПФДО', validators=[DataRequired()])
-    parent_phone = StringField('Телефон Родителя', validators=[DataRequired()])
-    student_phone = StringField('Телефон Ученика', validators=[DataRequired()])
+    parent_phone = StringField('Телефон Родителя', validators=[
+        DataRequired(),
+        Regexp(r'^\+7 \d{3} \d{3}-\d{2}-\d{2}$', message='Формат телефона: +7 XXX XXX-XX-XX')
+    ])
+
+    student_phone = StringField('Телефон Ученика', validators=[
+        DataRequired(),
+        Regexp(r'^\+7 \d{3} \d{3}-\d{2}-\d{2}$', message='Формат телефона: +7 XXX XXX-XX-XX')
+    ])
     school_class = IntegerField('Класс обучения ребёнка', validators=[DataRequired()])
     adres_of_living = StringField('Адрес Проживания', validators=[DataRequired()])
     submit = SubmitField('Зарегистрироваться')

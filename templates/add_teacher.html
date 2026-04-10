@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}Добавление наставника | IT-Куб Владикавказ{% endblock %}
+
+{% block page_title %}Регистрация нового наставника{% endblock %}
+{% block page_subtitle %}Заполните все необходимые поля{% endblock %}
+
+{% block extra_css %}
+<style>
+    .teacher-container {
+        background-color: white;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+    }
+    .btn-register {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white;
+    }
+    .btn-register:hover {
+        background-color: #bb2d3b;
+        border-color: #b02a37;
+    }
+    .invalid-feedback {
+        display: block;
+    }
+    .phone-input {
+        position: relative;
+    }
+    .phone-input input {
+        padding-left: 45px;
+    }
+    .phone-prefix {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="teacher-container">
+        <h2 class="mb-4 text-center"><i class="bi bi-person-badge-fill me-2 text-danger"></i>Форма регистрации наставника</h2>
+
+        {% if message %}
+        <div class="alert alert-warning">
+            {{ message }}
+        </div>
+        {% endif %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form action="/add_teacher" method="post" novalidate class="needs-validation">
+            {{ form.hidden_tag() }}
+
+            <div class="row mb-3">
+                <div class="col-md-4 mb-3">
+                    <label for="surename" class="form-label">Фамилия *</label>
+                    {{ form.surename(class="form-control", placeholder="Введите фамилию") }}
+                    {% for error in form.surename.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="name" class="form-label">Имя *</label>
+                    {{ form.name(class="form-control", placeholder="Введите имя") }}
+                    {% for error in form.name.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="patronymic" class="form-label">Отчество</label>
+                    {{ form.patronymic(class="form-control", placeholder="Введите отчество (необязательно)") }}
+                    {% for error in form.patronymic.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6 mb-3">
+                    <label for="phone" class="form-label">Телефон *</label>
+                    {{ form.phone(class="form-control", type="tel", placeholder="+7 XXX XXX-XX-XX") }}
+                    {% for error in form.phone.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="email" class="form-label">Email *</label>
+                    {{ form.email(class="form-control", placeholder="teacher@example.com") }}
+                    {% for error in form.email.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6 mb-3">
+                    <label for="birthday" class="form-label">Дата рождения *</label>
+                    <div class="date-input-wrapper">
+                        {{ form.birthday(class="form-control", id="teacher-birthday", placeholder="ДД.ММ.ГГГГ") }}
+                        <i class="bi bi-calendar3 calendar-icon" id="teacher-birthday-icon"></i>
+                    </div>
+                    {% for error in form.birthday.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="status" class="form-label">Статус *</label>
+                    {{ form.status(class="form-control", placeholder="Введите статус") }}
+                    {% for error in form.status.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="photo" class="form-label">Фотография</label>
+                {{ form.photo(class="form-control", id="photo-input", accept="image/*") }}
+                <small class="text-muted">Поддерживаемые форматы: JPG, JPEG, PNG, GIF</small>
+                {% for error in form.photo.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
+                <div class="photo-preview" id="photo-preview">
+                    <img id="preview-image" src="#" alt="Предпросмотр">
+                </div>
+            </div>
+            <div class="d-flex justify-content-between pt-3">
+                <button type="reset" class="btn btn-outline-secondary">Сбросить</button>
+                {{ form.submit(class="btn btn-register") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const photoInput = document.getElementById('photo-input');
+    const photoPreview = document.getElementById('photo-preview');
+    const previewImage = document.getElementById('preview-image');
+
+    photoInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                previewImage.src = event.target.result;
+                photoPreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            photoPreview.style.display = 'none';
+            previewImage.src = '#';
+        }
+    });
+
+    const teacherBirthdayInput = document.getElementById('teacher-birthday');
+
+    const teacherPicker = flatpickr(teacherBirthdayInput, {
+        locale: "ru",
+        dateFormat: "d.m.Y",
+        maxDate: "today",
+        allowInput: true,
+        clickOpens: true,
+        onClose: function(selectedDates, dateStr, instance) {
+            if (selectedDates.length > 0) {
+                const date = selectedDates[0];
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                instance.input.value = `${day}.${month}.${year}`;
+            }
+        }
+    });
+    document.getElementById('teacher-birthday-icon').addEventListener('click', function() {
+        teacherPicker.open();
+    });
+});
+</script>
+{% endblock %}
