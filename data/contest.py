@@ -1,5 +1,6 @@
 import sqlalchemy
 from .db_session import SqlAlchemyBase
+from sqlalchemy import orm
 
 
 class Contest(SqlAlchemyBase):
@@ -12,3 +13,6 @@ class Contest(SqlAlchemyBase):
     description = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     level_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("level_contests.id"), nullable=False)
     contest_organizer = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+
+    direction = orm.relationship("Direction")
+    level = orm.relationship("Level_contest")
