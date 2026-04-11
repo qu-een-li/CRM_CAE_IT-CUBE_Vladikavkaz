@@ -10,10 +10,16 @@ from app import app
 
 @app.route("/contests")
 def contests_list():
+    print("hgjhbj")
     db_sess = db_session.create_session()
     contests = db_sess.query(Contest).all()
-    today = date.today()
-    return render_template("contests.html", contests=contests, today=today)
+
+    # day_start = contests.date_start.strftime("%Y-%m-%d")
+    # day_end = contests.date_end.strftime("%Y-%m-%d")
+    day_start = "gvhbjn"
+    day_end = "hgjh"
+    print(day_start)
+    return render_template("contests.html", contests=contests)
 
 
 @app.route("/contest/<int:contest_id>")
@@ -36,7 +42,7 @@ def add_contest():
     if request.method == 'POST':
         contest = Contest()
         contest.name = request.form.get('name')
-        contest.date = request.form.get('start_date')
+        contest.date = request.form.get('date_start')
         contest.end_date = request.form.get('end_date') if request.form.get('end_date') else None
         contest.direction_id = int(request.form.get('direction_id'))
         contest.link_contest = request.form.get('link_contest')

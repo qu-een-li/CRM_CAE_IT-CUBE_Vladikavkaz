@@ -46,8 +46,8 @@
                 <i class="bi bi-person-video3 me-2"></i>Список наставников
             </a>
         </li>
-        <li class="{% if request.path == '/contests' or '/contest/' in request.path %}active{% endif %}">
-            <a href="{{ url_for('contests_list') }}" class="menu-link">
+        <li class="{% if request.path == '/contests' %}active{% endif %}">
+            <a href="/contests" class="menu-link">
                 <i class="bi bi-trophy-fill me-2"></i>Конкурсы
             </a>
         </li>

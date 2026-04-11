@@ -138,18 +138,17 @@
             <h4 class="mb-1">Доступные конкурсы</h4>
             <p class="text-muted">Участвуйте и побеждайте!</p>
         </div>
-        {% if current_user.is_authenticated and current_user.role == 'admin' %}
-        <a href="{{ url_for('contests.add_contest') }}" class="btn btn-danger">
+        <a href="/add_contest" class="btn btn-danger">
             <i class="bi bi-plus-circle"></i> Добавить конкурс
         </a>
-        {% endif %}
+
     </div>
     
     <div class="contests-grid">
         {% for contest in contests %}
         <div class="contest-card animate__animated animate__fadeInUp" data-delay="{{ loop.index * 100 }}">
             <div class="contest-header">
-                <a href="{{ url_for('contests.contest_details', contest_id=contest.id) }}" class="contest-title-link">
+                <a href="/contest_details" class="contest-title-link">
                     <h5 class="contest-title">{{ contest.name }}</h5>
                 </a>
             </div>
@@ -159,20 +158,26 @@
                         <i class="bi bi-calendar-event"></i> Дата начала:
                     </span>
                     <span class="contest-info-value">
-                        {{ contest.date.strftime('%d.%m.%Y') if contest.date else 'Не указана' }}
+                        {{ contest.date.strftime("%Y-%m-%d") }}
                     </span>
                 </div>
                 <div class="contest-info">
                     <span class="contest-info-label">
-                        <i class="bi bi-calendar-check"></i> Дата окончания:
+                            <i class="bi bi-calendar-check"></i> Дата окончания:
                     </span>
                     <span class="contest-info-value">
-                        {% if contest.end_date %}
-                            {{ contest.end_date.strftime('%d.%m.%Y') }}
-                        {% else %}
-                            Не указана
-                        {% endif %}
+                        Не указана
                     </span>
+<!--                    <span class="contest-info-label">-->
+<!--                        <i class="bi bi-calendar-check"></i> Дата окончания:-->
+<!--                    </span>-->
+<!--                    <span class="contest-info-value">-->
+<!--                        {% if contest.end_date %}-->
+<!--                            {{ end_date }}-->
+<!--                        {% else %}-->
+<!--                            Не указана-->
+<!--                        {% endif %}-->
+<!--                    </span>-->
                 </div>
                 <div class="contest-info">
                     <span class="contest-info-label">
@@ -183,15 +188,9 @@
                     </span>
                 </div>
                 <div class="mt-3">
-                    {% if contest.end_date and contest.end_date < today %}
-                        <span class="status-badge status-ended">Завершен</span>
-                    {% elif contest.date > today %}
-                        <span class="status-badge status-upcoming">Скоро начнется</span>
-                    {% else %}
-                        <span class="status-badge status-active">Активный</span>
-                    {% endif %}
+
                 </div>
-                <a href="{{ url_for('contests.contest_details', contest_id=contest.id) }}" class="btn btn-outline-danger btn-details">
+                <a href="/contest_details" class="btn btn-outline-danger btn-details">
                     Подробнее <i class="bi bi-arrow-right"></i>
                 </a>
             </div>

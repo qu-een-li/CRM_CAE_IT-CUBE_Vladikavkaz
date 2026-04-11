@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block title %}{{ contest.name }} | IT-Куб Владикавказ{% endblock %}
+
+{% block page_title %}Подробности конкурса{% endblock %}
+{% block page_subtitle %}{{ contest.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .contest-detail-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .detail-section {
+        padding: 1.5rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: #dc3545;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .detail-value {
+        font-size: 1.1rem;
+        color: #333;
+        line-height: 1.6;
+    }
+
+    .contest-link {
+        color: #dc3545;
+        text-decoration: none;
+        word-break: break-all;
+        transition: all 0.3s ease;
+    }
+
+    .contest-link:hover {
+        color: #c82333;
+        text-decoration: underline;
+    }
+
+    .level-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 25px;
+        font-size: 0.9rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .action-buttons {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="mb-3">
+        <a href="{{ url_for('contests.contests_list') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Назад к конкурсам
+        </a>
+    </div>
+
+    <div class="contest-detail-card">
+        <div class="detail-section">
+            <div class="detail-label">Название конкурса</div>
+            <div class="detail-value">
+                <h3 class="text-danger mb-0">{{ contest.name }}</h3>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <div class="row">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <div class="detail-label">
+                        <i class="bi bi-calendar-event"></i> Дата начала
+                    </div>
+                    <div class="detail-value">
+                        {{ contest.start_date.strftime('%d.%m.%Y') }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-label">
+                        <i class="bi bi-calendar-check"></i> Дата окончания
+                    </div>
+                    <div class="detail-value">
+                        {{ contest.end_date.strftime('%d.%m.%Y') }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <div class="detail-label">
+                <i class="bi bi-compass"></i> Направление
+            </div>
+            <div class="detail-value">
+                {{ contest.direction.name }}
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <div class="detail-label">
+                <i class="bi bi-link-45deg"></i> Ссылка на конкурс
+            </div>
+            <div class="detail-value">
+                {% if contest.link_contest %}
+                <a href="{{ contest.link_contest }}" target="_blank" class="contest-link">
+                    {{ contest.link_contest }} <i class="bi bi-box-arrow-up-right"></i>
+                </a>
+                {% else %}
+                Не указана
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <div class="detail-label">
+                <i class="bi bi-file-text"></i> Описание
+            </div>
+            <div class="detail-value">
+                {{ contest.description if contest.description else 'Нет описания' }}
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <div class="detail-label">
+                <i class="bi bi-trophy"></i> Уровень конкурса
+            </div>
+            <div class="detail-value">
+                {% if contest.level %}
+                <span class="level-badge">{{ contest.level.name }}</span>
+                {% else %}
+                Не указан
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <div class="detail-label">
+                <i class="bi bi-building"></i> Организатор конкурса
+            </div>
+            <div class="detail-value">
+                {{ contest.contest_organizer }}
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <div class="action-buttons">
+                <a href="{{ url_for('contests.edit_contest', contest_id=contest.id) }}" class="btn btn-warning">
+                    <i class="bi bi-pencil"></i> Редактировать
+                </a>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="bi bi-trash"></i> Удалить
+                </button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal удаления -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Подтверждение удаления</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Вы уверены, что хотите удалить конкурс <strong>"{{ contest.name }}"</strong>?</p>
+                <p class="text-danger">Это действие невозможно отменить.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <form action="{{ url_for('contests.delete_contest', contest_id=contest.id) }}" method="POST">
+                    <button type="submit" class="btn btn-danger">Удалить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
