@@ -3,6 +3,30 @@
 {% block content %}
 <div class="row mb-4 g-4">
     <div class="col-md-3">
+        <div class="card dashboard-card animate__animated animate__fadeInUp" data-delay="400">
+            <div class="card-body text-center p-4">
+                <div class="card-icon mb-3 text-danger">
+                    <i class="bi bi-calendar4-week"></i>
+                </div>
+                <h5>Расписание</h5>
+                <p class="small text-muted">Расписание по неделям</p>
+                <a href="/show_schedules" class="btn btn-danger btn-sm stretched-link">Перейти</a>
+            </div>
+        </div>
+    </div>
+     <div class="col-md-3">
+        <div class="card dashboard-card animate__animated animate__fadeInUp" data-delay="300">
+            <div class="card-body text-center p-4">
+                <div class="card-icon mb-3 text-danger">
+                    <i class="bi bi-search"></i>
+                </div>
+                <h5>Поиск ученика</h5>
+                <p class="small text-muted">Поиск по базе данных</p>
+                <a href="/search" class="btn btn-danger btn-sm stretched-link">Перейти</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
         <div class="card dashboard-card animate__animated animate__fadeInUp" data-delay="100">
             <div class="card-body text-center p-4">
                 <div class="card-icon mb-3 text-danger">
@@ -20,49 +44,15 @@
                 <div class="card-icon mb-3 text-danger">
                     <i class="bi bi-people-fill"></i>
                 </div>
-                <h5>Список учащихся</h5>
+                <h5>Списки учащихся</h5>
                 <p class="small text-muted">Все зарегистрированные ученики</p>
                 <a href="/students" class="btn btn-danger btn-sm stretched-link">Перейти</a>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card dashboard-card animate__animated animate__fadeInUp" data-delay="300">
-            <div class="card-body text-center p-4">
-                <div class="card-icon mb-3 text-danger">
-                    <i class="bi bi-search"></i>
-                </div>
-                <h5>Поиск</h5>
-                <p class="small text-muted">Поиск по базе данных</p>
-                <a href="/search" class="btn btn-danger btn-sm stretched-link">Перейти</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card dashboard-card animate__animated animate__fadeInUp" data-delay="400">
-            <div class="card-body text-center p-4">
-                <div class="card-icon mb-3 text-danger">
-                    <i class="bi bi-file-earmark-excel-fill"></i>
-                </div>
-                <h5>Экспорт</h5>
-                <p class="small text-muted">Экспорт данных в Excel</p>
-                <a href="#export" class="btn btn-danger btn-sm stretched-link">Перейти</a>
-            </div>
-        </div>
-    </div>
+
     
-    <div class="col-md-3">
-        <div class="card dashboard-card animate__animated animate__fadeInUp" data-delay="400">
-            <div class="card-body text-center p-4">
-                <div class="card-icon mb-3 text-danger">
-                    <i class="bi bi-calendar4-week"></i>
-                </div>
-                <h5>Расписание</h5>
-                <p class="small text-muted">Расписание по неделям</p>
-                <a href="/show_schedules" class="btn btn-danger btn-sm stretched-link">Перейти</a>
-            </div>
-        </div>
-    </div>
+
 
 </div>
 
