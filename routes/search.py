@@ -18,7 +18,8 @@ def search():
         if form.name_parent.data:
             query = query.filter(Student.name_parent.ilike(f'%{form.name_parent.data}%'))
         if form.birthday.data:
-            query = query.filter(Student.birthday == form.birthday.data)
+            birthday = datetime.strptime(form.birthday.data, "%d.%m.%Y").date()
+            query = query.filter(Student.birthday == birthday)
         if form.document.data:
             query = query.filter(Student.document.ilike(f'%{form.document.data}%'))
         if form.region.data:

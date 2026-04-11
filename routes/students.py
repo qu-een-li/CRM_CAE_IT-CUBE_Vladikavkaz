@@ -6,6 +6,7 @@ from data import db_session
 from data.student import Student
 from api.api_cities import get_cities_data
 from api.api_schools import get_schools_data
+from datetime import datetime
 
 
 @app.route('/students', methods=['GET'])
@@ -48,6 +49,7 @@ def add():
                        school=school_title, parent_phone=form.parent_phone.data,
                        student_phone=form.student_phone.data, school_class=form.school_class.data,
                        adres_of_living=form.adres_of_living.data)
+        user.birthday = datetime.strptime(form.birthday.data, "%d.%m.%Y").date()
         session.add(user)
         session.commit()
         flash('Ученик успешно зарегистрирован', 'success')
@@ -82,12 +84,12 @@ def edit_student(student_id):
 
     if request.method == "POST":
         update_student = Student(id=student_id, name_student=form.name_student.data, name_parent=form.name_parent.data,
-                                 birthday=form.birthday.data,
                                  PFDO=form.PFDO.data, city=student.city, school=student.school,
                                  student_phone=form.student_phone.data,
                                  parent_phone=form.parent_phone.data, school_class=form.school_class.data,
                                  document=form.document.data,
                                  adres_of_living=form.adres_of_living.data)
+        update_student.birthday = datetime.strptime(form.birthday.data, "%d.%m.%Y").date()
         db_sess.delete(student)
         db_sess.add(update_student)
         db_sess.commit()
