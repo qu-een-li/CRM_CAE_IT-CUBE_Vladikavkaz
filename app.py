@@ -9,7 +9,7 @@ from api.api_schools import schools_api
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = KEY_CSRF
+app.config["SECRET_KEY"] = KEY_CSRF
 
 app.register_blueprint(regions_api)
 app.register_blueprint(cities_api)
