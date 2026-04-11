@@ -23,10 +23,10 @@ class Schedule(SqlAlchemyBase):
         date_of_schedule = self.date
         date_of_schedule: date
         period_type = self.group.study_period.reporting_period
-        if period_type == "week":
-            return cur_date.weekday() == date_of_schedule.weekday()
-        if period_type == "single":
-            return date_of_schedule == cur_date.date()
-        if period_type == "year":
-            return cur_date.month == date_of_schedule.month and cur_date.day == date_of_schedule.day
+        # if period_type == "week":
+        return cur_date.weekday() == date_of_schedule.weekday()
+        # if period_type == "single":
+        # return date_of_schedule == cur_date.date()
+        # if period_type == "year":
+        #     return cur_date.month == date_of_schedule.month and cur_date.day == date_of_schedule.day
         return False

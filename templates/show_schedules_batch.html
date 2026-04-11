@@ -1,38 +1,50 @@
-{% for day in days %}
-<table class="table table-hover mb-5">
-    <thead>
+<table class="table table-bordered table-hover mb-5">
+    <thead class="thead-dark">
         <tr>
-            <!-- Выводим дату дня из Python -->
-            <th colspan="4" class="text-center" style="background-color:rgb(54, 54, 54); color:aliceblue">
-                {{ day.date_string }}
+            <!-- Заголовок с диапазоном дат или общей информацией -->
+            <th colspan="8" class="text-center" style="background-color:rgb(54, 54, 54); color:aliceblue">
+                {{week_interval}}
             </th>
         </tr>
-        {%if day.events%}
         <tr>
-            <th scope="col">Начало-Конец</th>
-            <th scope="col">Понедельник</th>
-            <th scope="col">Вторник</th>
-            <th scope="col">Среда</th>
-            <th scope="col">Четверг</th>
-            <th scope="col">Пятница</th>
-            <th scope="col">Суббота</th>
-            <th scope="col">Воскресенье</th>
+            <th scope="col" style="width: 15%;">Время</th>
+            <th scope="col">Пн</th>
+            <th scope="col">Вт</th>
+            <th scope="col">Ср</th>
+            <th scope="col">Чт</th>
+            <th scope="col">Пт</th>
+            <th scope="col">Сб</th>
+            <th scope="col">Вс</th>
         </tr>
-        {%else%}
-        <tr>
-            <th colspan="8" class="text-center" scope="col" style="background-color:rgb(207, 207, 207);">Нет событий</th>
-        </tr>
-        {%endif%}
     </thead>
     <tbody>
         {% for row in matrix %}
         <tr>
-            {% for elem in row%}
+            <!-- Первая колонка: интервал времени (строка) -->
+            <td class="align-middle font-weight-bold">{{ row[0] }}</td>
+            
+            <!-- Остальные 7 колонок: события (списки) -->
+            {% for day_events in row[1:] %}
+            <td class="p-0">
+                {% if day_events %}
+                <table class="table table-sm m-0 border-0">
+                    <tbody>
+                        {% for event in day_events %}
+                        <tr>
+                            <td class="border-0">{{ event.title }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center text-muted small py-2">-</div>
+                {% endif %}
+            </td>
+            {% endfor %}
         </tr>
         {% endfor %}
     </tbody>
 </table>
-{% endfor %}
 
 <!-- Передаем JS следующую дату для запроса -->
 <div id="next-date-marker" data-next="{{ next_date }}"></div>
