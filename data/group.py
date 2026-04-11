@@ -16,7 +16,7 @@ class Group(SqlAlchemyBase):
     auditorium_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("auditoriums.id"), nullable=True)
 
     level_of_education = sqlalchemy.Column(
-        sqlalchemy.String, sqlalchemy.Enum("вводный", "базовый", "углубленный"), nullable=False
+        sqlalchemy.String, sqlalchemy.Enum("вводный", "углубленный", "проектный"), nullable=False
     )
     group_type = sqlalchemy.Column(
         sqlalchemy.String, sqlalchemy.Enum("семестровый", "интенсив", "мастер-класс"), nullable=False

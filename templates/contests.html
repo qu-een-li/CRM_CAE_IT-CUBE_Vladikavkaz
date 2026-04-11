@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Конкурсы | IT-Куб Владикавказ{% endblock %}
+
+{% block page_title %}Конкурсы{% endblock %}
+{% block page_subtitle %}Актуальные конкурсы и соревнования{% endblock %}
+
+{% block extra_css %}
+<style>
+    .contests-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+        padding: 1rem 0;
+    }
+    
+    .contest-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+    }
+    
+    .contest-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(220, 53, 69, 0.2);
+    }
+    
+    .contest-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1.5rem;
+        color: white;
+    }
+    
+    .contest-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+        margin: 0;
+        transition: all 0.3s ease;
+        display: inline-block;
+        position: relative;
+    }
+    
+    .contest-title-link {
+        text-decoration: none;
+        color: inherit;
+        display: inline-block;
+    }
+    
+    .contest-title-link:hover .contest-title {
+        transform: translateX(5px);
+    }
+    
+    .contest-title::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: white;
+        transition: width 0.3s ease;
+    }
+    
+    .contest-title-link:hover .contest-title::after {
+        width: 100%;
+    }
+    
+    .contest-body {
+        padding: 1.5rem;
+    }
+    
+    .contest-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .contest-info-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .contest-info-value {
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .status-active {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-upcoming {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-ended {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .btn-details {
+        width: 100%;
+        margin-top: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-details:hover {
+        transform: translateX(5px);
+    }
+    
+    @media (max-width: 768px) {
+        .contests-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="mb-1">Доступные конкурсы</h4>
+            <p class="text-muted">Участвуйте и побеждайте!</p>
+        </div>
+        {% if current_user.is_authenticated and current_user.role == 'admin' %}
+        <a href="{{ url_for('contests.add_contest') }}" class="btn btn-danger">
+            <i class="bi bi-plus-circle"></i> Добавить конкурс
+        </a>
+        {% endif %}
+    </div>
+    
+    <div class="contests-grid">
+        {% for contest in contests %}
+        <div class="contest-card animate__animated animate__fadeInUp" data-delay="{{ loop.index * 100 }}">
+            <div class="contest-header">
+                <a href="{{ url_for('contests.contest_details', contest_id=contest.id) }}" class="contest-title-link">
+                    <h5 class="contest-title">{{ contest.name }}</h5>
+                </a>
+            </div>
+            <div class="contest-body">
+                <div class="contest-info">
+                    <span class="contest-info-label">
+                        <i class="bi bi-calendar-event"></i> Дата начала:
+                    </span>
+                    <span class="contest-info-value">
+                        {{ contest.date.strftime('%d.%m.%Y') if contest.date else 'Не указана' }}
+                    </span>
+                </div>
+                <div class="contest-info">
+                    <span class="contest-info-label">
+                        <i class="bi bi-calendar-check"></i> Дата окончания:
+                    </span>
+                    <span class="contest-info-value">
+                        {% if contest.end_date %}
+                            {{ contest.end_date.strftime('%d.%m.%Y') }}
+                        {% else %}
+                            Не указана
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="contest-info">
+                    <span class="contest-info-label">
+                        <i class="bi bi-building"></i> Организатор:
+                    </span>
+                    <span class="contest-info-value">
+                        {{ contest.contest_organizer[:30] + '...' if contest.contest_organizer|length > 30 else contest.contest_organizer }}
+                    </span>
+                </div>
+                <div class="mt-3">
+                    {% if contest.end_date and contest.end_date < today %}
+                        <span class="status-badge status-ended">Завершен</span>
+                    {% elif contest.date > today %}
+                        <span class="status-badge status-upcoming">Скоро начнется</span>
+                    {% else %}
+                        <span class="status-badge status-active">Активный</span>
+                    {% endif %}
+                </div>
+                <a href="{{ url_for('contests.contest_details', contest_id=contest.id) }}" class="btn btn-outline-danger btn-details">
+                    Подробнее <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                <i class="bi bi-info-circle"></i> Пока нет добавленных конкурсов
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
