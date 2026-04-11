@@ -53,27 +53,28 @@ def get_more_days():
     first_day_of_week = datetime.strptime(start_date_str, "%Y-%m-%d")
     first_day_of_week -= timedelta(days=first_day_of_week.weekday())
     last_day_of_week = first_day_of_week + timedelta(days=7)
-    with create_session() as db_sess:
-        schedules = db_sess.query(Schedule).options(joinedload(Schedule.group)).all()
+    db_sess = create_session()
+    schedules = db_sess.query(Schedule).options(joinedload(Schedule.group)).all()
 
-        unique_times = sorted(
-            list(set(f'{s.start_time.strftime("%H:%M")}-{s.end_time.strftime("%H:%M")}' for s in schedules))
-        )
+    unique_times = sorted(
+        list(set(f'{s.start_time.strftime("%H:%M")}-{s.end_time.strftime("%H:%M")}' for s in schedules))
+    )
 
-        matrix = []
-        for time_key in unique_times:
-            row = [time_key]  # Первая колонка — время
-            for day_offset in range(7):
-                cur_date = first_day_of_week + timedelta(days=day_offset)
-                events = []
-                for s in schedules:
-                    s_time = f'{s.start_time.strftime("%H:%M")}-{s.end_time.strftime("%H:%M")}'
-                    if s_time == time_key and s.is_schedule_at_date(cur_date):
-                        events.append({"title": s.group.name_of_group})
-                row.append(events)
-            matrix.append(row)
+    matrix = []
+    for time_key in unique_times:
+        row = [time_key]  # Первая колонка — время
+        for day_offset in range(7):
+            cur_date = first_day_of_week + timedelta(days=day_offset)
+            events = []
+            for s in schedules:
+                s_time = f'{s.start_time.strftime("%H:%M")}-{s.end_time.strftime("%H:%M")}'
+                if s_time == time_key and s.is_schedule_at_date(cur_date):
+                    events.append({"title": s.group.name_of_group})
+            row.append(events)
+        matrix.append(row)
 
-        next_date = (first_day_of_week + timedelta(days=7)).strftime("%Y-%m-%d")
+    next_date = (first_day_of_week + timedelta(days=7)).strftime("%Y-%m-%d")
+    print(matrix)
     return render_template(
         "show_schedules_batch.html",
         matrix=matrix,
