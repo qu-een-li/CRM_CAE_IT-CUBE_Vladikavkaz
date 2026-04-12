@@ -6,6 +6,7 @@
 {% block page_subtitle %}Актуальные конкурсы и соревнования{% endblock %}
 
 {% block extra_css %}
+
 <style>
     .contests-grid {
         display: grid;
@@ -29,29 +30,28 @@
     }
     
     .contest-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #ff6663 0%, #c82333 100%);
         padding: 1.5rem;
         color: white;
     }
-    
-    .contest-title {
-        font-size: 1.25rem;
-        font-weight: bold;
-        margin: 0;
-        transition: all 0.3s ease;
-        display: inline-block;
-        position: relative;
-    }
-    
-    .contest-title-link {
-        text-decoration: none;
-        color: inherit;
-        display: inline-block;
-    }
-    
-    .contest-title-link:hover .contest-title {
-        transform: translateX(5px);
-    }
+
+.contest-title-link,
+.contest-title-link:link,
+.contest-title-link:visited {
+    color: white !important;  /* обычное состояние - белый */
+    text-decoration: none;
+}
+
+.contest-title-link:hover,
+.contest-title-link:active,
+.contest-title-link:focus {
+    color: #7B1B38 !important;  /* при наведении - КРАСНЫЙ */
+    text-decoration: none;
+}
+
+.contest-title-link:hover .contest-title {
+    color: #7B1B38 !important;
+}
     
     .contest-title::after {
         content: '';
@@ -143,7 +143,7 @@
         </a>
 
     </div>
-    
+
     <div class="contests-grid">
         {% for contest in contests %}
         <div class="contest-card animate__animated animate__fadeInUp" data-delay="{{ loop.index * 100 }}">
@@ -168,16 +168,16 @@
                     <span class="contest-info-value">
                         Не указана
                     </span>
-<!--                    <span class="contest-info-label">-->
-<!--                        <i class="bi bi-calendar-check"></i> Дата окончания:-->
-<!--                    </span>-->
-<!--                    <span class="contest-info-value">-->
-<!--                        {% if contest.end_date %}-->
-<!--                            {{ end_date }}-->
-<!--                        {% else %}-->
-<!--                            Не указана-->
-<!--                        {% endif %}-->
-<!--                    </span>-->
+                    <!--                    <span class="contest-info-label">-->
+                    <!--                        <i class="bi bi-calendar-check"></i> Дата окончания:-->
+                    <!--                    </span>-->
+                    <!--                    <span class="contest-info-value">-->
+                    <!--                        {% if contest.end_date %}-->
+                    <!--                            {{ end_date }}-->
+                    <!--                        {% else %}-->
+                    <!--                            Не указана-->
+                    <!--                        {% endif %}-->
+                    <!--                    </span>-->
                 </div>
                 <div class="contest-info">
                     <span class="contest-info-label">
