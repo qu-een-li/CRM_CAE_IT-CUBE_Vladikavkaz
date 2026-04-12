@@ -7,6 +7,21 @@ from data.schedule import Schedule
 from data.teacher import Teacher
 from datetime import timedelta, datetime
 from sqlalchemy.orm import joinedload
+from babel.dates import format_date
+
+
+def get_week_range(d1, d2):
+    locale = "ru"
+    year = d1.year
+
+    if d1.month == d2.month:
+        days = f"{d1.day}–{d2.day}"
+        month_year = format_date(d2, format="MMMM yyyy г.", locale=locale)
+        return f"{days} {month_year}"
+    else:
+        start = format_date(d1, format="d MMMM", locale=locale)
+        end = format_date(d2, format="d MMMM yyyy г.", locale=locale)
+        return f"{start} — {end}"
 
 
 def get_full_teachers_initials_by_column(teacher: Teacher):
@@ -78,5 +93,5 @@ def get_more_days():
         "show_schedules_batch.html",
         matrix=matrix,
         next_date=next_date,
-        week_interval=f'{first_day_of_week.strftime("%B")} {first_day_of_week.strftime("%Y.%m.%d")} - {last_day_of_week.strftime("%Y.%m.%d")}',
+        week_interval=get_week_range(first_day_of_week, last_day_of_week),
     )

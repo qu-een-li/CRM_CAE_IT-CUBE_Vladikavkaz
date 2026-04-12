@@ -22,7 +22,7 @@ class Schedule(SqlAlchemyBase):
     def is_schedule_at_date(self, cur_date: datetime):
         date_of_schedule = self.date
         date_of_schedule: date
-        period_type = self.group.study_period.reporting_period
+        # period_type = self.group.study_period.reporting_period
         # if period_type == "week":
         return cur_date.weekday() == date_of_schedule.weekday()
         # if period_type == "single":

@@ -18,7 +18,7 @@
     <div class="sidebar-header text-center py-4">
         <img src="{{ url_for('static', filename='images/it-cube.png') }}" alt="IT-Куб" class="logo mb-3">
         <h4 class="text-white">IT-Куб Владикавказ</h4>
-        <p class="text-muted small">CRM для СДО</p>
+        <p class="text-muted small">CRM для ЦДО</p>
     </div>
     <ul class="sidebar-menu">
         <li class="{% if request.path == '/' %}active{% endif %}">
@@ -97,7 +97,9 @@
             <div class="row align-items-center">
                 <div class="col-md-8">
                     <h1 class="display-6 fw-bold">
-                        <i class="bi bi-speedometer2 me-3 text-danger"></i>{% block page_title %}Система управления данными для ЦДО{%
+                        <i class="bi bi-speedometer2 me-3 text-danger"></i>{% block page_title %}CRM для центра дополнительного образования
+
+{%
                         endblock %}
                     </h1>
                     <p class="lead">{% block page_subtitle %}управление данными об учащихся, педагогах, участиях в конкурсах{%
