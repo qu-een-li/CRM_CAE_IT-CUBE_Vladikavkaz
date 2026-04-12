@@ -1,13 +1,27 @@
+<style>.cell-hover:hover {
+    background-color: #dbdbdb !important; /* Светло-серый (стандарт Bootstrap) */
+    cursor: pointer;                      /* Указатель в виде пальца */
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.1); /* Легкая внутренняя тень для объема */
+    transition: background-color 0.2s;    /* Плавность */
+}
+.cell-hover {
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+.fulled-cell:hover {
+    background-color: 
+#cccccc !important; 
+}
+</style>
 <table class="table table-bordered table-hover mb-5">
     <thead class="thead-dark">
         <tr>
             <!-- Заголовок с диапазоном дат или общей информацией -->
-            <th colspan="8" class="text-center" style="background-color:rgb(54, 54, 54); color:aliceblue">
+            <th colspan="8" style="background-color:rgb(54, 54, 54); color:aliceblue; text-align: right; font-size: 1.4rem">
                 {{week_interval}}
             </th>
         </tr>
         <tr>
-            th scope="col" style="width: 15%;">Время</th>
+            <th scope="col" style="width: 8%;">Время</th>
             <th scope="col">Пн</th>
             <th scope="col">Вт</th>
             <th scope="col">Ср</th>
@@ -25,19 +39,19 @@
 
             <!-- Остальные 7 колонок: события (списки) -->
             {% for day_events in row[1:] %}
-            <td class="p-0">
+            <td class="p-0 cell-hover" style="height: 100%">
                 {% if day_events %}
                 <table class="table table-sm m-0 border-0">
-                    <tbody>
+                    <tbody style="display: table; width: 100%; height: 100%;">
                         {% for event in day_events %}
                         <tr>
-                            <td class="border-0">{{ event.title }}</td>
+                            <td class="border-0 fulled-cell" style='font-size: 1.1rem'>{{ event.title }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
                 {% else %}
-                <div class="text-center text-muted small py-2">-</div>
+                <div style="min-height: 100%; font-size: 1.2rem; text-align: center">-</div>
                 {% endif %}
             </td>
             {% endfor %}
