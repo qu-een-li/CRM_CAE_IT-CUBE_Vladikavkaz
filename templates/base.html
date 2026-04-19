@@ -47,6 +47,11 @@
                 <i class="bi bi-person-video3 me-2"></i>Список наставников
             </a>
         </li>
+        <li class="{% if request.path == '/directions' %}active{% endif %}">
+            <a href="/directions" class="menu-link">
+                <i class="bi bi-compass"></i> Направления
+            </a>
+        </li>
         <li class="{% if request.path == '/contests' or '/contest/' in request.path %}active{% endif %}">
             <a href="{{ url_for('contests_list') }}" class="menu-link">
                 <i class="bi bi-trophy-fill me-2"></i>Конкурсы
@@ -63,7 +68,7 @@
             </a>
         </li>
         <li>
-            <a href="#settings" class="menu-link">
+            <a href="/under_construction" class="menu-link">
                 <i class="bi bi-gear-fill me-2"></i>Настройки
             </a>
         </li>

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Список направлений| IT-Куб Владикавказ{% endblock %}
+{% block page_title %}Список направлений{% endblock %}
+{% block page_subtitle %}Все доступные на данный момент направления{% endblock %}
+{% block extra_css %}
+<style>
+    .students-table {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        width: 98%;
+        margin: 0 auto;
+    }
+    .table th {
+        background-color: #dc3545;
+        color: white;
+        position: sticky;
+        top: 0;
+    }
+    .table td {
+        vertical-align: middle;
+        padding: 0 !important; /* Убираем паддинг у td, чтобы ссылка заполнила всё пространство */
+    }
+
+    .table td a {
+        display: block;
+        padding: 0.75rem; /* Возвращаем паддинг внутри ссылки, чтобы по ней было удобно попадать */
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .table-hover tbody tr:hover td {
+        background-color: rgba(220, 53, 69, 0.1);
+    }
+    .table-container {
+    }
+    .edit-icon {
+        color: #6c757d;
+        font-size: 1.1rem;
+        cursor: pointer;
+    }
+    .edit-icon:hover {
+        color: #dc3545;
+    }
+</style>
+
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4" style="max-width: 98%;">
+    <div class="students-table">
+        <div class="table-container">
+            <table class="table table-hover">
+                <caption>
+                    *Вы можете посмотреть состав направления при нажатии на него
+                </caption>
+                <thead>
+                    <tr>
+                        <th>Название направления</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for direction in directions %}
+                        <tr class="clickable-row" style="cursor: pointer;">
+                            <td class="p-0">
+                                <a href="/direction/{{ direction.id }}/groups" class="d-block w-100 h-100 p-3 text-decoration-none text-dark">
+                                    {{ direction.name }}
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

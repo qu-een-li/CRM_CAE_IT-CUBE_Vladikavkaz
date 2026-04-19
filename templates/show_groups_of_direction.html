@@ -1,12 +1,19 @@
 {% extends "base.html" %}
 
 {% block title %}группы в направлении| IT-Куб Владикавказ{% endblock %}
-
+{%block extra_css%}
+<style>
+  .table-hover tbody tr td:hover, 
+  .table-hover tbody tr th:hover {
+    background-color: rgba(0, 0, 0, 0.035) !important; /* Настраиваемая степень затемнения */
+    transition: background-color 0.2s ease; /* Плавный переход */
+  }
+</style>{%endblock%}
 {% block page_title %}Список групп и участников в них{% endblock %}
 {% block page_subtitle %}Все доступные группы и их участники в направлении "{{direction_name}}"{% endblock %}
 
 {% block content %}
-<table style="width:95%;height:100%;border-collapse: collapse;" class="table table-bordered table-dark table-hover">
+<table style="width:95%;height:100%;border-collapse: collapse;" class="table table-bordered table-white table-hover">
   <colgroup>
     <col style="width: 50px;">
   </colgroup>
