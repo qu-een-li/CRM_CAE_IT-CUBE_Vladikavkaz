@@ -33,7 +33,8 @@ def add_schedule():
     form = AddScheduleForm()
     db_sess = create_session()
     form.group.choices = [
-        (group.id, f'"{group.name_of_group}" c {get_full_teachers_initials_by_column(group.teacher)}')
+        (group.id,
+         f'"{group.name_of_group}" c {get_full_teachers_initials_by_column(group.teacher)}')
         for group in db_sess.query(Group).all()
     ]
     if form.validate_on_submit():
@@ -42,14 +43,16 @@ def add_schedule():
         schedule.group_id = int(form.group.data)
         schedule.date = form.datetime.data.date()
         dt = form.datetime.data
-        duration = timedelta(hours=form.duration.data.hour, minutes=form.duration.data.minute)
+        duration = timedelta(hours=form.duration.data.hour,
+                             minutes=form.duration.data.minute)
         end_dt = duration + dt
         schedule.start_time = dt.time()
         schedule.end_time = end_dt.time()
         print(dt.hour * 60 + dt.minute + duration.seconds / 60)
         # проверка, что занятие кончиться в тот же день когда и началось
         if dt.hour * 60 + dt.minute + duration.seconds / 60 >= 24 * 60:
-            form.duration.errors.append("the lesson may not start and end on different days")
+            form.duration.errors.append(
+                "the lesson may not start and end on different days")
             is_there_problem = True
         if not is_there_problem:
             db_sess.add(schedule)
@@ -64,35 +67,42 @@ def show_schedules():
 
 @app.route("/get_more_days")
 def get_more_days():
+    n_of_weeks = 3
     start_date_str = request.args.get("start_date")
-    first_day_of_week = datetime.strptime(start_date_str, "%Y-%m-%d")
-    first_day_of_week -= timedelta(days=first_day_of_week.weekday())
-    last_day_of_week = first_day_of_week + timedelta(days=7)
+    list_of_matrix_and_interval = []
     db_sess = create_session()
-    schedules = db_sess.query(Schedule).options(joinedload(Schedule.group)).all()
+    schedules = db_sess.query(Schedule).options(
+        joinedload(Schedule.group)).all()
+    for _ in range(n_of_weeks):
+        first_day_of_week = datetime.strptime(start_date_str, "%Y-%m-%d")
+        first_day_of_week -= timedelta(days=first_day_of_week.weekday())
+        last_day_of_week = first_day_of_week + timedelta(days=7)
 
-    unique_times = sorted(
-        list(set(f'{s.start_time.strftime("%H:%M")}-{s.end_time.strftime("%H:%M")}' for s in schedules))
-    )
+        unique_times = sorted(
+            list(set(
+                f'{s.start_time.strftime("%H:%M")}-{s.end_time.strftime("%H:%M")}' for s in schedules))
+        )
 
-    matrix = []
-    for time_key in unique_times:
-        row = [time_key]  # Первая колонка — время
-        for day_offset in range(7):
-            cur_date = first_day_of_week + timedelta(days=day_offset)
-            events = []
-            for s in schedules:
-                s_time = f'{s.start_time.strftime("%H:%M")}-{s.end_time.strftime("%H:%M")}'
-                if s_time == time_key and s.is_schedule_at_date(cur_date):
-                    events.append({"title": s.group.name_of_group})
-            row.append(events)
-        matrix.append(row)
+        matrix = []
+        for time_key in unique_times:
+            row = [time_key]  # Первая колонка — время
+            for day_offset in range(7):
+                cur_date = first_day_of_week + timedelta(days=day_offset)
+                events = []
+                for s in schedules:
+                    s_time = f'{s.start_time.strftime("%H:%M")}-{s.end_time.strftime("%H:%M")}'
+                    if s_time == time_key and s.is_schedule_at_date(cur_date):
+                        events.append({"title": s.group.name_of_group})
+                row.append(events)
+            matrix.append(row)
 
-    next_date = (first_day_of_week + timedelta(days=7)).strftime("%Y-%m-%d")
-    print(matrix)
+        next_date = (first_day_of_week + timedelta(days=7)
+                     ).strftime("%Y-%m-%d")
+        start_date_str = next_date
+        list_of_matrix_and_interval.append(
+            (matrix, get_week_range(first_day_of_week, last_day_of_week - timedelta(days=1))))
     return render_template(
         "show_schedules_batch.html",
-        matrix=matrix,
+        list_of_matrix=list_of_matrix_and_interval,
         next_date=next_date,
-        week_interval=get_week_range(first_day_of_week, last_day_of_week),
     )

@@ -20,3 +20,8 @@ def internal_server_error(e):
         "error_code": "500",
     }
     return render_template("error.html", **parameters)
+
+
+@app.route('/under_construction')
+def under_construction():
+    return render_template('under_construction.html')

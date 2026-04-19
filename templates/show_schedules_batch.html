@@ -12,6 +12,7 @@
 #cccccc !important; 
 }
 </style>
+{% for matrix, week_interval in list_of_matrix%}
 <table class="table table-bordered table-hover mb-5">
     <thead class="thead-dark">
         <tr>
@@ -59,6 +60,7 @@
         {% endfor %}
     </tbody>
 </table>
+{%endfor%}
 
 <!-- Передаем JS следующую дату для запроса -->
 <div id="next-date-marker" data-next="{{ next_date }}"></div>
