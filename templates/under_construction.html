@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Страница в разработке</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI';
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+        .container {
+            text-align: center;
+            padding: 20px;
+        }
+        .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        p {
+            font-size: 1.2rem;
+            color: #666;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .loader {
+            margin: 30px auto;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .btn-custom {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); /* Градиент */
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px; /* Скругленные края */
+            text-decoration: none;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease; /* Плавная анимация */
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3); /* Мягкая тень */
+            border: none;
+            display: inline-block;
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-2px); /* Эффект парения при наведении */
+            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+            color: white;
+            filter: brightness(1.1);
+        }
+
+        .btn-custom:active {
+            transform: translateY(1px);
+            background: #d2006b; /* Красный цвет из палитры IT-Cube */
+            box-shadow: inset 0 3px 5px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="icon">🏗️</div>
+        <h1>Уже работаем над этим</h1>
+        <p>Данная страница находится на этапе разработки. Совсем скоро здесь появится что-то интересное!</p>
+        <!-- <div class="loader"></div> -->
+        <a href="/" class="btn-custom mt-3" style="margin-bottom: 10%; margin-top: 5%"><span>Вернуться на главную</span></a>
+    </div>
+
+</body>
+</html>

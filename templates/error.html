@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    </style>
+    <title>Страница не найдена</title>
+    <!-- Подключаем Bootstrap для быстрых отступов (mb-3 и т.д.) -->
+    <link href="https://jsdelivr.net" rel="stylesheet">
+    <style>
+        body, html {
+            height: 100%; /* Обязательно для центрирования по вертикали */
+            margin: 0;
+             font-size: 1.1rem;
+
+        }
+        .error-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Центр по вертикали */
+            align-items: center;    /* Центр по горизонтали */
+            height: 100vh;          /* Высота на весь экран */
+            text-align: center;
+
+        }
+        .logo {
+            max-width: 150px; 
+            width: 250px; /* Укажите нужный вам размер в пикселях */
+            height: auto;
+            display: block;
+            margin: 0 auto 0rem; /* Центрирует и добавляет отступ снизу */
+            transition: transform 0.8s ease-in-out; /* Плавность вращения */
+            cursor: pointer;
+        }
+        .logo:hover {
+            transform: rotate(45deg); /* Поворот на 165 градусов */
+        }
+        /* Стили для красивой кнопки */
+        .btn-custom {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); /* Градиент */
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px; /* Скругленные края */
+            text-decoration: none;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease; /* Плавная анимация */
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3); /* Мягкая тень */
+            border: none;
+            display: inline-block;
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-2px); /* Эффект парения при наведении */
+            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+            color: white;
+            filter: brightness(1.1);
+        }
+
+        .btn-custom:active {
+            transform: translateY(1px);
+            background: #d2006b; /* Красный цвет из палитры IT-Cube */
+            box-shadow: inset 0 3px 5px rgba(0,0,0,0.2);
+        }
+
+        .red-wrap {
+            background: #e2f2ff;
+            border-radius: 15px;
+            padding: 60px 30px;
+            display: inline-block;
+            border: 3px solid #000000; 
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        .white-wrap {
+            background: linear-gradient(135deg, #b7acca 0%, #bdddff 100%);
+            border-radius: 5px;
+            padding: 1px 0px;
+            display: inline-block;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <!-- Ваш логотип -->
+        <div class='red-wrap'>
+        <div class="white-wrap">
+        <img src="{{ url_for('static', filename='images/it-cube.png') }}" 
+             alt="IT-Куб" class="logo mb-3">
+        </div>
+        <h1 class="display-1 fw-bold" style="margin-bottom: 0px; margin-top: 0px;">{{error_code}}</h1>
+        <h3 class="fs   ё-3 text-muted" style="margin-bottom: 3px">{{up_message}}</h3>
+        <h4 class="lead">{{down_message}}</h4>
+        <a href="/" class="btn-custom mt-3" style="margin-bottom: 10%; margin-top: 5%"><span>Вернуться на главную</span></a>
+         </div>
+    </div>
+</body>
+</html>

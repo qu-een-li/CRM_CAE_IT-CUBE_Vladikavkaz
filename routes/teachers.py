@@ -34,7 +34,8 @@ def add_teacher():
         if form.photo.data:
             photo = form.photo.data
             if photo and allowed_file(photo.filename):
-                photo_filename = secure_filename(f"{form.surename.data}_{form.name.data}_{photo.filename}")
+                photo_filename = secure_filename(
+                    f"{form.surename.data}_{form.name.data}_{photo.filename}")
                 photo.save(os.path.join(UPLOAD_FOLDER, photo_filename))
 
         teacher = Teacher(
@@ -45,7 +46,8 @@ def add_teacher():
             email=form.email.data,
             status=form.status.data,
         )
-        teacher.birthday = datetime.strptime(form.birthday.data, "%d.%m.%Y").date()
+        teacher.birthday = datetime.strptime(
+            form.birthday.data, "%d.%m.%Y").date()
 
         session.add(teacher)
         session.commit()
@@ -54,3 +56,8 @@ def add_teacher():
         return redirect("/add_teacher")
 
     return render_template("add_teacher.html", form=form)
+
+
+@app.route('/teachers')
+def list_of_teachers():
+    return redirect('/under_construction')
