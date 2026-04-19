@@ -5,7 +5,7 @@ import os
 from config import UPLOAD_FOLDER
 import locale
 
-locale.setlocale(locale.LC_TIME, "Russian_Russia.1251")
+locale.setlocale(locale.LC_TIME, "Russian_Russia.65001")
 
 if __name__ == "__main__":
 
