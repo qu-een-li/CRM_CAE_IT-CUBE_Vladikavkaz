@@ -7,6 +7,13 @@ from itertools import zip_longest
 from data.group_service import GroupService
 
 
+@app.route("/directions")
+def list_directions():
+    db_sess = create_session()
+    directions = db_sess.query(Direction).all()
+    return render_template("directions.html", directions=directions)
+
+
 @app.route("/direction/<int:direction_id>/groups")
 def show_groups_from_direction(direction_id: int):
     db_sess = create_session()
