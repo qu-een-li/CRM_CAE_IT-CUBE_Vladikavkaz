@@ -6,11 +6,11 @@ from flask_login import LoginManager
 from api.api_regions import regions_api
 from api.api_cities import cities_api
 from api.api_schools import schools_api
-
+from flask_wtf.csrf import CSRFProtect
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = KEY_CSRF
-
+csrf = CSRFProtect(app)
 app.register_blueprint(regions_api)
 app.register_blueprint(cities_api)
 app.register_blueprint(schools_api)
