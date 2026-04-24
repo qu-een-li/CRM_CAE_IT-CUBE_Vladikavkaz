@@ -124,11 +124,8 @@ for i in range(N_OF_TEACHER):
         teacher.email = f'{choice(MAIL_TEMPLATES[0])}{randint(1, 100)}@{choice(MAIL_TEMPLATES[1])}'
     else:
         teacher.email = f'{choice(MAIL_TEMPLATES[0])}@{choice(MAIL_TEMPLATES[1])}'
-    syms = ascii_lowercase + '0123456789/' + ascii_lowercase.upper()
-    teacher.personal_photos = 'data:image/jpeg;base64,/'
-    for _ in range(15):
-        teacher.personal_photos += choice(syms)
-    teacher.status = ''
+    teacher.personal_photos = "anonymous.jpg"
+    teacher.status = ""
     teacher.phone = randint(11111111111, 99999999999)
     teacher.phone = int('7' + str(teacher.phone))
     birth_month = randint(1, 12)

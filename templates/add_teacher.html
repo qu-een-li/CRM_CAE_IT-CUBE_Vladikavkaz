@@ -72,7 +72,7 @@
             {% endif %}
         {% endwith %}
 
-        <form action="/add_teacher" method="post" novalidate class="needs-validation">
+        <form action="/add_teacher" method="post" enctype="multipart/form-data" novalidate class="needs-validation">
             {{ form.hidden_tag() }}
 
             <div class="row mb-3">
