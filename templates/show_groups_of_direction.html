@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}группы в направлении| IT-Куб Владикавказ{% endblock %}
+{% block title %}Группы в направлении| IT-Куб Владикавказ{% endblock %}
 {%block extra_css%}
 <style>
   .table-hover tbody tr td:hover, 
@@ -8,11 +8,270 @@
     background-color: rgba(0, 0, 0, 0.035) !important; /* Настраиваемая степень затемнения */
     transition: background-color 0.2s ease; /* Плавный переход */
   }
-</style>{%endblock%}
+  .min-width {
+    width: min-content
+  }
+.settings-btn {
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 2px 6px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  color: #ffffff;
+  background-color: #6b6b6b;
+}
+
+.settings-btn:hover {
+  background-color: #f0f0f0;
+  border-color: #bbb;
+  color: #5c5c5c;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.popup-content {
+  background-color: #ffffff;
+  min-width: 150px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1050; /* Чтобы быть выше таблицы и навигации */
+  display: flex;
+  flex-direction: column;
+  padding: 5px 0;
+  overflow: hidden;
+  animation: fadeIn 0.1s ease-out;
+}
+
+.popup-content button {
+  background: none;
+  border: none;
+  padding: 15px 10px;
+  text-align: left;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Отступ между будущей иконкой и текстом */
+}
+
+.popup-content button:hover {
+  background-color: #f8f9fa;
+  color: #007bff; /* Цвет при наведении */
+}
+
+.popup-content button:not(:last-child) {
+  border-bottom: 1px solid #f1f1f1;
+}
+
+/* Плавное появление */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.delete-button {
+  color: black;
+}
+.popup-content .delete-button:hover {
+  color: red !important;
+}
+.menu-item {
+  display: flex;
+  align-items: center; /* Центровка по вертикали */
+  justify-content: space-between; /* Текст слева, селект справа */
+  padding: 10px 15px;
+  background-color: #fff;
+  border-bottom: 1px solid #f1f1f1;
+  gap: 10px; /* Расстояние между текстом и селектом */
+}
+
+.menu-item span {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+.menu-item select {
+  padding: 5px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.menu-item select:focus {
+  border-color: #007bff; /* Цвет рамки при клике */
+}
+
+</style>
+{%endblock%}
+{% block extra_js %}
+<script>
+// Глобальные переменные для хранения данных выбранной ячейки
+let activeCellId = null;
+let activeGroupId = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const menu = document.getElementById('cellMenu');
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.settings-btn');
+        const isMenuClick = e.target.closest('#cellMenu');
+
+        if (btn) {
+            e.stopPropagation();
+            
+            // Получаем ID студента и группы из data-атрибутов кнопки
+          activeCellId = btn.getAttribute('data-id');
+          activeGroupId = btn.getAttribute('data-group-id');            
+            // Позиционирование меню
+            const rect = btn.getBoundingClientRect();
+            menu.style.display = 'flex';
+            menu.style.top = `${rect.bottom + 5}px`; 
+            menu.style.left = `${rect.left}px`;
+            
+            // Сброс выбора в выпадающем списке
+            if (groupSelect) groupSelect.value = "";
+        } 
+        // Закрытие меню при клике вне его области
+        else if (!isMenuClick) {
+            menu.style.display = 'none';
+        }
+    });
+});
+
+/**
+ * Основной обработчик действий меню
+ * @param {string} type - тип действия ('move' или 'clear')
+ */
+function action(type, newGroupId) { 
+    if (type === 'move') {
+        if (!newGroupId) {  
+            alert("Выберите группу для перевода!");
+            return;
+        }
+        move_student_from_group_to_another(activeCellId, activeGroupId, newGroupId);
+    }
+    
+    if (type === 'clear') {
+        if (confirm('Вы уверены, что хотите удалить ученика из этой группы?')) {
+            delete_student_from_group(activeCellId, activeGroupId);
+        }
+    }
+    document.getElementById('cellMenu').style.display = 'none';
+}
+/**
+ * Отправка запроса на удаление студента из группы
+ */
+function delete_student_from_group(student_id, group_id) {
+    const url = `/groups/${group_id}/${student_id}`;
+
+    fetch(url, {
+        method: 'DELETE', 
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            // Передаем CSRF-токен, который генерирует Flask-WTF
+            'X-CSRFToken': "{{ csrf_token() }}"
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            // Если сервер вернул 200 OK или 204 No Content
+            location.reload(); 
+        } else if (response.status === 401 || response.status === 403) {
+            alert('Ошибка доступа: возможно, сессия истекла. Обновите страницу.');
+        } else {
+            alert('Произошла ошибка при удалении (код ' + response.status + ')');
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка запроса:', error);
+        alert('Не удалось связаться с сервером');
+    });
+}
+
+function add_student_to_group(student_id, group_id) {
+    const url = `/groups/${group_id}/${student_id}`;
+
+    fetch(url, {
+        method: 'POST', 
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            // Передаем CSRF-токен, который генерирует Flask-WTF
+            'X-CSRFToken': "{{ csrf_token() }}"
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            location.reload(); 
+        } else if (response.status === 401 || response.status === 403) {
+            alert('Ошибка доступа: возможно, сессия истекла. Обновите страницу.');
+        } else {
+            alert('Произошла ошибка при добавлении (код ' + response.status + ')');
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка запроса:', error);
+        alert('Не удалось связаться с сервером');
+    });
+}
+
+async function move_student_from_group_to_another(student_id, group_id_old, group_id_new) {
+    console.log(`Перенос студента ${student_id} из ${group_id_old} в ${group_id_new}`);
+    
+    try {
+        // Сначала удаляем из старой группы
+        const deleteRes = await fetch(`/groups/${group_id_old}/${student_id}`, { 
+            method: 'DELETE',
+            headers: { 'X-CSRFToken': "{{ csrf_token() if csrf_token is defined else '' }}" }
+        });
+
+        if (deleteRes.ok) {
+            // Если удаление успешно, добавляем в новую
+            const addRes = await fetch(`/groups/${group_id_new}/${student_id}`, { 
+                method: 'POST', // Обычно добавление — это POST
+                headers: { 'X-CSRFToken': "{{ csrf_token() if csrf_token is defined else '' }}" }
+            });
+
+            if (addRes.ok) {
+                location.reload(); // Перезагружаем только после успеха обоих запросов
+            } else {
+                alert("произошла ошибка при добавлении ученика в новую группу.");
+            }
+        } else {
+            alert("Ошибка при попытке исключить ученика из текущей группы.");
+        }
+    } catch (e) {
+        console.error("Ошибка сети:", e);
+    }
+}
+
+</script>
+{% endblock %}
 {% block page_title %}Список групп и участников в них{% endblock %}
 {% block page_subtitle %}Все доступные группы и их участники в направлении "{{direction_name}}"{% endblock %}
 
 {% block content %}
+<div id="cellMenu" class="popup-content" style="display: none; position: fixed;">
+  <!-- Обертка для имитации кнопки с выбором -->
+  <div class="menu-item">
+    <span>Перенести в:</span>
+    <select onchange="action('move', this.value)">
+      <option value="" disabled selected>Выберите...</option>
+      {%for group in groups%}
+      <option value="{{group.id}}">{{group.name_of_group}}</option>
+      {%endfor%}
+    </select>
+  </div>
+  
+  <button onclick="action('clear')" class="delete-button">Удалить</button>
+</div>
 <table style="width:95%;height:100%;border-collapse: collapse;" class="table table-bordered table-white table-hover">
   <colgroup>
     <col style="width: 50px;">
@@ -29,15 +288,28 @@
         {%endfor%}
     </tr>
   </thead>
-  <tbody>
-    {%for row in table_data[1:]%}
-    <tr>
-      <th scope="row">{{loop.index}}</th>
-      {%for cell_data in row%}
-      <td style="text-align:center;">{{cell_data}}</td>
-      {%endfor%}
-    </tr>
-    {%endfor%}
-  </tbody>
+    <tbody>
+      {% for row in table_data[1:] %}
+        <tr>
+          <th scope="row">{{ loop.index }}</th>
+          
+          {% for student in row %}
+            <td style="text-align: left;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span>{{ student.name_student }}</span>
+                {%if student.id%}
+                  <button class="settings-btn" 
+                          data-id="{{ student.id }}" 
+                          data-group-id="{{ groups[loop.index0].id }}">
+                      <i class="bi bi-gear-fill"></i>
+                  </button>                
+                {%endif%}
+              </div>
+            </td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+
 </table>
 {% endblock %}
