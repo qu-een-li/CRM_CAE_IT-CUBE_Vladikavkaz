@@ -47,6 +47,16 @@
                 <i class="bi bi-person-video3 me-2"></i>Список наставников
             </a>
         </li>
+        <li class="{% if request.path == '/add_schedule' %}active{% endif %}">
+            <a href="/add_schedule" class="menu-link">
+                <i class="bi bi-calendar-plus"></i> Добавить событие
+            </a>
+        </li>
+        <li class="{% if request.path == '/show_schedules' %}active{% endif %}">
+            <a href="/show_schedules" class="menu-link">
+                <i class="bi bi-calendar4-week"></i> Расписание
+            </a>
+        </li>
         <li class="{% if request.path == '/directions' %}active{% endif %}">
             <a href="/directions" class="menu-link">
                 <i class="bi bi-compass"></i> Направления
