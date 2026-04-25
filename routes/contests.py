@@ -4,7 +4,7 @@ from data import db_session
 from data.contest import Contest
 from data.direction import Direction
 from data.level_contest import Level_contest
-from datetime import date
+from datetime import date, datetime
 from app import app
 
 
@@ -13,7 +13,7 @@ def contests_list():
     db_sess = db_session.create_session()
     contests = db_sess.query(Contest).all()
     today = date.today()
-    return render_template("contests.html", contests=contests, today=today)
+    return render_template("contests.html", contests=contests, today=today, date=date)
 
 
 @app.route("/contest/<int:contest_id>")
@@ -27,7 +27,6 @@ def contest_details(contest_id):
 
 
 @app.route('/add_contest', methods=['GET', 'POST'])
-@login_required
 def add_contest():
     db_sess = db_session.create_session()
     directions = db_sess.query(Direction).all()
@@ -36,8 +35,24 @@ def add_contest():
     if request.method == 'POST':
         contest = Contest()
         contest.name = request.form.get('name')
-        contest.date = request.form.get('start_date')
-        contest.end_date = request.form.get('end_date') if request.form.get('end_date') else None
+        # contest.date = request.form.get('start_date')
+        # contest.end_date = request.form.get('end_date') if request.form.get('end_date') else None
+
+        start_date = request.form.get('start_date')
+        if start_date:
+            if start_date:
+                try:
+                    contest.date = datetime.strptime(start_date, '%d.%m.%Y').date()
+                except ValueError:
+                    contest.date = datetime.strptime(start_date, '%Y-%m-%d').date()
+
+        end_date = request.form.get('end_date')
+        if end_date:
+            try:
+                contest.end_date = datetime.strptime(end_date, '%d.%m.%Y').date()
+            except ValueError:
+                contest.end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+
         contest.direction_id = int(request.form.get('direction_id'))
         contest.link_contest = request.form.get('link_contest')
         contest.description = request.form.get('description')
@@ -74,8 +89,23 @@ def edit_contest(contest_id):
 
     if request.method == 'POST':
         contest.name = request.form.get('name')
-        contest.date = request.form.get('start_date')
-        contest.end_date = request.form.get('end_date') if request.form.get('end_date') else None
+        start_date = request.form.get('start_date')
+
+        if start_date:
+            try:
+                contest.date = datetime.strptime(start_date, '%d.%m.%Y').date()
+            except ValueError:
+                contest.date = datetime.strptime(start_date, '%Y-%m-%d').date()
+
+        end_date = request.form.get('end_date')
+        if end_date:
+            try:
+                contest.end_date = datetime.strptime(end_date, '%d.%m.%Y').date()
+            except ValueError:
+                contest.end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+        else:
+            contest.end_date = None
+
         contest.direction_id = int(request.form.get('direction_id'))
         contest.link_contest = request.form.get('link_contest')
         contest.description = request.form.get('description')

@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} | IT-Куб Владикавказ{% endblock %}
+
+{% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}Заполните информацию о конкурсе{% endblock %}
+
+{% block extra_css %}
+<style>
+    .contest-container {
+        background-color: white;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+    }
+    .btn-register {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white;
+    }
+    .btn-register:hover {
+        background-color: #bb2d3b;
+        border-color: #b02a37;
+    }
+    .invalid-feedback {
+        display: block;
+    }
+    .date-input-wrapper {
+        position: relative;
+    }
+    .calendar-icon {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #6c757d;
+        z-index: 10;
+        font-size: 1.2rem;
+    }
+    .calendar-icon:hover {
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="contest-container">
+        <h2 class="mb-4 text-center">
+            <i class="bi bi-trophy-fill me-2 text-danger"></i>
+            {{ 'Редактирование конкурса' if contest else 'Добавление конкурса' }}
+        </h2>
+
+        {% if message %}
+        <div class="alert alert-warning">
+            {{ message }}
+        </div>
+        {% endif %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="post" novalidate class="needs-validation">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="mb-3">
+                <label for="name" class="form-label">Название конкурса</label>
+                <input type="text" class="form-control" id="name" name="name"
+                       value="{{ contest.name if contest else '' }}"
+                       placeholder="Введите название конкурса" required>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6 mb-3">
+                    <label for="start_date" class="form-label">Дата начала</label>
+                    <div class="date-input-wrapper">
+                        <input type="text" class="form-control" id="start_date" name="start_date"
+                               placeholder="ДД.ММ.ГГГГ"
+                               value="{{ contest.date.strftime('%d.%m.%Y') if contest and contest.date else '' }}" required>
+                        <i class="bi bi-calendar3 calendar-icon" id="start-date-icon"></i>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="end_date" class="form-label">Дата окончания</label>
+                    <div class="date-input-wrapper">
+                        <input type="text" class="form-control" id="end_date" name="end_date"
+                               placeholder="ДД.ММ.ГГГГ"
+                               value="{{ contest.end_date.strftime('%d.%m.%Y') if contest and contest.end_date else '' }}">
+                        <i class="bi bi-calendar3 calendar-icon" id="end-date-icon"></i>
+                    </div>
+                    <small class="text-muted">Необязательно</small>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6 mb-3">
+                    <label for="direction_id" class="form-label">Направление</label>
+                    <select class="form-select" id="direction_id" name="direction_id" required>
+                        <option value="">Выберите направление</option>
+                        {% for direction in directions %}
+                        <option value="{{ direction.id }}"
+                                {% if contest and contest.direction_id == direction.id %}selected{% endif %}>
+                            {{ direction.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="level_id" class="form-label">Уровень конкурса</label>
+                    <select class="form-select" id="level_id" name="level_id" required>
+                        <option value="">Выберите уровень</option>
+                        {% for level in levels %}
+                        <option value="{{ level.id }}"
+                                {% if contest and contest.level_id == level.id %}selected{% endif %}>
+                            {{ level.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="contest_organizer" class="form-label">Организатор</label>
+                <input type="text" class="form-control" id="contest_organizer" name="contest_organizer"
+                       value="{{ contest.contest_organizer if contest else '' }}"
+                       placeholder="Введите название организации-организатора" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="link_contest" class="form-label">Ссылка на конкурс</label>
+                <input type="url" class="form-control" id="link_contest" name="link_contest"
+                       value="{{ contest.link_contest if contest else '' }}"
+                       placeholder="https://example.com/contest" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">Описание</label>
+                <textarea class="form-control" id="description" name="description" rows="5"
+                          placeholder="Подробное описание конкурса, условия участия, призы...">{{ contest.description if contest else '' }}</textarea>
+                <small class="text-muted">Необязательно, но рекомендуется для информирования участников</small>
+            </div>
+
+            <div class="d-flex justify-content-between pt-3">
+                <a href="/contests" class="btn btn-outline-secondary">Отмена</a>
+                <button type="submit" class="btn btn-register">
+                    <i class="bi bi-save"></i> {{ 'Сохранить изменения' if contest else 'Добавить конкурс' }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Календарь для даты начала
+        const startDateInput = document.getElementById('start_date');
+        if (startDateInput) {
+            const startPicker = flatpickr(startDateInput, {
+                locale: "ru",
+                dateFormat: "d.m.Y",
+                allowInput: true,
+                clickOpens: true,
+                onClose: function(selectedDates, dateStr, instance) {
+                    if (selectedDates.length > 0) {
+                        const date = selectedDates[0];
+                        const day = String(date.getDate()).padStart(2, '0');
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const year = date.getFullYear();
+                        instance.input.value = `${day}.${month}.${year}`;
+                    }
+                }
+            });
+            document.getElementById('start-date-icon').addEventListener('click', function() {
+                startPicker.open();
+            });
+        }
+
+        // Календарь для даты окончания
+        const endDateInput = document.getElementById('end_date');
+        if (endDateInput) {
+            const endPicker = flatpickr(endDateInput, {
+                locale: "ru",
+                dateFormat: "d.m.Y",
+                allowInput: true,
+                clickOpens: true,
+                onClose: function(selectedDates, dateStr, instance) {
+                    if (selectedDates.length > 0) {
+                        const date = selectedDates[0];
+                        const day = String(date.getDate()).padStart(2, '0');
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const year = date.getFullYear();
+                        instance.input.value = `${day}.${month}.${year}`;
+                    }
+                }
+            });
+            document.getElementById('end-date-icon').addEventListener('click', function() {
+                endPicker.open();
+            });
+        }
+
+        // Валидация: дата окончания не может быть раньше даты начала
+        if (startDateInput && endDateInput) {
+            function parseDate(dateStr) {
+                const parts = dateStr.split('.');
+                if (parts.length === 3) {
+                    return new Date(parts[2], parts[1] - 1, parts[0]);
+                }
+                return null;
+            }
+
+            function validateDates() {
+                if (startDateInput.value && endDateInput.value) {
+                    const startDate = parseDate(startDateInput.value);
+                    const endDate = parseDate(endDateInput.value);
+
+                    if (startDate && endDate && endDate < startDate) {
+                        alert('Дата окончания не может быть раньше даты начала!');
+                        endDateInput.value = '';
+                    }
+                }
+            }
+
+            endDateInput.addEventListener('change', validateDates);
+            startDateInput.addEventListener('change', validateDates);
+        }
+    });
+</script>
+{% endblock %}
