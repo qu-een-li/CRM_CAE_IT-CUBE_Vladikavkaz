@@ -41,15 +41,16 @@ def add():
                            if str(city["id"]) == form.city.data), "")
         school_title = next((school["title"] for school in get_schools_data(int(form.city.data))
                              if str(school["id"]) == form.school.data), "")
+        birthday_obj = datetime.strptime(form.birthday.data, "%d.%m.%Y").date()
 
         user = Student(name_student=form.name_student.data, name_parent=form.name_parent.data,
-                       birthday=form.birthday.data, PFDO=form.PFDO.data,
+                       birthday=birthday_obj, PFDO=form.PFDO.data,
                        document=form.document.data,
                        city=city_title,
                        school=school_title, parent_phone=form.parent_phone.data,
                        student_phone=form.student_phone.data, school_class=form.school_class.data,
                        adres_of_living=form.adres_of_living.data)
-        user.birthday = datetime.strptime(form.birthday.data, "%d.%m.%Y").date()
+
         session.add(user)
         session.commit()
         flash('Ученик успешно зарегистрирован', 'success')

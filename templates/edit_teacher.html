@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block title %}Редактирование наставника | IT-Куб Владикавказ{% endblock %}
+
+{% block page_title %}Редактирование наставника{% endblock %}
+{% block page_subtitle %}Измените необходимые данные{% endblock %}
+
+{% block extra_css %}
+<style>
+    .teacher-container {
+        background-color: white;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+    }
+    .btn-register {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white;
+    }
+    .btn-register:hover {
+        background-color: #bb2d3b;
+        border-color: #b02a37;
+    }
+    .invalid-feedback {
+        display: block;
+    }
+    .current-photo {
+        margin-top: 10px;
+        margin-bottom: 15px;
+    }
+    .current-photo img {
+        max-width: 150px;
+        max-height: 150px;
+        border-radius: 10px;
+        border: 2px solid #dc3545;
+        cursor: pointer;
+    }
+    .photo-preview {
+        margin-top: 10px;
+        display: none;
+    }
+    .photo-preview img {
+        max-width: 150px;
+        max-height: 150px;
+        border-radius: 10px;
+        border: 2px solid #28a745;
+    }
+    .no-photo {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background-color: #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .no-photo i {
+        font-size: 60px;
+        color: #999;
+    }
+    .modal-photo {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        cursor: pointer;
+    }
+    .modal-photo-content {
+        margin: auto;
+        display: block;
+        max-width: 90%;
+        max-height: 90%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    .close-modal {
+        position: absolute;
+        top: 20px;
+        right: 35px;
+        color: #f1f1f1;
+        font-size: 40px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .close-modal:hover {
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="teacher-container">
+        <h2 class="mb-4 text-center"><i class="bi bi-person-badge-fill me-2 text-danger"></i>Форма редактирования наставника</h2>
+
+<!--        {% with messages = get_flashed_messages(with_categories=true) %}-->
+<!--            {% if messages %}-->
+<!--                {% for category, message in messages %}-->
+<!--                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">-->
+<!--                        {{ message }}-->
+<!--                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>-->
+<!--                    </div>-->
+<!--                {% endfor %}-->
+<!--            {% endif %}-->
+<!--        {% endwith %}-->
+
+        <form action="/edit_teacher/{{ teacher_id }}" method="post" enctype="multipart/form-data" novalidate class="needs-validation">
+            {{ form.hidden_tag() }}
+
+            <div class="row mb-3">
+                <div class="col-md-4 mb-3">
+                    <label for="surename" class="form-label">Фамилия *</label>
+                    {{ form.surename(class="form-control", placeholder="Введите фамилию") }}
+                    {% for error in form.surename.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="name" class="form-label">Имя *</label>
+                    {{ form.name(class="form-control", placeholder="Введите имя") }}
+                    {% for error in form.name.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="patronymic" class="form-label">Отчество</label>
+                    {{ form.patronymic(class="form-control", placeholder="Введите отчество (необязательно)") }}
+                    {% for error in form.patronymic.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6 mb-3">
+                    <label for="phone" class="form-label">Телефон *</label>
+                    {{ form.phone(class="form-control", type="tel", placeholder="+7 XXX XXX-XX-XX") }}
+                    {% for error in form.phone.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="email" class="form-label">Email *</label>
+                    {{ form.email(class="form-control", placeholder="teacher@example.com") }}
+                    {% for error in form.email.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6 mb-3">
+                    <label for="birthday" class="form-label">Дата рождения *</label>
+                    {{ form.birthday(class="form-control", id="teacher-birthday", placeholder="ДД.ММ.ГГГГ",
+                    value=form.birthday.data if form.birthday.data else '') }}
+                    {% for error in form.birthday.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="status" class="form-label">Статус *</label>
+                    {{ form.status(class="form-control", placeholder="Введите статус") }}
+                    {% for error in form.status.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Текущая фотография</label>
+                <div class="current-photo">
+                    {% if current_photo and current_photo != "anonymous.jpg" %}
+                        <img src="{{ url_for('uploaded_file', filename=current_photo) }}"
+                             alt="Текущее фото"
+                             onclick="showPhotoModal('{{ url_for('uploaded_file', filename=current_photo) }}')">
+                    {% else %}
+                        <div class="no-photo">
+                            <i class="bi bi-person-circle"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <small class="text-muted">Нажмите на фото для увеличения</small>
+            </div>
+
+            <div class="mb-3">
+                <label for="photo" class="form-label">Новая фотография</label>
+                {{ form.photo(class="form-control", id="photo-input", accept="image/*") }}
+                <small class="text-muted">Поддерживаемые форматы: JPG, JPEG, PNG, GIF. Оставьте пустым, если не хотите менять фото</small>
+                {% for error in form.photo.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
+                <div class="photo-preview" id="photo-preview">
+                    <img id="preview-image" src="#" alt="Предпросмотр">
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between pt-3">
+                <a href="/teachers" class="btn btn-outline-secondary">Отмена</a>
+                {{ form.submit(class="btn btn-register", value="Сохранить изменения") }}
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Модальное окно для просмотра фото -->
+<div id="photoModal" class="modal-photo" onclick="closePhotoModal()">
+    <span class="close-modal">&times;</span>
+    <img class="modal-photo-content" id="modalImage">
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const photoInput = document.getElementById('photo-input');
+    const photoPreview = document.getElementById('photo-preview');
+    const previewImage = document.getElementById('preview-image');
+
+    photoInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                previewImage.src = event.target.result;
+                photoPreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            photoPreview.style.display = 'none';
+            previewImage.src = '#';
+        }
+    });
+
+    const teacherBirthdayInput = document.getElementById('teacher-birthday');
+    if (teacherBirthdayInput) {
+        flatpickr(teacherBirthdayInput, {
+            locale: "ru",
+            dateFormat: "d.m.Y",
+            maxDate: "today",
+            allowInput: true
+        });
+    }
+});
+
+function showPhotoModal(imageUrl) {
+    const modal = document.getElementById('photoModal');
+    const modalImg = document.getElementById('modalImage');
+    if (imageUrl) {
+        modalImg.src = imageUrl;
+        modal.style.display = 'block';
+    }
+}
+
+function closePhotoModal() {
+    const modal = document.getElementById('photoModal');
+    modal.style.display = 'none';
+    document.getElementById('modalImage').src = '';
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closePhotoModal();
+    }
+});
+</script>
+{% endblock %}
