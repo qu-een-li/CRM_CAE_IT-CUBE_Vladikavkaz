@@ -9,8 +9,6 @@ class Teacher_in_Contests(SqlAlchemyBase):
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True, nullable=False)
     contest_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("contests_for_teachers.id"), nullable=False)
     teacher_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("teachers.id"), nullable=False)
-    date = sqlalchemy.Column(sqlalchemy.Date, nullable=False)
-    end_date = sqlalchemy.Column(sqlalchemy.Date, nullable=True)
     place = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
     rank = sqlalchemy.Column(sqlalchemy.String, nullable=False)
 
