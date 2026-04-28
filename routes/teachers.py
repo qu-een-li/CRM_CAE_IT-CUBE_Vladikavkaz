@@ -2,7 +2,9 @@
 from app import app
 from flask import render_template, request, redirect, jsonify, flash, send_from_directory
 from data import db_session
+from data.teacher_in_contests import Teacher_in_Contests
 from data.teacher import Teacher
+from data.contest_for_teachers import Contest_for_Teachers
 from forms.teacher_form import TeacherForm
 import os
 from datetime import datetime

@@ -2,6 +2,8 @@ import datetime
 import sqlalchemy
 from sqlalchemy import orm
 from flask import url_for
+from sqlalchemy.orm import relationship
+
 from .db_session import SqlAlchemyBase
 
 
@@ -16,3 +18,5 @@ class Teacher(SqlAlchemyBase):
     birthday = sqlalchemy.Column(sqlalchemy.Date, nullable=False)
     status = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     personal_photos = sqlalchemy.Column(sqlalchemy.String, nullable=False, default="anonymous.jpg")
+
+    contests = relationship("Teacher_in_Contests", back_populates="name_teacher")
