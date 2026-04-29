@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Конкурсы для преподавателей | IT-Куб Владикавказ{% endblock %}
+
+{% block page_title %}Конкурсы для преподавателей{% endblock %}
+{% block page_subtitle %}Актуальные конкурсы и мероприятия{% endblock %}
+
+{% block extra_css %}
+<style>
+    .contests-table {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        width: 98%;
+        margin: 0 auto;
+    }
+    .table th {
+        background-color: #dc3545;
+        color: white;
+        position: sticky;
+        top: 0;
+    }
+    .table td {
+        vertical-align: middle;
+    }
+    .table-hover tbody tr:hover {
+        background-color: rgba(220, 53, 69, 0.1);
+    }
+    .table-container {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+    .edit-icon, .details-icon {
+        color: #6c757d;
+        font-size: 1.1rem;
+        cursor: pointer;
+        margin: 0 5px;
+    }
+    .edit-icon:hover {
+        color: #dc3545;
+    }
+    .details-icon:hover {
+        color: #0d6efd;
+    }
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    .status-active {
+        background: #d4edda;
+        color: #155724;
+    }
+    .status-upcoming {
+        background: #fff3cd;
+        color: #856404;
+    }
+    .status-ended {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    .btn-add {
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4" style="max-width: 98%;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Список конкурсов</h4>
+        <a href="" class="btn btn-danger btn-add">
+            <i class="bi bi-plus-circle"></i> Добавить конкурс
+        </a>
+    </div>
+
+    <div class="contests-table">
+        <div class="table-container">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Наименование конкурса</th>
+                        <th>Дата начала</th>
+                        <th>Дата окончания</th>
+                        <th>Уровень</th>
+                        <th>Организатор</th>
+                        <th>Статус</th>
+                        <th style="width: 80px;">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for contest in contests %}
+                    {% set today = today if today else date.today() %}
+                    {% set status = '' %}
+                    {% set status_class = '' %}
+
+                    {% if contest.date and contest.end_date %}
+                        {% if today >= contest.date and today <= contest.end_date %}
+                            {% set status = 'Активен' %}
+                            {% set status_class = 'status-active' %}
+                        {% elif today < contest.date %}
+                            {% set status = 'Предстоит' %}
+                            {% set status_class = 'status-upcoming' %}
+                        {% else %}
+                            {% set status = 'Завершен' %}
+                            {% set status_class = 'status-ended' %}
+                        {% endif %}
+                    {% elif contest.date %}
+                        {% if today < contest.date %}
+                            {% set status = 'Предстоит' %}
+                            {% set status_class = 'status-upcoming' %}
+                        {% else %}
+                            {% set status = 'Активен' %}
+                            {% set status_class = 'status-active' %}
+                        {% endif %}
+                    {% else %}
+                        {% set status = 'Даты не указаны' %}
+                        {% set status_class = 'status-ended' %}
+                    {% endif %}
+
+                    <tr>
+                        <td><strong>{{ contest.name }}</strong></td>
+                        <td>{{ contest.date.strftime('%d.%m.%Y') if contest.date else 'Не указана' }}</td>
+                        <td>{{ contest.end_date.strftime('%d.%m.%Y') if contest.end_date else 'Не указана' }}</td>\
+                        <td>{{ contest.level_id if contest.level_id else 'Не указан' }}</td>
+                        <td>{{ contest.organizer if contest.organizer else 'Не указан' }}</td>
+                        <td><span class="status-badge {{ status_class }}">{{ status }}</span></td>
+                        <td>
+                            <a href="" class="details-icon" title="Подробнее">
+                                <i class="bi bi-eye-fill"></i>
+                            </a>
+                            <a href="" class="edit-icon" title="Редактировать">
+                                <i class="bi bi-pencil-fill"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4">
+                            <i class="bi bi-info-circle"></i> Пока нет добавленных конкурсов
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
