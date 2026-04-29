@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}{{ contest.name }} | IT-Куб Владикавказ{% endblock %}
+
+{% block page_title %}Информация о конкурсе{% endblock %}
+{% block page_subtitle %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .contest-detail {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    .info-row {
+        display: flex;
+        padding: 12px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .info-label {
+        width: 180px;
+        font-weight: 600;
+        color: #495057;
+    }
+    .info-value {
+        flex: 1;
+        color: #212529;
+    }
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    .status-active {
+        background: #d4edda;
+        color: #155724;
+    }
+    .status-upcoming {
+        background: #fff3cd;
+        color: #856404;
+    }
+    .status-ended {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    .btn-back {
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="contest-detail">
+        <h2 class="text-center mb-4">{{ contest.name }}</h2>
+
+        <div class="info-row">
+            <div class="info-label">Дата начала:</div>
+            <div class="info-value">{{ contest.date.strftime('%d.%m.%Y') if contest.date else 'Не указана' }}</div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">Дата окончания:</div>
+            <div class="info-value">{{ contest.end_date.strftime('%d.%m.%Y') if contest.end_date else 'Не указана' }}</div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">Организатор:</div>
+            <div class="info-value">{{ contest.contest_organizer if contest.contest_organizer else 'Не указан' }}</div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">Уровень конкурса:</div>
+            <div class="info-value">{{ contest.level.name if contest.level else 'Не указан' }}</div>
+        </div>
+
+        <div class="d-flex justify-content-between btn-back">
+            <a href="/teachers_contests" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Назад к списку
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

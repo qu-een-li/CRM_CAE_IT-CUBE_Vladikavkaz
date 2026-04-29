@@ -129,7 +129,7 @@
                         <td>{{ contest.organizer if contest.organizer else 'Не указан' }}</td>
                         <td><span class="status-badge {{ status_class }}">{{ status }}</span></td>
                         <td>
-                            <a href="" class="details-icon" title="Подробнее">
+                            <a href="/teachers_contests/{{ contest.id }}" class="details-icon" title="Подробнее">
                                 <i class="bi bi-eye-fill"></i>
                             </a>
                             <a href="" class="edit-icon" title="Редактировать">
