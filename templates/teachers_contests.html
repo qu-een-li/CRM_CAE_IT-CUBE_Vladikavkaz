@@ -125,7 +125,7 @@
                         <td><strong>{{ contest.name }}</strong></td>
                         <td>{{ contest.date.strftime('%d.%m.%Y') if contest.date else 'Не указана' }}</td>
                         <td>{{ contest.end_date.strftime('%d.%m.%Y') if contest.end_date else 'Не указана' }}</td>\
-                        <td>{{ contest.level_id if contest.level_id else 'Не указан' }}</td>
+                        <td>{{ contest.level.name if contest.level else 'Не указан' }}</td>
                         <td>{{ contest.organizer if contest.organizer else 'Не указан' }}</td>
                         <td><span class="status-badge {{ status_class }}">{{ status }}</span></td>
                         <td>
