@@ -14,6 +14,7 @@ class Contest_for_Teachers(SqlAlchemyBase):
     level_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("level_contests.id"), nullable=False)
     organizer = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     description = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    link = sqlalchemy.Column(sqlalchemy.String, nullable=True)
 
     level = orm.relationship("Level_contest")
     teachers = relationship("Teacher_in_Contests", back_populates="name_contest")
