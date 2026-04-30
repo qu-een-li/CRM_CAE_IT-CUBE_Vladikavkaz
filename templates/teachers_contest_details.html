@@ -79,6 +79,11 @@
             <div class="info-value">{{ contest.level.name if contest.level else 'Не указан' }}</div>
         </div>
 
+        <div class="info-row">
+            <div class="info-label">Описание конкурса:</div>
+            <div class="info-value">{{ contest.description if contest.description else 'Не указано' }}</div>
+        </div>
+
         <div class="d-flex justify-content-between btn-back">
             <a href="/teachers_contests" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i> Назад к списку
