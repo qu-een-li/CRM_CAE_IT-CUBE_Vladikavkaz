@@ -6,6 +6,7 @@ from flask_login import LoginManager
 from api.api_regions import regions_api
 from api.api_cities import cities_api
 from api.api_schools import schools_api
+from api.v1.schedule import schedule_api
 from flask_wtf.csrf import CSRFProtect
 
 app = Flask(__name__)
@@ -14,7 +15,7 @@ csrf = CSRFProtect(app)
 app.register_blueprint(regions_api)
 app.register_blueprint(cities_api)
 app.register_blueprint(schools_api)
-
+app.register_blueprint(schedule_api)
 login_manager = LoginManager()
 login_manager.init_app(app)
 

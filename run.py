@@ -12,4 +12,4 @@ if __name__ == "__main__":
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
     db_session.global_init("db/reg_form.db")
-    app.run(port=8080, host="127.0.0.1", debug=True)
+    app.run(port=8080, host="127.0.0.1", debug=True, threaded=True)
