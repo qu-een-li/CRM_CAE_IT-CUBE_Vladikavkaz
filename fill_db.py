@@ -15,7 +15,7 @@ from data.student import Student
 from data.study_period import Study_period
 from data.teacher import Teacher
 from data.auditorium import Auditorium
-
+from data.user import User, UserRole
 
 global_init("db/reg_form.db")
 
@@ -77,6 +77,10 @@ MAIL_TEMPLATES = (['yandex', 'bestteacher', 'justanothermailbox', 'mouseman', 'p
 
 db_sess = create_session()
 
+admin = User(id=1, role=UserRole("admin"), user_name='admin')
+admin.set_password('admin')
+db_sess.add(admin)
+
 
 def generate_school_name():
     """Генерация названия школы"""
@@ -92,7 +96,8 @@ def generate_school_name():
 
     types = ["Академия", "Гимназия", "Лицей", "Школа", "Центр"]
 
-    specializations = ["программирования", "дизайна", "языков", "бизнеса", "творчества"]
+    specializations = ["программирования",
+                       "дизайна", "языков", "бизнеса", "творчества"]
 
     # Шаблоны структур названий
     structures = [

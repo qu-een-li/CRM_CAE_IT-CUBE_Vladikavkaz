@@ -1,9 +1,10 @@
 import sqlalchemy
 from .db_session import SqlAlchemyBase
 from sqlalchemy import orm
+from data.parents_for_models import DictConvertable
 
 
-class Direction(SqlAlchemyBase):
+class Direction(SqlAlchemyBase, DictConvertable):
     __tablename__ = "directions"
     id = sqlalchemy.Column(
         sqlalchemy.Integer, primary_key=True, autoincrement=True, nullable=False)

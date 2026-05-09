@@ -3,9 +3,10 @@ import sqlalchemy
 from sqlalchemy import orm
 from .db_session import SqlAlchemyBase
 from data.student_in_group import student_in_group
+from data.parents_for_models import DictConvertable
 
 
-class Student(SqlAlchemyBase):
+class Student(SqlAlchemyBase, DictConvertable):
     __tablename__ = 'students'
     id = sqlalchemy.Column(
         sqlalchemy.Integer, primary_key=True, autoincrement=True)

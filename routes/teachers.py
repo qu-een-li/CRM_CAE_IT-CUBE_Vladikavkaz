@@ -97,7 +97,8 @@ def edit_teacher(teacher_id):
             photo = form.photo.data
             if photo and allowed_file(photo.filename):
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                safe_name = secure_filename(f"{form.surename.data}_{form.name.data}".replace(' ', '_'))
+                safe_name = secure_filename(
+                    f"{form.surename.data}_{form.name.data}".replace(' ', '_'))
                 file_ext = photo.filename.rsplit('.', 1)[1].lower()
                 new_photo_filename = f"{timestamp}_{safe_name}.{file_ext}"
                 photo.save(os.path.join(UPLOAD_FOLDER, new_photo_filename))
@@ -112,7 +113,8 @@ def edit_teacher(teacher_id):
         teacher.email = form.email.data
         teacher.status = form.status.data
         teacher.personal_photos = new_photo_filename
-        teacher.birthday = datetime.strptime(form.birthday.data, "%d.%m.%Y").date()
+        teacher.birthday = datetime.strptime(
+            form.birthday.data, "%d.%m.%Y").date()
 
         db_sess.commit()
         return redirect("/teachers")
