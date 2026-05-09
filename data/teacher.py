@@ -1,14 +1,14 @@
 import datetime
 import sqlalchemy
-import json
 from .db_session import SqlAlchemyBase
-from api.api_base import api_request
 from datetime import date
+from data.parents_for_models import DictConvertable
 
 
-class Teacher(SqlAlchemyBase):
+class Teacher(SqlAlchemyBase, DictConvertable):
     __tablename__ = "teachers"
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
+    id = sqlalchemy.Column(
+        sqlalchemy.Integer, primary_key=True, autoincrement=True)
     surename = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     patronymic = sqlalchemy.Column(sqlalchemy.String, nullable=True)
@@ -16,24 +16,5 @@ class Teacher(SqlAlchemyBase):
     email = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     birthday = sqlalchemy.Column(sqlalchemy.Date, nullable=False)
     status = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-    personal_photos = sqlalchemy.Column(sqlalchemy.String, nullable=False, default="anonymous.jpg")
-
-    def to_dict(self):
-        return {
-            c.name: (
-                atr.isoformat()
-                if (atr := getattr(self, c.name)) is not None and isinstance(atr, (datetime.date))
-                else atr
-            )
-            for c in self.__table__.columns
-        }
-
-    @staticmethod
-    def from_dict(data_linked: dict):
-        data = data_linked.copy()
-        """Создает объект Group из словаря"""
-        if isinstance((birthday := data.get("birthday")), str):
-            data["birthday"] = date.fromisoformat(birthday)
-
-        dic = {k: v for k, v in data.items() if k in Teacher.__table__.columns.keys()}
-        return Teacher(**dic)
+    personal_photos = sqlalchemy.Column(
+        sqlalchemy.String, nullable=False, default="anonymous.jpg")

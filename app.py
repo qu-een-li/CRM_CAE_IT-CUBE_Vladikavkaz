@@ -6,7 +6,7 @@ from flask_login import LoginManager
 from api.api_regions import regions_api
 from api.api_cities import cities_api
 from api.api_schools import schools_api
-
+from data.user import User
 from flask_wtf.csrf import CSRFProtect
 
 app = Flask(__name__)
@@ -23,4 +23,4 @@ login_manager.init_app(app)
 @login_manager.user_loader
 def load_user(user_id):
     db_sess = db_session.create_session()
-    return db_sess.query(Student).get(user_id)
+    return db_sess.query(User).get(user_id)

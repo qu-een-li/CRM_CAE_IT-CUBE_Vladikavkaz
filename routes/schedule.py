@@ -1,7 +1,6 @@
 from app import app
 from flask import render_template, request
 from forms.add_schedule import AddScheduleForm
-from data.db_session import create_session
 from data.group import Group
 from data.schedule import Schedule
 from data.teacher import Teacher
@@ -12,7 +11,6 @@ from api.api_base import api_request
 
 def get_week_range(d1, d2):
     locale = "ru"
-    year = d1.year
 
     if d1.month == d2.month:
         days = f"{d1.day}–{d2.day}"
@@ -31,10 +29,10 @@ def get_full_teachers_initials_by_column(teacher: Teacher):
 @app.route("/add_schedule", methods=["GET", "POST"])
 def add_schedule():
     form = AddScheduleForm()
-    db_sess = create_session()
     form.group.choices = [
-        (group.id, f'"{group.name_of_group}" c {get_full_teachers_initials_by_column(group.teacher)}')
-        for group in map(Group.from_dict, api_request("/api/v1/groups/"))
+        (group.id,
+         f'"{group.name_of_group}" c {get_full_teachers_initials_by_column(Teacher.from_dict(api_request(f'v1/teachers/{group.teacher_id}')))}')
+        for group in map(Group.from_dict, api_request("/v1/groups/"))
     ]
     if form.validate_on_submit():
         is_there_problem = False
@@ -42,18 +40,20 @@ def add_schedule():
         schedule.group_id = int(form.group.data)
         schedule.date = form.datetime.data.date()
         dt = form.datetime.data
-        duration = timedelta(hours=form.duration.data.hour, minutes=form.duration.data.minute)
+        duration = timedelta(hours=form.duration.data.hour,
+                             minutes=form.duration.data.minute)
         end_dt = duration + dt
         schedule.start_time = dt.time()
         schedule.end_time = end_dt.time()
-        print(dt.hour * 60 + dt.minute + duration.seconds / 60)
+
         # проверка, что занятие кончиться в тот же день когда и началось
         if dt.hour * 60 + dt.minute + duration.seconds / 60 >= 24 * 60:
-            form.duration.errors.append("the lesson may not start and end on different days")
+            form.duration.errors.append(
+                "the lesson may not start and end on different days")
             is_there_problem = True
         if not is_there_problem:
-            db_sess.add(schedule)
-            db_sess.commit()
+            print(api_request('v1/schedules/',
+                  method='POST', data=schedule.to_dict()))
     return render_template("add_schedule.html", form=form)
 
 
@@ -67,14 +67,16 @@ def get_more_days():
     n_of_weeks = 3
     start_date_str = request.args.get("start_date")
     list_of_matrix_and_interval = []
-    schedules = [Schedule.from_dict(schedule_dict) for schedule_dict in api_request("/api/v1/schedules")]
+    schedules = [Schedule.from_dict(schedule_dict)
+                 for schedule_dict in api_request("/v1/schedules")]
     for _ in range(n_of_weeks):
         first_day_of_week = datetime.strptime(start_date_str, "%Y-%m-%d")
         first_day_of_week -= timedelta(days=first_day_of_week.weekday())
         last_day_of_week = first_day_of_week + timedelta(days=7)
 
         unique_times = sorted(
-            list(set(f'{s.start_time.strftime("%H:%M")}-{s.end_time.strftime("%H:%M")}' for s in schedules))
+            list(set(
+                f'{s.start_time.strftime("%H:%M")}-{s.end_time.strftime("%H:%M")}' for s in schedules))
         )
 
         matrix = []
@@ -86,14 +88,17 @@ def get_more_days():
                 for s in schedules:
                     s_time = f'{s.start_time.strftime("%H:%M")}-{s.end_time.strftime("%H:%M")}'
                     if s_time == time_key and s.is_schedule_at_date(cur_date):
-                        events.append({"title": s.group.name_of_group})
+                        events.append(
+                            {"title": api_request(f'/v1/groups/{s.group_id}', params={'fields': ['name_of_group']})['name_of_group']})
                 row.append(events)
             matrix.append(row)
 
-        next_date = (first_day_of_week + timedelta(days=7)).strftime("%Y-%m-%d")
+        next_date = (first_day_of_week + timedelta(days=7)
+                     ).strftime("%Y-%m-%d")
         start_date_str = next_date
         list_of_matrix_and_interval.append(
-            (matrix, get_week_range(first_day_of_week, last_day_of_week - timedelta(days=1)))
+            (matrix, get_week_range(first_day_of_week,
+             last_day_of_week - timedelta(days=1)))
         )
     return render_template(
         "show_schedules_batch.html",

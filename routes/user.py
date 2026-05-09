@@ -1,0 +1,33 @@
+from flask import render_template, request, redirect, url_for, flash
+from flask_login import login_user, logout_user, login_required
+from data.user import User
+from app import app
+from data.db_session import create_session
+from forms.loginform import LoginForm
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+
+    if form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
+        db_sess = create_session()
+        user = db_sess.query(User).filter(
+            User.user_name == username).first()
+        if user and user.check_password(password):
+            print(user)
+            login_user(user, remember=True)
+            return redirect('/')
+        else:
+            flash('Неверные данные!')
+
+    return render_template('login.html', title='Авторизация', form=form)
+
+
+@app.route('/logout')
+# @login_required  # Запрещает доступ неавторизованным
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
