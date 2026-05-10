@@ -19,106 +19,121 @@ def contests_list():
 @app.route("/contest/<int:contest_id>")
 def contest_details(contest_id):
     db_sess = db_session.create_session()
-    contest = db_sess.query(Contest).get(contest_id)
-    if not contest:
-        flash("Конкурс не найден", "danger")
-        return redirect(url_for("contests_list"))
-    return render_template("contest_details.html", contest=contest)
+    try:
+        contest = db_sess.query(Contest).get(contest_id)
+        if not contest:
+            flash("Конкурс не найден", "danger")
+            return redirect(url_for("contests_list"))
+        return render_template("contest_details.html", contest=contest)
+    finally:
+        db_sess.close()
 
 
 @app.route('/add_contest', methods=['GET', 'POST'])
 def add_contest():
     db_sess = db_session.create_session()
-    directions = db_sess.query(Direction).all()
-    levels = db_sess.query(Level_contest).all()
+    try:
+        directions = db_sess.query(Direction).all()
+        levels = db_sess.query(Level_contest).all()
 
-    if request.method == 'POST':
-        contest = Contest()
-        contest.name = request.form.get('name')
-        # contest.date = request.form.get('start_date')
-        # contest.end_date = request.form.get('end_date') if request.form.get('end_date') else None
+        if request.method == 'POST':
+            contest = Contest()
+            contest.name = request.form.get('name')
+            # contest.date = request.form.get('start_date')
+            # contest.end_date = request.form.get('end_date') if request.form.get('end_date') else None
 
-        start_date = request.form.get('start_date')
-        if start_date:
+            start_date = request.form.get('start_date')
             if start_date:
+                if start_date:
+                    try:
+                        contest.date = datetime.strptime(
+                            start_date, '%d.%m.%Y').date()
+                    except ValueError:
+                        contest.date = datetime.strptime(
+                            start_date, '%Y-%m-%d').date()
+
+            end_date = request.form.get('end_date')
+            if end_date:
                 try:
-                    contest.date = datetime.strptime(start_date, '%d.%m.%Y').date()
+                    contest.end_date = datetime.strptime(
+                        end_date, '%d.%m.%Y').date()
                 except ValueError:
-                    contest.date = datetime.strptime(start_date, '%Y-%m-%d').date()
+                    contest.end_date = datetime.strptime(
+                        end_date, '%Y-%m-%d').date()
 
-        end_date = request.form.get('end_date')
-        if end_date:
-            try:
-                contest.end_date = datetime.strptime(end_date, '%d.%m.%Y').date()
-            except ValueError:
-                contest.end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+            contest.direction_id = int(request.form.get('direction_id'))
+            contest.link_contest = request.form.get('link_contest')
+            contest.description = request.form.get('description')
+            contest.level_id = int(request.form.get('level_id'))
+            contest.contest_organizer = request.form.get('contest_organizer')
 
-        contest.direction_id = int(request.form.get('direction_id'))
-        contest.link_contest = request.form.get('link_contest')
-        contest.description = request.form.get('description')
-        contest.level_id = int(request.form.get('level_id'))
-        contest.contest_organizer = request.form.get('contest_organizer')
+            db_sess.add(contest)
+            db_sess.commit()
+            flash('Конкурс успешно добавлен!', 'success')
+            return redirect(url_for('contests_list'))
 
-        db_sess.add(contest)
-        db_sess.commit()
-        flash('Конкурс успешно добавлен!', 'success')
-        return redirect(url_for('contests_list'))
-
-    return render_template('add_edit_contest.html',
-                           directions=directions,
-                           levels=levels,
-                           title='Добавить конкурс',
-                           contest=None)
+        return render_template('add_edit_contest.html',
+                               directions=directions,
+                               levels=levels,
+                               title='Добавить конкурс',
+                               contest=None)
+    finally:
+        db_sess.close()
 
 
 @app.route('/edit_contest/<int:contest_id>', methods=['GET', 'POST'])
-@login_required
 def edit_contest(contest_id):
-    if current_user.role != 'admin':
-        flash('Доступ запрещен', 'danger')
-        return redirect(url_for('index'))
+    try:
+        if current_user.role != 'admin':
+            flash('Доступ запрещен', 'danger')
+            return redirect(url_for('index'))
 
-    db_sess = db_session.create_session()
-    contest = db_sess.query(Contest).get(contest_id)
-    if not contest:
-        flash('Конкурс не найден', 'danger')
-        return redirect(url_for('contests_list'))
+        db_sess = db_session.create_session()
+        contest = db_sess.query(Contest).get(contest_id)
+        if not contest:
+            flash('Конкурс не найден', 'danger')
+            return redirect(url_for('contests_list'))
 
-    directions = db_sess.query(Direction).all()
-    levels = db_sess.query(Level_contest).all()
+        directions = db_sess.query(Direction).all()
+        levels = db_sess.query(Level_contest).all()
 
-    if request.method == 'POST':
-        contest.name = request.form.get('name')
-        start_date = request.form.get('start_date')
+        if request.method == 'POST':
+            contest.name = request.form.get('name')
+            start_date = request.form.get('start_date')
 
-        if start_date:
-            try:
-                contest.date = datetime.strptime(start_date, '%d.%m.%Y').date()
-            except ValueError:
-                contest.date = datetime.strptime(start_date, '%Y-%m-%d').date()
+            if start_date:
+                try:
+                    contest.date = datetime.strptime(
+                        start_date, '%d.%m.%Y').date()
+                except ValueError:
+                    contest.date = datetime.strptime(
+                        start_date, '%Y-%m-%d').date()
 
-        end_date = request.form.get('end_date')
-        if end_date:
-            try:
-                contest.end_date = datetime.strptime(end_date, '%d.%m.%Y').date()
-            except ValueError:
-                contest.end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
-        else:
-            contest.end_date = None
+            end_date = request.form.get('end_date')
+            if end_date:
+                try:
+                    contest.end_date = datetime.strptime(
+                        end_date, '%d.%m.%Y').date()
+                except ValueError:
+                    contest.end_date = datetime.strptime(
+                        end_date, '%Y-%m-%d').date()
+            else:
+                contest.end_date = None
 
-        contest.direction_id = int(request.form.get('direction_id'))
-        contest.link_contest = request.form.get('link_contest')
-        contest.description = request.form.get('description')
-        contest.level_id = int(request.form.get('level_id'))
-        contest.contest_organizer = request.form.get('contest_organizer')
+            contest.direction_id = int(request.form.get('direction_id'))
+            contest.link_contest = request.form.get('link_contest')
+            contest.description = request.form.get('description')
+            contest.level_id = int(request.form.get('level_id'))
+            contest.contest_organizer = request.form.get('contest_organizer')
 
-        db_sess.commit()
-        flash('Конкурс успешно обновлен!', 'success')
-        return redirect(url_for('contest_details', contest_id=contest.id))
+            db_sess.commit()
+            flash('Конкурс успешно обновлен!', 'success')
+            return redirect(url_for('contest_details', contest_id=contest.id))
 
-    return render_template('add_edit_contest.html',
-                           directions=directions,
-                           levels=levels,
-                           title='Редактировать конкурс',
-                           contest=contest)
-
+        return render_template('add_edit_contest.html',
+                               directions=directions,
+                               levels=levels,
+                               title='Редактировать конкурс',
+                               contest=contest)
+    finally:
+        db_sess.close()

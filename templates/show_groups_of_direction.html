@@ -225,8 +225,10 @@ async function move_student_from_group_to_another(student_id, group_id_old, grou
 {% block page_subtitle %}Все доступные группы и их участники в направлении "{{direction_name}}"{% endblock %}
 
 {% block content %}
+
+
+<!-- Обертка для имитации кнопки с выбором -->
 <div id="cellMenu" class="popup-content" style="display: none; position: fixed;">
-  <!-- Обертка для имитации кнопки с выбором -->
   <div class="menu-item">
     <span>Перенести в:</span>
     <select onchange="action('move', this.value)">
@@ -239,6 +241,16 @@ async function move_student_from_group_to_another(student_id, group_id_old, grou
   
   <button onclick="action('clear')" class="delete-button">Удалить</button>
 </div>
+
+
+<!-- фильтр по группам -->
+<select onchange="window.location.href=this.value;">
+  <option value="">Выберите страницу</option>
+  <option value="page1.html">Страница 1</option>
+  <option value="https://google.com">Google</option>
+</select>
+
+
 <table style="width:95%;height:100%;border-collapse: collapse;" class="table table-bordered table-white table-hover">
   <colgroup>
     <col style="width: 50px;">

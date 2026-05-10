@@ -31,6 +31,7 @@ class DirectionListResource(Resource):
             session.close()
 
     def post(self):
+
         data = request.get_json()
         session = db_session.create_session()
 

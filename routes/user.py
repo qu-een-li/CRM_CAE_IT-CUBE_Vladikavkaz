@@ -13,21 +13,22 @@ def login():
     if form.validate_on_submit():
         username = form.username.data
         password = form.password.data
-        db_sess = create_session()
-        user = db_sess.query(User).filter(
-            User.user_name == username).first()
-        if user and user.check_password(password):
-            print(user)
-            login_user(user, remember=True)
-            return redirect('/')
-        else:
-            flash('Неверные данные!')
+        try:
+            db_sess = create_session()
+            user = db_sess.query(User).filter(
+                User.user_name == username).first()
+            if user and user.check_password(password):
+                login_user(user, remember=True)
+                return redirect('/')
+            else:
+                flash('Неверные данные!')
+        finally:
+            db_sess.close()
 
     return render_template('login.html', title='Авторизация', form=form)
 
 
 @app.route('/logout')
-# @login_required  # Запрещает доступ неавторизованным
 def logout():
     logout_user()
     return redirect(url_for('login'))
