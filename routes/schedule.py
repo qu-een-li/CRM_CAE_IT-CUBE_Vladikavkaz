@@ -59,16 +59,26 @@ def add_schedule():
 
 @app.route("/show_schedules")
 def show_schedules():
-    return render_template("show_schedules.html")
+    group_id = request.args.get('group_id')
+    id_and_group_names = api_request(
+        'v1/groups', data={'fields': ['id', 'name_of_group']})
+    return render_template("show_schedules.html", id_and_group_names=id_and_group_names, group_id_filter=group_id)
 
 
 @app.route("/get_more_days")
 def get_more_days():
+    group_id = request.args.get('group_id')
     n_of_weeks = 3
     start_date_str = request.args.get("start_date")
     list_of_matrix_and_interval = []
     schedules = [Schedule.from_dict(schedule_dict)
                  for schedule_dict in api_request("/v1/schedules")]
+
+    # фильтруем если обьявлена группа для фильтра
+    if group_id:
+        schedules = [
+            schedule for schedule in schedules if schedule.group_id == int(group_id)]
+
     for _ in range(n_of_weeks):
         first_day_of_week = datetime.strptime(start_date_str, "%Y-%m-%d")
         first_day_of_week -= timedelta(days=first_day_of_week.weekday())

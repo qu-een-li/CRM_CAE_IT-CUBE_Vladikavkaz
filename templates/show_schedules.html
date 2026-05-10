@@ -7,6 +7,21 @@
 {% block page_subtitle %}по неделям от текущей{% endblock %}
 
 {% block content %}
+<!-- фильтр по группам -->
+ 
+<div class="container mt-4" style="display: flex; justify-content: flex-end;"">
+    <select onchange="window.location.href=this.value;">
+        <option value="" disabled selected>Выберите группу</option>
+        <option value="/show_schedules">📅Все группы</option>
+        {% for id_and_group_name in id_and_group_names %}
+            <option value="/show_schedules?group_id={{ id_and_group_name['id'] }}">
+                👥{{ id_and_group_name['name_of_group'] }}
+            </option>
+        {% endfor %}
+    </select>
+</div>
+
+<!-- место для таблиц расписаний -->
 <div class="container mt-4">
     <div class="registration-container">
         <!-- Сюда JS будет "склеивать" таблицы -->
@@ -18,39 +33,71 @@
         </div>
     </div>
 </div>
+
+
 {% endblock %}
 
 {% block extra_js %}
     <script>
         // Начальная дата — сегодня
+
         let currentDate = new Date().toISOString().split('T')[0];
+        const group_id_to_filter = {{group_id_filter|tojson}}
         const wrapper = document.querySelector('#schedule-wrapper');
         const sentinel = document.querySelector('#sentinel');
 
         const loadMore = () => {
-            fetch(`/get_more_days?start_date=${currentDate}`)
+            // Чтобы не отправлять 100 запросов одновременно, можно добавить флаг isLoading
+            if (window.isLoading) return;
+            window.isLoading = true;
+
+            fetch(`/get_more_days?start_date=${currentDate}{%if group_id_filter%}&group_id=${group_id_to_filter}{%endif%}`)
                 .then(res => res.text())
                 .then(html => {
-                    // 1. Вставляем новый контент
+                    if (!html.trim()) {
+                        // Если данных больше нет, прекращаем наблюдение
+                        observer.unobserve(sentinel);
+                        return;
+                    }
+
                     wrapper.insertAdjacentHTML('beforeend', html);
                     
-                    // 2. Ищем маркер следующей даты в только что вставленном коде
                     const marker = document.querySelector('#next-date-marker');
                     if (marker) {
                         currentDate = marker.getAttribute('data-next');
-                        marker.remove(); // Удаляем старый маркер
+                        marker.remove();
                     }
-                });
+
+                    window.isLoading = false;
+
+                    // КЛЮЧЕВОЙ МОМЕНТ:
+                    // Если после добавления контента sentinel все еще виден (мало данных),
+                    // вызываем loadMore еще раз автоматически.
+                    checkIfSentinelVisible();
+                })
+                .catch(() => { window.isLoading = false; });
         };
 
-        // Следим за "стражем" (sentinel) внизу страницы
+        // Функция для принудительной проверки видимости
+        const checkIfSentinelVisible = () => {
+            const rect = sentinel.getBoundingClientRect();
+            if (rect.top < window.innerHeight) {
+                loadMore();
+            }
+        };
+
         const observer = new IntersectionObserver((entries) => {
             if (entries[0].isIntersecting) {
                 loadMore();
             }
-        }, { rootMargin: '0px' }); // Начинаем грузить за 200px до конца
+        }, { 
+            rootMargin: '200px' // Лучше оставить запас, чтобы загрузка шла заранее
+        });
 
         observer.observe(sentinel);
+
+        // Запускаем первичную проверку сразу после загрузки страницы
+        checkIfSentinelVisible();
     </script>
     <script>let scrollAmount = 0;
 
