@@ -1,2 +1,19 @@
-from . import (student_in_group, student, auditorium, group, study_period, teacher, schedule, attendance,
-               student_in_contest, level_contest, direction, contest, user, past_schedules, students_to_past_schedule)
+from . import (
+    student_in_group,
+    student,
+    auditorium,
+    group,
+    study_period,
+    teacher,
+    schedule,
+    attendance,
+    student_in_contest,
+    level_contest,
+    direction,
+    contest,
+    user,
+    past_schedules,
+    students_to_past_schedule,
+    contest_for_teachers,
+    teacher_in_contests,
+)
