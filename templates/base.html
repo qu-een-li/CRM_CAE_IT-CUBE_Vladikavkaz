@@ -62,10 +62,14 @@
                 <i class="bi bi-compass"></i> Направления
             </a>
         </li>
-        <li class="{% if request.path == '/contests' or '/contest/' in request.path %}active{% endif %}">
-            <a href="{{ url_for('contests_list') }}" class="menu-link">
+        <li class="dropdown">
+            <a href="#" class="menu-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="bi bi-trophy-fill me-2"></i>Конкурсы
             </a>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{{ url_for('contests_list') }}"><i class="bi bi-people-fill me-2"></i>Конкурсы для учащихся</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('teachers_contests_list') or '#' }}"><i class="bi bi-person-video3 me-2"></i>Конкурсы для наставников</a></li>
+            </ul>
         </li>
         <li>
             <a href="#reports" class="menu-link">
