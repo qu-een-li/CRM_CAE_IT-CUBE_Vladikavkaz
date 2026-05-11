@@ -6,7 +6,7 @@ from data.parents_for_models import DictConvertable
 
 
 class Schedule(SqlAlchemyBase, DictConvertable):
-    __tablename__ = "schedule"
+    __tablename__ = "schedules"
     id = sq.Column(sq.Integer, primary_key=True,
                    autoincrement=True, nullable=False)
     group_id = sq.Column(sq.Integer, sq.ForeignKey(

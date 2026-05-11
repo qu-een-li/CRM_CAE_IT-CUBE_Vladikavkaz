@@ -1,2 +1,2 @@
 from . import (student_in_group, student, auditorium, group, study_period, teacher, schedule, attendance,
-               student_in_contest, level_contest, direction, contest, user)
+               student_in_contest, level_contest, direction, contest, user, past_schedules, students_to_past_schedule)

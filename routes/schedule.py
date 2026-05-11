@@ -72,7 +72,7 @@ def get_more_days():
     start_date_str = request.args.get("start_date")
     list_of_matrix_and_interval = []
     schedules = [Schedule.from_dict(schedule_dict)
-                 for schedule_dict in api_request("/v1/schedules")]
+                 for schedule_dict in api_request("/v1/schedules/")]
 
     # фильтруем если обьявлена группа для фильтра
     if group_id:

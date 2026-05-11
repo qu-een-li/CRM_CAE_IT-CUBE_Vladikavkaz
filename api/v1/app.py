@@ -5,7 +5,7 @@ from api.v1.schedules import ScheduleResource, ScheduleListResource
 from api.v1.teachers import TeacherResource, TeacherListResource
 from api.v1.students import StudentResource, StudentListResource, StudentInGroupResource, StudentsInGroupListResource
 from api.v1.direction import DirectionListResource, DirectionResource
-
+from api.v1.past_schedules import PastScheduleResource, PastScheduleListResource, StudentsInPastScheduleListResource
 app = Flask(__name__)
 api = Api(app)
 
@@ -15,6 +15,12 @@ api.add_resource(GroupResource, "/api/v1/groups/<int:group_id>")
 api.add_resource(ScheduleListResource, "/api/v1/schedules/")
 api.add_resource(ScheduleResource, "/api/v1/schedules/<int:schedule_id>")
 
+api.add_resource(PastScheduleListResource, "/api/v1/past_schedules/")
+api.add_resource(PastScheduleResource,
+                 "/api/v1/past_schedules/<int:past_schedule_id>")
+
+api.add_resource(StudentsInPastScheduleListResource,
+                 "/api/v1/past_schedules/<int:past_schedule_id>/students")
 
 api.add_resource(TeacherListResource, "/api/v1/teachers/")
 api.add_resource(TeacherResource, "/api/v1/teachers/<int:teacher_id>")

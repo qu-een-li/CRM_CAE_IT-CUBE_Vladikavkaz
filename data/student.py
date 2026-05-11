@@ -4,6 +4,7 @@ from sqlalchemy import orm
 from .db_session import SqlAlchemyBase
 from data.student_in_group import student_in_group
 from data.parents_for_models import DictConvertable
+from sqlalchemy.orm import relationship
 
 
 class Student(SqlAlchemyBase, DictConvertable):
@@ -23,6 +24,11 @@ class Student(SqlAlchemyBase, DictConvertable):
     adres_of_living = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     groups = orm.relationship(
         "Group", secondary=student_in_group, back_populates='students')
+    past_schedules = relationship(
+        "PastSchedule",
+        secondary="student_to_past_schedules",
+        back_populates="students"
+    )
 
     def __repr__(self):
         return f'Student("{self.name_student}")'
