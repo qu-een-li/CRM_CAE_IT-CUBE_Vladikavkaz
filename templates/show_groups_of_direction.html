@@ -115,6 +115,7 @@
 // Глобальные переменные для хранения данных выбранной ячейки
 let activeCellId = null;
 let activeGroupId = null;
+const api_address = "{{ api_address }}"; 
 
 document.addEventListener('DOMContentLoaded', function() {
     const menu = document.getElementById('cellMenu');
@@ -168,7 +169,7 @@ function action(type, newGroupId) {
  * Отправка запроса на удаление студента из группы
  */
 function delete_student_from_group(student_id, group_id) {
-    const url = `/groups/${group_id}/${student_id}`;
+    const url = `${api_address}/groups/${group_id}/${student_id}`;
 
     fetch(url, {
         method: 'DELETE', 
@@ -195,58 +196,24 @@ function delete_student_from_group(student_id, group_id) {
     });
 }
 
-function add_student_to_group(student_id, group_id) {
-    const url = `/groups/${group_id}/${student_id}`;
-
-    fetch(url, {
-        method: 'POST', 
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            // Передаем CSRF-токен, который генерирует Flask-WTF
-            'X-CSRFToken': "{{ csrf_token() }}"
-        }
-    })
-    .then(response => {
-        if (response.ok) {
-            location.reload(); 
-        } else if (response.status === 401 || response.status === 403) {
-            alert('Ошибка доступа: возможно, сессия истекла. Обновите страницу.');
-        } else {
-            alert('Произошла ошибка при добавлении (код ' + response.status + ')');
-        }
-    })
-    .catch(error => {
-        console.error('Ошибка запроса:', error);
-        alert('Не удалось связаться с сервером');
-    });
-}
-
 async function move_student_from_group_to_another(student_id, group_id_old, group_id_new) {
     console.log(`Перенос студента ${student_id} из ${group_id_old} в ${group_id_new}`);
     
     try {
         // Сначала удаляем из старой группы
-        const deleteRes = await fetch(`/groups/${group_id_old}/${student_id}`, { 
-            method: 'DELETE',
-            headers: { 'X-CSRFToken': "{{ csrf_token() if csrf_token is defined else '' }}" }
-        });
 
-        if (deleteRes.ok) {
             // Если удаление успешно, добавляем в новую
-            const addRes = await fetch(`/groups/${group_id_new}/${student_id}`, { 
-                method: 'POST', // Обычно добавление — это POST
-                headers: { 'X-CSRFToken': "{{ csrf_token() if csrf_token is defined else '' }}" }
-            });
+      const addRes = await fetch(`${api_address}/groups/${group_id_new}/${student_id}`, { 
+          method: 'PUT', // Обычно добавление — это POST
+          headers: { 'X-CSRFToken': "{{ csrf_token() if csrf_token is defined else '' }}" }
+      });
 
-            if (addRes.ok) {
-                location.reload(); // Перезагружаем только после успеха обоих запросов
-            } else {
-                alert("произошла ошибка при добавлении ученика в новую группу.");
-            }
-        } else {
-            alert("Ошибка при попытке исключить ученика из текущей группы.");
-        }
+      if (addRes.ok) {
+          location.reload(); // Перезагружаем только после успеха обоих запросов
+      } else {
+          alert("произошла ошибка при добавлении ученика в новую группу.");
+      }
+
     } catch (e) {
         console.error("Ошибка сети:", e);
     }
@@ -258,8 +225,10 @@ async function move_student_from_group_to_another(student_id, group_id_old, grou
 {% block page_subtitle %}Все доступные группы и их участники в направлении "{{direction_name}}"{% endblock %}
 
 {% block content %}
+
+
+<!-- Обертка для имитации кнопки с выбором -->
 <div id="cellMenu" class="popup-content" style="display: none; position: fixed;">
-  <!-- Обертка для имитации кнопки с выбором -->
   <div class="menu-item">
     <span>Перенести в:</span>
     <select onchange="action('move', this.value)">
@@ -272,6 +241,9 @@ async function move_student_from_group_to_another(student_id, group_id_old, grou
   
   <button onclick="action('clear')" class="delete-button">Удалить</button>
 </div>
+
+
+
 <table style="width:95%;height:100%;border-collapse: collapse;" class="table table-bordered table-white table-hover">
   <colgroup>
     <col style="width: 50px;">

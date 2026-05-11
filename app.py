@@ -6,8 +6,9 @@ from flask_login import LoginManager
 from api.api_regions import regions_api
 from api.api_cities import cities_api
 from api.api_schools import schools_api
+from data.user import User
 from flask_wtf.csrf import CSRFProtect
-
+from flask_login import current_user
 app = Flask(__name__)
 app.config["SECRET_KEY"] = KEY_CSRF
 csrf = CSRFProtect(app)
@@ -19,7 +20,18 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
+@app.before_request
+def check_login():
+    if not current_user.is_authenticated and request.endpoint not in ['login', 'static']:
+        return redirect('/login')
+
+
 @login_manager.user_loader
 def load_user(user_id):
     db_sess = db_session.create_session()
-    return db_sess.query(Student).get(user_id)
+    return db_sess.query(User).get(user_id)
+
+
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db_session.remove_session()

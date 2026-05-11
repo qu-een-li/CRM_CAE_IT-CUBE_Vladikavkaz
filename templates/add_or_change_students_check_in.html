@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Посещаемость | IT-Куб Владикавказ{% endblock %}
+
+{% block page_title %}Посещаемость учеников в занятии{% endblock %}
+{% block page_subtitle %}Выберите учеников, что посетили занятие{% endblock %}
+
+{% block extra_css %}
+<style>
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+    }
+    .form-check-input:checked {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+    .card {
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        border: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <form method="POST" action="">
+        {% csrf_token %} {# Если используете Django, оставьте эту строку #}
+        
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Список группы</h5>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for s in students %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="fw-bold">{{ loop.index }}.</span> 
+                        {{ s.name }}
+                    </div>
+                    <div class="form-check form-switch">
+                        <!-- Передаем ID ученика в качестве значения -->
+                        <input class="form-check-input" type="checkbox" name="attendance" value="{{ s.id }}" id="student_{{ s.id }}">
+                        <label class="form-check-label" for="student_{{ s.id }}">Присутствовал</label>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            <div class="card-footer text-end">
+                <button type="submit" class="btn btn-success">Сохранить посещаемость</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

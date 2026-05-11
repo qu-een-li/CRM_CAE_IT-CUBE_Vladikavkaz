@@ -9,7 +9,7 @@ def not_found_page(e):
         "down_message": "Кажется, вы забрели не туда.",
         "error_code": "404",
     }
-    return render_template("error.html", **parameters)
+    return render_template("error.html", **parameters), int(parameters["error_code"])
 
 
 @app.errorhandler(500)
@@ -19,9 +19,9 @@ def internal_server_error(e):
         "down_message": "Кажется, у нас ошибка.",
         "error_code": "500",
     }
-    return render_template("error.html", **parameters)
+    return render_template("error.html", **parameters), int(parameters["error_code"])
 
 
-@app.route('/under_construction')
+@app.route("/under_construction")
 def under_construction():
-    return render_template('under_construction.html')
+    return render_template("under_construction.html")
