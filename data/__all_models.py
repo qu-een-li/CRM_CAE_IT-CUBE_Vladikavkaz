@@ -16,5 +16,6 @@ from . import (
     students_to_past_schedule,
     contest_for_teachers,
     teacher_in_contests,
-    qualification_course
+    qualification_course,
+    teacher_qualification
 )
