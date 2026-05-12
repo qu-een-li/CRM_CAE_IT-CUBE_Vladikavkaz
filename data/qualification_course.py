@@ -1,4 +1,6 @@
 import sqlalchemy
+from sqlalchemy.orm import relationship
+
 from .db_session import SqlAlchemyBase
 
 
@@ -11,3 +13,5 @@ class QualificationCourse(SqlAlchemyBase):
     organization = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     place = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     link = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+
+    teacher_qualifications = relationship("TeacherQualification", back_populates="course")

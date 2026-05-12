@@ -22,3 +22,4 @@ class Teacher(SqlAlchemyBase, DictConvertable):
         sqlalchemy.String, nullable=False, default="anonymous.jpg")
 
     contests = relationship("Teacher_in_Contests", back_populates="name_teacher")
+    qualifications = relationship("TeacherQualification", back_populates="teacher")
