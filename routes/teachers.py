@@ -9,7 +9,7 @@ from data.teacher_qualification import TeacherQualification
 from data.qualification_course import QualificationCourse
 from forms.teacher_form import TeacherForm
 import os
-from datetime import datetime
+from datetime import datetime, date
 from config import UPLOAD_FOLDER
 from werkzeug.utils import secure_filename
 
@@ -156,8 +156,12 @@ def teacher_profile(teacher_id):
 
         qualifications = session.query(TeacherQualification).filter_by(teacher_id=teacher_id).all()
 
+        teacher_contests = session.query(Teacher_in_Contests).filter_by(teacher_id=teacher_id).all()
+
         return render_template("teacher_profile.html",
                                teacher=teacher,
-                               qualifications=qualifications)
+                               qualifications=qualifications,
+                               teacher_contests=teacher_contests,
+                               date=date)
     finally:
         session.close()

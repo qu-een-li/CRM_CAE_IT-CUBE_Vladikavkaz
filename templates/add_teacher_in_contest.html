@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} | IT-Куб Владикавказ{% endblock %}
+
+{% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}Заполните информацию об участии в конкурсе{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        background-color: white;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+    }
+    .btn-save {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white;
+        padding: 0.5rem 2rem;
+    }
+    .btn-save:hover {
+        background-color: #bb2d3b;
+        border-color: #b02a37;
+    }
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+        font-weight: bold;
+    }
+    .help-text {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+    .contest-info {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 12px;
+        margin-top: 10px;
+        font-size: 0.9rem;
+    }
+    .contest-info i {
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="form-container">
+        <h2 class="mb-4 text-center">
+            <i class="bi bi-trophy-fill me-2 text-danger"></i>
+            {{ title }}
+        </h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="post" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="mb-4">
+                <label for="teacher_id" class="form-label required-field">Преподаватель</label>
+                <select class="form-select" id="teacher_id" name="teacher_id" required>
+                    <option value="">Выберите преподавателя</option>
+                    {% for teacher in teachers %}
+                    <option value="{{ teacher.id }}" 
+                            {% if preselected_teacher_id and preselected_teacher_id == teacher.id %}selected
+                            {% elif teacher_contest and teacher_contest.teacher_id == teacher.id %}selected{% endif %}>
+                        {{ teacher.surename }} {{ teacher.name }} 
+                        {% if teacher.patronymic %}{{ teacher.patronymic }}{% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label for="contest_id" class="form-label required-field">Конкурс</label>
+                <select class="form-select" id="contest_id" name="contest_id" required>
+                    <option value="">Выберите конкурс</option>
+                    {% for contest in contests %}
+                    <option value="{{ contest.id }}"
+                            {% if teacher_contest and teacher_contest.contest_id == contest.id %}selected{% endif %}>
+                        {{ contest.name }}
+                        {% if contest.date %} ({{ contest.date.strftime('%d.%m.%Y') }}){% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+                <div class="help-text">Выберите конкурс из списка</div>
+            </div>
+
+            <div id="contestInfo" class="contest-info" style="display: none;">
+                <i class="bi bi-info-circle"></i> 
+                <span id="contestInfoText"></span>
+            </div>
+
+            <div class="section-title">
+                <i class="bi bi-award"></i> Результаты участия
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="place" class="form-label">Место</label>
+                    <select class="form-select" id="place" name="place">
+                        <option value="">Выберите место</option>
+                        <option value="1" {% if teacher_contest and teacher_contest.place == 1 %}selected{% endif %}>🥇 1 место</option>
+                        <option value="2" {% if teacher_contest and teacher_contest.place == 2 %}selected{% endif %}>🥈 2 место</option>
+                        <option value="3" {% if teacher_contest and teacher_contest.place == 3 %}selected{% endif %}>🥉 3 место</option>
+                        <option value="4" {% if teacher_contest and teacher_contest.place == 4 %}selected{% endif %}>4 место</option>
+                        <option value="5" {% if teacher_contest and teacher_contest.place == 5 %}selected{% endif %}>5 место</option>
+                    </select>
+                    <div class="help-text">Занятое место в конкурсе</div>
+                </div>
+                <div class="col-md-6">
+                    <label for="rank" class="form-label">Результат / Звание</label>
+                    <input type="text" class="form-control" id="rank" name="rank"
+                           value="{{ teacher_contest.rank if teacher_contest else '' }}"
+                           placeholder="Победитель, Лауреат, Дипломант, Участник">
+                    <div class="help-text">Статус или звание</div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between pt-4">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Назад
+                </a>
+                <button type="submit" class="btn btn-save">
+                    <i class="bi bi-save"></i> Сохранить
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const contestSelect = document.getElementById('contest_id');
+        const contestInfo = document.getElementById('contestInfo');
+        const contestInfoText = document.getElementById('contestInfoText');
+
+        const contestsData = {
+            {% for contest in contests %}
+            {{ contest.id }}: {
+                name: "{{ contest.name|escape }}",
+                organizer: "{{ contest.organizer|escape }}",
+                date: "{{ contest.date.strftime('%d.%m.%Y') if contest.date else '' }}",
+                level: "{{ contest.level.name if contest.level else '' }}"
+            },
+            {% endfor %}
+        };
+
+        function showContestInfo() {
+            const contestId = contestSelect.value;
+            if (contestId && contestsData[contestId]) {
+                const contest = contestsData[contestId];
+                let info = contest.name;
+                if (contest.organizer) info += ` (${contest.organizer})`;
+                if (contest.date) info += `, ${contest.date}`;
+                if (contest.level) info += `, уровень: ${contest.level}`;
+                contestInfoText.textContent = info;
+                contestInfo.style.display = 'block';
+            } else {
+                contestInfo.style.display = 'none';
+            }
+        }
+
+        contestSelect.addEventListener('change', showContestInfo);
+        
+        if (contestSelect.value) {
+            showContestInfo();
+        }
+
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            const teacherSelect = document.getElementById('teacher_id');
+            if (!teacherSelect.value) {
+                e.preventDefault();
+                alert('Выберите преподавателя');
+                teacherSelect.focus();
+            }
+            
+            const contestSelect = document.getElementById('contest_id');
+            if (!contestSelect.value) {
+                e.preventDefault();
+                alert('Выберите конкурс');
+                contestSelect.focus();
+            }
+        });
+    });
+</script>
+{% endblock %}

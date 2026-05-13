@@ -67,30 +67,51 @@
         width: 140px;
         display: inline-block;
     }
-    .qualification-card {
+    .qualification-card, .contest-card {
         border-left: 4px solid #dc3545;
         transition: transform 0.2s;
     }
-    .qualification-card:hover {
+    .qualification-card:hover, .contest-card:hover {
         transform: translateX(5px);
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-    .btn-add-qualification {
+    .btn-add {
         background: #dc3545;
         color: white;
         border-radius: 30px;
         padding: 0.5rem 1.5rem;
         margin-bottom: 1rem;
+        display: inline-block;
+        text-decoration: none;
+        border: none;
     }
-    .btn-add-qualification:hover {
+    .btn-add:hover {
         background: #b02a37;
         color: white;
+        text-decoration: none;
     }
     .doc-link {
         word-break: break-all;
     }
-    
-    /* Модальное окно для фото */
+    .contest-status {
+        display: inline-block;
+        padding: 0.2rem 0.6rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+    .status-active {
+        background: #d4edda;
+        color: #155724;
+    }
+    .status-upcoming {
+        background: #fff3cd;
+        color: #856404;
+    }
+    .status-ended {
+        background: #f8d7da;
+        color: #721c24;
+    }
     .modal-photo {
         display: none;
         position: fixed;
@@ -129,24 +150,23 @@
 
 {% block content %}
 <div class="container mt-4">
-    <!-- Шапка профиля -->
     <div class="profile-header">
         <div class="row align-items-center">
             <div class="col-auto">
                 {% if teacher.personal_photos and teacher.personal_photos != "anonymous.jpg" %}
-                    {% set photo_url = url_for('uploaded_file', filename=teacher.personal_photos) %}
-                    <img src="{{ photo_url }}" 
-                         class="profile-avatar" 
-                         alt="Фото {{ teacher.surename }}"
-                         onclick="showPhotoModal('{{ photo_url }}')"
-                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                    <div class="profile-avatar-placeholder" style="display: none;" onclick="showPhotoModal(null)">
-                        <i class="bi bi-person-fill"></i>
-                    </div>
+                {% set photo_url = url_for('uploaded_file', filename=teacher.personal_photos) %}
+                <img src="{{ photo_url }}"
+                     class="profile-avatar"
+                     alt="Фото {{ teacher.surename }}"
+                     onclick="showPhotoModal('{{ photo_url }}')"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="profile-avatar-placeholder" style="display: none;" onclick="showPhotoModal(null)">
+                    <i class="bi bi-person-fill"></i>
+                </div>
                 {% else %}
-                    <div class="profile-avatar-placeholder" onclick="showPhotoModal(null)">
-                        <i class="bi bi-person-fill"></i>
-                    </div>
+                <div class="profile-avatar-placeholder" onclick="showPhotoModal(null)">
+                    <i class="bi bi-person-fill"></i>
+                </div>
                 {% endif %}
             </div>
             <div class="col">
@@ -166,25 +186,30 @@
         </div>
     </div>
 
-    <!-- Вкладки -->
     <ul class="nav nav-tabs" id="teacherTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" 
+            <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info"
                     type="button" role="tab">
                 <i class="bi bi-person-circle"></i> Личная информация
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="qualifications-tab" data-bs-toggle="tab" data-bs-target="#qualifications" 
+            <button class="nav-link" id="qualifications-tab" data-bs-toggle="tab" data-bs-target="#qualifications"
                     type="button" role="tab">
                 <i class="bi bi-mortarboard-fill"></i> Повышение квалификации
                 <span class="badge bg-danger ms-1">{{ qualifications|length }}</span>
             </button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="contests-tab" data-bs-toggle="tab" data-bs-target="#contests"
+                    type="button" role="tab">
+                <i class="bi bi-trophy-fill"></i> Конкурсы
+                <span class="badge bg-danger ms-1">{{ teacher_contests|length }}</span>
+            </button>
+        </li>
     </ul>
 
     <div class="tab-content mt-4">
-        <!-- Вкладка 1: Личная информация -->
         <div class="tab-pane fade show active" id="info" role="tabpanel">
             <div class="row">
                 <div class="col-md-6">
@@ -193,7 +218,7 @@
                         <hr>
                         <p><span class="info-label">Email:</span> {{ teacher.email or '—' }}</p>
                         <p><span class="info-label">Телефон:</span> {{ teacher.phone or '—' }}</p>
-                        <p><span class="info-label">Дата рождения:</span> 
+                        <p><span class="info-label">Дата рождения:</span>
                             {{ teacher.birthday.strftime('%d.%m.%Y') if teacher.birthday else '—' }}</p>
                     </div>
                 </div>
@@ -203,14 +228,15 @@
                         <hr>
                         <p><span class="info-label">Статус:</span> {{ teacher.status or '—' }}</p>
                         <p><span class="info-label">Пройдено курсов:</span> {{ qualifications|length }}</p>
-                        <p><span class="info-label">Всего часов:</span> 
+                        <p><span class="info-label">Участие в конкурсах:</span> {{ teacher_contests|length }}</p>
+                        <p><span class="info-label">Всего часов:</span>
                             {% set total_hours = namespace(value=0) %}
                             {% for q in qualifications %}
-                                {% if q.volume_hours %}
-                                    {% set total_hours.value = total_hours.value + q.volume_hours %}
-                                {% elif q.course and q.course.hours %}
-                                    {% set total_hours.value = total_hours.value + q.course.hours %}
-                                {% endif %}
+                            {% if q.volume_hours %}
+                            {% set total_hours.value = total_hours.value + q.volume_hours %}
+                            {% elif q.course and q.course.hours %}
+                            {% set total_hours.value = total_hours.value + q.course.hours %}
+                            {% endif %}
                             {% endfor %}
                             {{ total_hours.value or 0 }}
                         </p>
@@ -219,10 +245,9 @@
             </div>
         </div>
 
-        <!-- Вкладка 2: Повышение квалификации -->
         <div class="tab-pane fade" id="qualifications" role="tabpanel">
             <div class="d-flex justify-content-end mb-3">
-                <a href="/add_teacher_qualification?teacher_id={{ teacher.id }}" class="btn btn-add-qualification">
+                <a href="/add_teacher_qualification?teacher_id={{ teacher.id }}" class="btn-add">
                     <i class="bi bi-plus-circle"></i> Добавить курс повышения квалификации
                 </a>
             </div>
@@ -273,8 +298,8 @@
                             </table>
                         </div>
                         <div class="card-footer bg-white d-flex justify-content-end gap-2">
-                            <form method="post" action="/delete_teacher_qualification/{{ q.id }}" 
-                                  style="display: inline;" 
+                            <form method="post" action="/delete_teacher_qualification/{{ q.id }}"
+                                  style="display: inline;"
                                   onsubmit="return confirm('Удалить запись о курсе?')">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="btn btn-sm btn-danger">
@@ -296,10 +321,124 @@
             </div>
             {% endif %}
         </div>
+
+        <div class="tab-pane fade" id="contests" role="tabpanel">
+            <div class="d-flex justify-content-end mb-3">
+                <a href="/add_teacher_in_contest?teacher_id={{ teacher.id }}" class="btn-add">
+                    <i class="bi bi-plus-circle"></i> Добавить участие в конкурсе
+                </a>
+            </div>
+
+            {% if teacher_contests %}
+            <div class="row">
+                {% for tc in teacher_contests %}
+                <div class="col-md-6 mb-3">
+                    <div class="card contest-card h-100">
+                        <div class="card-header bg-white">
+                            <strong>
+                                <i class="bi bi-trophy text-danger"></i>
+                                {{ tc.name_contest.name if tc.name_contest else 'Конкурс' }}
+                            </strong>
+                            {% if tc.name_contest and tc.name_contest.date and tc.name_contest.end_date %}
+                            {% set today = date.today() %}
+                            {% if today >= tc.name_contest.date and today <= tc.name_contest.end_date %}
+                            <span class="contest-status status-active float-end">Активен</span>
+                            {% elif today < tc.name_contest.date %}
+                            <span class="contest-status status-upcoming float-end">Предстоит</span>
+                            {% else %}
+                            <span class="contest-status status-ended float-end">Завершен</span>
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm table-borderless">
+                                {% if tc.name_contest and tc.name_contest.level %}
+                                <tr>
+                                    <td width="40%"><strong>Уровень:</strong></td>
+                                    <td>{{ tc.name_contest.level.name if tc.name_contest.level else '—' }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if tc.name_contest and tc.name_contest.organizer %}
+                                <tr>
+                                    <td><strong>Организатор:</strong></td>
+                                    <td>{{ tc.name_contest.organizer }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if tc.name_contest and tc.name_contest.date %}
+                                <tr>
+                                    <td><strong>Дата проведения:</strong></td>
+                                    <td>{{ tc.name_contest.date.strftime('%d.%m.%Y') }}
+                                        {% if tc.name_contest.end_date %} — {{
+                                        tc.name_contest.end_date.strftime('%d.%m.%Y') }}{% endif %}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% if tc.place %}
+                                <tr>
+                                    <td><strong>Место:</strong></td>
+                                    <td>
+                                        {% if tc.place == 1 %}🥇 1 место
+                                        {% elif tc.place == 2 %}🥈 2 место
+                                        {% elif tc.place == 3 %}🥉 3 место
+                                        {% else %}{{ tc.place }} место
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% if tc.rank %}
+                                <tr>
+                                    <td><strong>Результат/Звание:</strong></td>
+                                    <td>{{ tc.rank }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if tc.name_contest and tc.name_contest.link %}
+                                <tr>
+                                    <td><strong>Ссылка на конкурс:</strong></td>
+                                    <td class="doc-link">
+                                        <a href="{{ tc.name_contest.link }}" target="_blank" class="text-primary">
+                                            <i class="bi bi-link"></i> Подробнее
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% if tc.name_contest and tc.name_contest.description %}
+                                <tr>
+                                    <td><strong>Описание:</strong></td>
+                                    <td>{{ tc.name_contest.description|truncate(100) }}</td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                        <div class="card-footer bg-white d-flex justify-content-end gap-2">
+                            <a href="/edit_teacher_contest/{{ tc.id }}" class="btn btn-sm btn-warning">
+                                <i class="bi bi-pencil"></i> Редактировать
+                            </a>
+                            <form method="post" action="/delete_teacher_contest/{{ tc.id }}"
+                                  style="display: inline;"
+                                  onsubmit="return confirm('Удалить запись об участии в конкурсе?')">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-trash"></i> Удалить
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5 bg-light rounded">
+                <i class="bi bi-trophy" style="font-size: 3rem; color: #6c757d;"></i>
+                <p class="mt-3 text-muted">Нет записей об участии в конкурсах</p>
+                <a href="/add_teacher_in_contest?teacher_id={{ teacher.id }}" class="btn btn-danger mt-2">
+                    <i class="bi bi-plus-circle"></i> Добавить первый конкурс
+                </a>
+            </div>
+            {% endif %}
+        </div>
     </div>
 </div>
 
-<!-- Модальное окно для просмотра фото -->
 <div id="photoModal" class="modal-photo" onclick="closePhotoModal()">
     <span class="close-modal">&times;</span>
     <img class="modal-photo-content" id="modalImage">

@@ -144,7 +144,7 @@
                         <td>{{ course.end_date.strftime('%d.%m.%Y') if course.end_date else '—' }}</td>
                         <td>{{ course.place if course.place else '—' }}</td>
                         <td>{{ course.hours if course.hours else '—' }}</td>
-                        <td>{{ course.level.name if course.level else '—' }}</td>
+                        <td>{{ course.level_id if course.level_id else '—' }}</td>
                         <td><span class="status-badge {{ status_class }}">{{ status }}</span></td>
                         <td class="text-nowrap">
                             <a href="/qualification_courses/{{ course.id }}" class="action-icon view" title="Подробнее">
