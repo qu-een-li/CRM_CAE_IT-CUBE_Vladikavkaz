@@ -9,7 +9,7 @@
 {% block content %}
 <!-- фильтр по группам -->
  
-<div class="container mt-4" style="display: flex; justify-content: flex-end;"">
+<div class="container mt-4" style="display: flex; justify-content: flex-end;">
     <select onchange="window.location.href=this.value;">
         <option value="" disabled selected>Выберите группу</option>
         <option value="/show_schedules">📅Все группы</option>
@@ -91,7 +91,7 @@
                 loadMore();
             }
         }, { 
-            rootMargin: '200px' // Лучше оставить запас, чтобы загрузка шла заранее
+            rootMargin: '10px' // Лучше оставить запас, чтобы загрузка шла заранее
         });
 
         observer.observe(sentinel);
