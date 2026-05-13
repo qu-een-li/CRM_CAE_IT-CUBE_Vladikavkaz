@@ -1,0 +1,337 @@
+{% extends "base.html" %}
+
+{% block title %}{{ teacher.surename }} {{ teacher.name }} | Профиль наставника{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-header {
+        background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+    }
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid white;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        cursor: pointer;
+    }
+    .profile-avatar-placeholder {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 4px solid white;
+    }
+    .profile-avatar-placeholder i {
+        font-size: 60px;
+        color: white;
+    }
+    .profile-name {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    .profile-status {
+        display: inline-block;
+        padding: 0.25rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        background: rgba(255,255,255,0.2);
+    }
+    .nav-tabs .nav-link {
+        color: #495057;
+        font-weight: 500;
+    }
+    .nav-tabs .nav-link.active {
+        color: #dc3545;
+        border-bottom: 3px solid #dc3545;
+        font-weight: 600;
+    }
+    .info-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+        width: 140px;
+        display: inline-block;
+    }
+    .qualification-card {
+        border-left: 4px solid #dc3545;
+        transition: transform 0.2s;
+    }
+    .qualification-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .btn-add-qualification {
+        background: #dc3545;
+        color: white;
+        border-radius: 30px;
+        padding: 0.5rem 1.5rem;
+        margin-bottom: 1rem;
+    }
+    .btn-add-qualification:hover {
+        background: #b02a37;
+        color: white;
+    }
+    .doc-link {
+        word-break: break-all;
+    }
+    
+    /* Модальное окно для фото */
+    .modal-photo {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        cursor: pointer;
+    }
+    .modal-photo-content {
+        margin: auto;
+        display: block;
+        max-width: 90%;
+        max-height: 90%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    .close-modal {
+        position: absolute;
+        top: 20px;
+        right: 35px;
+        color: #f1f1f1;
+        font-size: 40px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .close-modal:hover {
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Шапка профиля -->
+    <div class="profile-header">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                {% if teacher.personal_photos and teacher.personal_photos != "anonymous.jpg" %}
+                    {% set photo_url = url_for('uploaded_file', filename=teacher.personal_photos) %}
+                    <img src="{{ photo_url }}" 
+                         class="profile-avatar" 
+                         alt="Фото {{ teacher.surename }}"
+                         onclick="showPhotoModal('{{ photo_url }}')"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="profile-avatar-placeholder" style="display: none;" onclick="showPhotoModal(null)">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                {% else %}
+                    <div class="profile-avatar-placeholder" onclick="showPhotoModal(null)">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col">
+                <h1 class="profile-name">
+                    {{ teacher.surename }} {{ teacher.name }}
+                    {% if teacher.patronymic %}{{ teacher.patronymic }}{% endif %}
+                </h1>
+                <span class="profile-status">
+                    <i class="bi bi-person-badge"></i> {{ teacher.status or 'Преподаватель' }}
+                </span>
+            </div>
+            <div class="col-auto">
+                <a href="/edit_teacher/{{ teacher.id }}" class="btn btn-outline-light">
+                    <i class="bi bi-pencil-fill"></i> Редактировать профиль
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Вкладки -->
+    <ul class="nav nav-tabs" id="teacherTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" 
+                    type="button" role="tab">
+                <i class="bi bi-person-circle"></i> Личная информация
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="qualifications-tab" data-bs-toggle="tab" data-bs-target="#qualifications" 
+                    type="button" role="tab">
+                <i class="bi bi-mortarboard-fill"></i> Повышение квалификации
+                <span class="badge bg-danger ms-1">{{ qualifications|length }}</span>
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content mt-4">
+        <!-- Вкладка 1: Личная информация -->
+        <div class="tab-pane fade show active" id="info" role="tabpanel">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="info-card">
+                        <h5><i class="bi bi-envelope-fill text-danger"></i> Контактная информация</h5>
+                        <hr>
+                        <p><span class="info-label">Email:</span> {{ teacher.email or '—' }}</p>
+                        <p><span class="info-label">Телефон:</span> {{ teacher.phone or '—' }}</p>
+                        <p><span class="info-label">Дата рождения:</span> 
+                            {{ teacher.birthday.strftime('%d.%m.%Y') if teacher.birthday else '—' }}</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="info-card">
+                        <h5><i class="bi bi-calendar-event text-danger"></i> Образовательная деятельность</h5>
+                        <hr>
+                        <p><span class="info-label">Статус:</span> {{ teacher.status or '—' }}</p>
+                        <p><span class="info-label">Пройдено курсов:</span> {{ qualifications|length }}</p>
+                        <p><span class="info-label">Всего часов:</span> 
+                            {% set total_hours = namespace(value=0) %}
+                            {% for q in qualifications %}
+                                {% if q.volume_hours %}
+                                    {% set total_hours.value = total_hours.value + q.volume_hours %}
+                                {% elif q.course and q.course.hours %}
+                                    {% set total_hours.value = total_hours.value + q.course.hours %}
+                                {% endif %}
+                            {% endfor %}
+                            {{ total_hours.value or 0 }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка 2: Повышение квалификации -->
+        <div class="tab-pane fade" id="qualifications" role="tabpanel">
+            <div class="d-flex justify-content-end mb-3">
+                <a href="/add_teacher_qualification?teacher_id={{ teacher.id }}" class="btn btn-add-qualification">
+                    <i class="bi bi-plus-circle"></i> Добавить курс повышения квалификации
+                </a>
+            </div>
+
+            {% if qualifications %}
+            <div class="row">
+                {% for q in qualifications %}
+                <div class="col-md-6 mb-3">
+                    <div class="card qualification-card h-100">
+                        <div class="card-header bg-white">
+                            <strong>
+                                <i class="bi bi-book text-danger"></i>
+                                {{ q.course.program_name if q.course else q.organization or 'Курс' }}
+                            </strong>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm table-borderless">
+                                <tr>
+                                    <td width="40%"><strong>Организация:</strong></td>
+                                    <td>{{ q.organization or (q.course.organization if q.course else '—') }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Объем часов:</strong></td>
+                                    <td>{{ q.volume_hours or (q.course.hours if q.course else '—') }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Рег. номер:</strong></td>
+                                    <td>{{ q.registration_number or '—' }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Дата выдачи:</strong></td>
+                                    <td>{{ q.issue_date.strftime('%d.%m.%Y') if q.issue_date else '—' }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Место выдачи:</strong></td>
+                                    <td>{{ q.issued_by or '—' }}</td>
+                                </tr>
+                                {% if q.link %}
+                                <tr>
+                                    <td><strong>Документ:</strong></td>
+                                    <td class="doc-link">
+                                        <a href="{{ q.link }}" target="_blank" class="text-danger">
+                                            <i class="bi bi-file-pdf-fill"></i> Скачать/Открыть
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                        <div class="card-footer bg-white d-flex justify-content-end gap-2">
+                            <form method="post" action="/delete_teacher_qualification/{{ q.id }}" 
+                                  style="display: inline;" 
+                                  onsubmit="return confirm('Удалить запись о курсе?')">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-trash"></i> Удалить
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5 bg-light rounded">
+                <i class="bi bi-bookmark-x" style="font-size: 3rem; color: #6c757d;"></i>
+                <p class="mt-3 text-muted">Нет записей о повышении квалификации</p>
+                <a href="/add_teacher_qualification?teacher_id={{ teacher.id }}" class="btn btn-danger mt-2">
+                    <i class="bi bi-plus-circle"></i> Добавить первый курс
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для просмотра фото -->
+<div id="photoModal" class="modal-photo" onclick="closePhotoModal()">
+    <span class="close-modal">&times;</span>
+    <img class="modal-photo-content" id="modalImage">
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function showPhotoModal(imageUrl) {
+        const modal = document.getElementById('photoModal');
+        const modalImg = document.getElementById('modalImage');
+
+        if (imageUrl) {
+            modalImg.src = imageUrl;
+            modalImg.style.display = 'block';
+        } else {
+            modalImg.src = '';
+            modalImg.alt = 'Фото отсутствует';
+        }
+        modal.style.display = 'block';
+    }
+
+    function closePhotoModal() {
+        const modal = document.getElementById('photoModal');
+        modal.style.display = 'none';
+        document.getElementById('modalImage').src = '';
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closePhotoModal();
+        }
+    });
+</script>
+{% endblock %}

@@ -13,7 +13,8 @@ from routes import (
     user,
     teachers_contests,
     reports,
-    qualification_courses
+    qualification_courses,
+    teachers_qualifications
 )
 import os
 from config import UPLOAD_FOLDER, PORT, HOST

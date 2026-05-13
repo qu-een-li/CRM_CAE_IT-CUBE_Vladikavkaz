@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} | IT-Куб Владикавказ{% endblock %}
+
+{% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}Выберите курс и укажите данные документа{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        background-color: white;
+        border-radius: 10px;
+padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+    }
+    .btn-save {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white;
+        padding: 0.5rem 2rem;
+    }
+    .btn-save:hover {
+        background-color: #bb2d3b;
+        border-color: #b02a37;
+    }
+    .section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 20px 0 15px 0;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #dee2e6;
+        color: #dc3545;
+    }
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+        font-weight: bold;
+    }
+    .help-text {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+    .course-info {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 12px;
+        margin-top: 10px;
+        font-size: 0.9rem;
+    }
+    .course-info i {
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="form-container">
+        <h2 class="mb-4 text-center">
+            <i class="bi bi-mortarboard-fill me-2 text-danger"></i>
+            {{ title }}
+        </h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="post" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <!-- Выбор преподавателя -->
+            <div class="mb-4">
+                <label for="teacher_id" class="form-label required-field">Преподаватель</label>
+                <select class="form-select" id="teacher_id" name="teacher_id" required>
+                    <option value="">Выберите преподавателя</option>
+                    {% for teacher in teachers %}
+                    <option value="{{ teacher.id }}"
+                            {% if preselected_teacher_id and preselected_teacher_id == teacher.id %}selected{% endif %}>
+                        {{ teacher.surename }} {{ teacher.name }}
+                        {% if teacher.patronymic %}{{ teacher.patronymic }}{% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Выбор курса -->
+            <div class="mb-3">
+                <label for="course_id" class="form-label required-field">Курс повышения квалификации</label>
+                <select class="form-select" id="course_id" name="course_id" required>
+                    <option value="">Выберите курс</option>
+                    {% for course in courses %}
+                    <option value="{{ course.id }}">
+                        {{ course.program_name }}
+                        {% if course.hours %} ({{ course.hours }} ч.){% endif %}
+                        {% if course.organization %} — {{ course.organization }}{% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="section-title">
+                <i class="bi bi-file-text"></i> Данные документа
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="registration_number" class="form-label">Регистрационный номер</label>
+                    <input type="text" class="form-control" id="registration_number" name="registration_number"
+                           placeholder="№ 12345">
+                    <div class="help-text">Номер удостоверения/сертификата</div>
+                </div>
+                <div class="col-md-6">
+                    <label for="certificate_number" class="form-label">Номер сертификата</label>
+                    <input type="text" class="form-control" id="certificate_number" name="certificate_number"
+                           placeholder="СER-2024-001">
+                    <div class="help-text">Дополнительный номер (если есть)</div>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="issue_date" class="form-label">Дата выдачи</label>
+                    <input type="date" class="form-control" id="issue_date" name="issue_date">
+                </div>
+                <div class="col-md-6">
+                    <label for="issued_by" class="form-label">Место выдачи (кем выдан)</label>
+                    <input type="text" class="form-control" id="issued_by" name="issued_by"
+                           placeholder="Например: Министерство образования">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="link" class="form-label">Ссылка на документ</label>
+                <input type="url" class="form-control" id="link" name="link"
+                       placeholder="https://example.com/certificate.pdf">
+                <div class="help-text">Ссылка на PDF, скан документа или страницу проверки</div>
+            </div>
+
+            <div class="d-flex justify-content-between pt-4">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Назад
+                </a>
+                <button type="submit" class="btn btn-save">
+                    <i class="bi bi-save"></i> Сохранить запись
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Валидация формы
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            const teacherSelect = document.getElementById('teacher_id');
+            if (!teacherSelect.value) {
+                e.preventDefault();
+                alert('Выберите преподавателя');
+                teacherSelect.focus();
+            }
+
+            const courseSelect = document.getElementById('course_id');
+            if (!courseSelect.value) {
+                e.preventDefault();
+                alert('Выберите курс');
+                courseSelect.focus();
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -150,8 +150,11 @@
                         <td>{{ teacher.email }}</td>
                         <td>{{ teacher.status }}</td>
                         <td>
-                            <a href="/edit_teacher/{{ teacher.id }}">
-                                <i class="bi bi-pencil edit-icon"></i>
+                            <a href="/teachers/{{ teacher.id }}" class="text-primary me-2" title="Профиль">
+                                <i class="bi bi-eye-fill"></i>
+                            </a>
+                            <a href="/edit_teacher/{{ teacher.id }}" class="text-danger" title="Редактировать">
+                                <i class="bi bi-pencil-fill"></i>
                             </a>
                         </td>
                     </tr>

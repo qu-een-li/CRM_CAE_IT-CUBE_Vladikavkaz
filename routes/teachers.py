@@ -5,6 +5,8 @@ from data import db_session
 from data.teacher_in_contests import Teacher_in_Contests
 from data.teacher import Teacher
 from data.contest_for_teachers import Contest_for_Teachers
+from data.teacher_qualification import TeacherQualification
+from data.qualification_course import QualificationCourse
 from forms.teacher_form import TeacherForm
 import os
 from datetime import datetime
@@ -139,3 +141,23 @@ def edit_teacher(teacher_id):
 def uploaded_file(filename):
     """Скачивание файла из /uploads"""
     return send_from_directory(UPLOAD_FOLDER, filename)
+
+
+@app.route("/teachers/<int:teacher_id>")
+def teacher_profile(teacher_id):
+    """Страница профиля учителя"""
+    try:
+        session = db_session.create_session()
+        teacher = session.query(Teacher).get(teacher_id)
+
+        if not teacher:
+            flash("Наставник не найден", "danger")
+            return redirect("/teachers")
+
+        qualifications = session.query(TeacherQualification).filter_by(teacher_id=teacher_id).all()
+
+        return render_template("teacher_profile.html",
+                               teacher=teacher,
+                               qualifications=qualifications)
+    finally:
+        session.close()
