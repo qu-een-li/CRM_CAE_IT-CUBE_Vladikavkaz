@@ -18,7 +18,15 @@ import os
 from config import UPLOAD_FOLDER, PORT, HOST
 import locale
 
-locale.setlocale(locale.LC_TIME, "Russian_Russia.65001")
+locales = ["ru_RU.UTF-8", "ru_RU", "Russian_Russia.65001", "Russian"]
+
+# обратная совместимость локали и с linux и c windows
+for loc in locales:
+    try:
+        locale.setlocale(locale.LC_TIME, loc)
+        break
+    except locale.Error:
+        continue
 
 if __name__ == "__main__":
 
