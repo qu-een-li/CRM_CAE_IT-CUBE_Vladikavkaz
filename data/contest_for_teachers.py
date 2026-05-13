@@ -6,6 +6,8 @@ from sqlalchemy import orm
 
 
 class Contest_for_Teachers(SqlAlchemyBase):
+    """Таблица конкурсов для учителей"""
+
     __tablename__ = "contests_for_teachers"
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True, nullable=False)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=False)

@@ -10,6 +10,8 @@ from api.api_base import api_request
 
 
 def get_week_range(d1, d2):
+    """Получить отформатированный период между двумя датами
+    в виде строки для заголовка в неделе расписания"""
     locale = "ru"
 
     if d1.month == d2.month:
@@ -28,6 +30,7 @@ def get_full_teachers_initials_by_column(teacher: Teacher):
 
 @app.route("/add_schedule", methods=["GET", "POST"])
 def add_schedule():
+    """Добавить событие (на данный момент только еженедельное)"""
     form = AddScheduleForm()
     form.group.choices = [
         (
@@ -58,6 +61,7 @@ def add_schedule():
 
 @app.route("/show_schedules")
 def show_schedules():
+    """Страница расписания"""
     group_id = request.args.get("group_id")
     id_and_group_names = api_request("v1/groups", data={"fields": ["id", "name_of_group"]})
     return render_template("show_schedules.html", id_and_group_names=id_and_group_names, group_id_filter=group_id)
@@ -65,6 +69,7 @@ def show_schedules():
 
 @app.route("/get_more_days")
 def get_more_days():
+    """Загрузка расписания по неделям в страницу расписания"""
     group_id = request.args.get("group_id")
     n_of_weeks = 3
     start_date_str = request.args.get("start_date")

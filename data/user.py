@@ -11,6 +11,7 @@ import sqlalchemy
 from .db_session import SqlAlchemyBase
 from data.parents_for_models import DictConvertable
 from flask_login import UserMixin
+
 # 1. Определяем перечисление ролей
 
 
@@ -20,10 +21,11 @@ class UserRole(enum.Enum):
 
 
 class User(SqlAlchemyBase, DictConvertable, UserMixin):
+    """Таблица с данными пользователя для регистрации"""
+
     __tablename__ = "users"
 
-    id = sqlalchemy.Column(
-        sqlalchemy.Integer, primary_key=True, autoincrement=True)
+    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
 
     # Поле роли с использованием Enum
     role = sqlalchemy.Column(sqlalchemy.Enum(UserRole), nullable=False)
@@ -38,8 +40,7 @@ class User(SqlAlchemyBase, DictConvertable, UserMixin):
     user_name = sqlalchemy.Column(sqlalchemy.String, index=True, unique=True)
 
     # Дата регистрации (по умолчанию текущее время)
-    registration_date = sqlalchemy.Column(
-        sqlalchemy.DateTime, default=datetime.datetime.now)
+    registration_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
 
     def __repr__(self):
         return f"<User> {self.id} {self.user_name} ({self.role.value})"

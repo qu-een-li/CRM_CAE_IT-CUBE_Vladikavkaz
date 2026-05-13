@@ -5,6 +5,8 @@ from data.parents_for_models import DictConvertable
 
 
 class Student_to_past_schedule(SqlAlchemyBase, DictConvertable):
+    """Таблица связывающая ученика и определенное событие в определенный день и время. С статусом был ли он на нем или нет."""
+
     __tablename__ = "student_to_past_schedules"
     id = sq.Column(sq.Integer, primary_key=True, autoincrement=True, nullable=False)
     student_id = sq.Column(sq.Integer, sq.ForeignKey("students.id"), nullable=False)

@@ -7,6 +7,7 @@ from data.group import Group
 
 @app.route("/")
 def index():
+    """Главная страница"""
     ses = create_session()
     teachers = ses.query(Teacher).all()
     for teacher in teachers:

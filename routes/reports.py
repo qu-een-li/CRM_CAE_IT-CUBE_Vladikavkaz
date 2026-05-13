@@ -16,6 +16,7 @@ from babel.dates import format_date
 
 
 def create_attendance_report(teacher_name, course_name, period_start, period_end, students_data):
+    """Отчет успеваемости учеников преподавателя."""
     output = io.BytesIO()
     if not students_data:
         students_data = [
@@ -95,6 +96,8 @@ def create_attendance_report(teacher_name, course_name, period_start, period_end
 
 @app.route("/reports/teacher/<int:teacher_id>/attendance/students")
 def route_to_create_teachers_students_attendance(teacher_id: int):
+    """route для отчета успеваемости учеников преподавателя."""
+
     start_month_str = request.args.get("start_date")  # придет "2025-09"
     end_month_str = request.args.get("end_date")  # придет "2026-01"
 
@@ -189,15 +192,8 @@ def route_to_create_teachers_students_attendance(teacher_id: int):
 # посещаемость по группам
 
 
-import pandas as pd
-import io
-
-
-import pandas as pd
-import io
-
-
 def create_attendance_report_group(students_names: list[str], attendance_dict: dict[str, list[str]]):
+    """Отчет успеваемости учеников группы."""
     # Создаем DataFrame
     df = pd.DataFrame(index=students_names)
 
@@ -257,6 +253,7 @@ def create_attendance_report_group(students_names: list[str], attendance_dict: d
 
 @app.route("/reports/group/<int:group_id>/attendance/students")
 def route_to_create_group_students_attendance(group_id: int):
+    """route для отчета успеваемости учеников группы."""
     start_month_str = request.args.get("start_date")  # придет "2025-09"
     end_month_str = request.args.get("end_date")  # придет "2026-01"
 

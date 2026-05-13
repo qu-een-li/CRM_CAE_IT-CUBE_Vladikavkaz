@@ -10,6 +10,7 @@ from datetime import datetime
 
 @app.route("/search", methods=["POST", "GET"])
 def search():
+    """Форма поиска ученика"""
     form = SearchForm()
     if request.method == "POST":
         session = db_session.create_session()

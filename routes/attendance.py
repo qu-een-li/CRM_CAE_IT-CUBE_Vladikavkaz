@@ -14,7 +14,9 @@ from babel.dates import format_date
 
 @app.route("/attendance/create_past_schedule_if_doesnt_exist")
 def create_past_schedule_if_doesnt_exist_and_redirect():
-    # past_schedule_id = request.args.get("past_schedule_id", type=int)
+    """Создание списка учеников для определенного события и отмечивания их
+      как не присутствующих по-умолчанию и перенаправление на форму
+    изменения статуса присутствия определенного события"""
     schedule_id = request.args.get("schedule_id", type=int)
     date_str = request.args.get("date")
     if not all([schedule_id, date_str]):
@@ -38,6 +40,7 @@ def create_past_schedule_if_doesnt_exist_and_redirect():
 
 @app.route("/attendance/schedules/<int:past_schedule_id>/date/<str_date>/group/students_list")
 def add_or_change_students_check_in(past_schedule_id: int, str_date: str):
+    """Отображения формы для отметки присутсвующих на занятии"""
     formated_date = date.fromisoformat(str_date)
 
     formated_str_date = format_date(formated_date, format="full", locale="ru")
@@ -61,6 +64,7 @@ def add_or_change_students_check_in(past_schedule_id: int, str_date: str):
 
 @app.route("/update_students_check_in/<int:past_schedule_id>", methods=["POST"])
 def update_students_check_in(past_schedule_id):
+    """Получаем все данные из формы, где мы отмечаем присутствие ученика на занятии и меняем данные, если ученик был"""
     data = request.get_json()  # { "student_id": false/true, "student_id": false/true ... }
     print(data)
     if not data:

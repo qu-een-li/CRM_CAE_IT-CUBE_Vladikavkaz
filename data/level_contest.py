@@ -3,6 +3,8 @@ from .db_session import SqlAlchemyBase
 
 
 class Level_contest(SqlAlchemyBase):
+    """Таблица обозначаю какой уровеь конкурса (олимпиады)"""
+
     __tablename__ = "level_contests"
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True, nullable=False)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
@@ -14,7 +16,7 @@ class Level_contest(SqlAlchemyBase):
             "Муниципальный/региональный уровень, открытый конкурс",
             "Межрегиональный уровень",
             "Федеральный уровень",
-            "Международный уровень"
+            "Международный уровень",
         ]
 
         for level_name in levels:
