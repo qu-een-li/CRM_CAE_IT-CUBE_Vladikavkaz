@@ -10,13 +10,45 @@ from app import app
 @app.route("/teachers_qualifications")
 def teachers_qualifications():
     db_sess = db_session.create_session()
-    qualifications = db_sess.query(TeacherQualification).all()
-    teachers = db_sess.query(Teacher).all()
     courses = db_sess.query(QualificationCourse).all()
     today = date.today()
     return render_template("teachers_qualifications.html",
-                         qualifications=qualifications,
-                         teachers=teachers,
-                         courses=courses,
-                         today=today,
-                         date=date)
+                           courses=courses,
+                           today=today,
+                           date=date)
+
+
+@app.route('/add_teacher_qualification', methods=['GET', 'POST'])
+def add_teacher_qualification():
+    db_sess = db_session.create_session()
+
+    if request.method == 'POST':
+        course = QualificationCourse()
+        course.program_name = request.form.get('program_name')
+
+        start_date = request.form.get('start_date')
+        if start_date:
+            try:
+                course.start_date = datetime.strptime(start_date, '%d.%m.%Y').date()
+            except ValueError:
+                course.start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+
+        end_date = request.form.get('end_date')
+        if end_date:
+            try:
+                course.end_date = datetime.strptime(end_date, '%d.%m.%Y').date()
+            except ValueError:
+                course.end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+
+        course.hours = int(request.form.get('hours')) if request.form.get('hours') else None
+        course.organization = request.form.get('organization')
+        course.link = request.form.get('link')
+
+        db_sess.add(course)
+        db_sess.commit()
+        flash('Курс успешно добавлен!', 'success')
+        return redirect(url_for('teachers_qualifications'))
+
+    return render_template('add_edit_teacher_qualification.html',
+                           title='Добавить курс повышения квалификации',
+                           course=None)

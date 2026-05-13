@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} | IT-Куб Владикавказ{% endblock %}
+
+{% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}Заполните информацию о курсе{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        background-color: white;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+    }
+    .btn-save {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white;
+    }
+    .btn-save:hover {
+        background-color: #bb2d3b;
+        border-color: #b02a37;
+    }
+    .date-input-wrapper {
+        position: relative;
+    }
+    .calendar-icon {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #6c757d;
+        z-index: 10;
+        font-size: 1.2rem;
+    }
+    .calendar-icon:hover {
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="form-container">
+        <h2 class="mb-4 text-center">
+            <i class="bi bi-mortarboard-fill me-2 text-danger"></i>
+            {{ title }}
+        </h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="post" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="mb-3">
+                <label for="program_name" class="form-label">Название курса *</label>
+                <input type="text" class="form-control" id="program_name" name="program_name"
+                       value="{{ course.program_name if course else '' }}" required>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="start_date" class="form-label">Дата начала</label>
+                    <div class="date-input-wrapper">
+                        <input type="text" class="form-control" id="start_date" name="start_date"
+                               placeholder="ДД.ММ.ГГГГ"
+                               value="{{ course.start_date.strftime('%d.%m.%Y') if course and course.start_date else '' }}">
+                        <i class="bi bi-calendar3 calendar-icon" id="start-date-icon"></i>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label for="end_date" class="form-label">Дата окончания</label>
+                    <div class="date-input-wrapper">
+                        <input type="text" class="form-control" id="end_date" name="end_date"
+                               placeholder="ДД.ММ.ГГГГ"
+                               value="{{ course.end_date.strftime('%d.%m.%Y') if course and course.end_date else '' }}">
+                        <i class="bi bi-calendar3 calendar-icon" id="end-date-icon"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="hours" class="form-label">Объем часов</label>
+                    <input type="number" class="form-control" id="hours" name="hours"
+                           value="{{ course.hours if course else '' }}">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="organization" class="form-label">Организатор</label>
+                <input type="text" class="form-control" id="organization" name="organization"
+                       value="{{ course.organization if course else '' }}">
+            </div>
+
+            <div class="mb-3">
+                <label for="link" class="form-label">Ссылка на курс</label>
+                <input type="url" class="form-control" id="link" name="link"
+                       value="{{ course.link if course else '' }}"
+                       placeholder="https://example.com/course">
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">Описание курса</label>
+                <textarea class="form-control" id="description" name="description" rows="5"
+                          placeholder="Подробное описание курса, программа обучения...">{{ course.description if course else '' }}</textarea>
+            </div>
+
+            <div class="d-flex justify-content-between pt-3">
+                <a href="/teachers_qualifications" class="btn btn-outline-secondary">Отмена</a>
+                <button type="submit" class="btn btn-save">
+                    <i class="bi bi-save"></i> Сохранить
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const startDateInput = document.getElementById('start_date');
+        if (startDateInput) {
+            const startPicker = flatpickr(startDateInput, {
+                locale: "ru",
+                dateFormat: "d.m.Y",
+                allowInput: true,
+                clickOpens: true
+            });
+            document.getElementById('start-date-icon').addEventListener('click', function() {
+                startPicker.open();
+            });
+        }
+
+        const endDateInput = document.getElementById('end_date');
+        if (endDateInput) {
+            const endPicker = flatpickr(endDateInput, {
+                locale: "ru",
+                dateFormat: "d.m.Y",
+                allowInput: true,
+                clickOpens: true
+            });
+            document.getElementById('end-date-icon').addEventListener('click', function() {
+                endPicker.open();
+            });
+        }
+    });
+</script>
+{% endblock %}

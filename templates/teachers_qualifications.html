@@ -7,7 +7,7 @@
 
 {% block extra_css %}
 <style>
-    .qualifications-table {
+    .courses-table {
         background-color: white;
         border-radius: 10px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -78,7 +78,7 @@
         </a>
     </div>
 
-    <div class="qualifications-table">
+    <div class="courses-table">
         <div class="table-container">
             <table class="table table-hover">
                 <thead>
@@ -89,17 +89,26 @@
                         <th>Дата конца</th>
                         <th>Место</th>
                         <th>Часы</th>
+                        <th style="width: 80px;">Действия</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for q in qualifications %}
+                    {% for course in courses %}
                     <tr>
-                        <td>{{ q.course.program_name if q.course else '—' }}</td>
-                        <td>{{ q.course.organization if q.course else '—' }}</td>
-                        <td>{{ q.course.start_date if q.course else '—' }}</td>
-                        <td>{{ q.course.end_date if q.course else '—' }}</td>
-                        <td>{{ q.course.place if q.course else '—' }} </td>
-                        <td>{{ q.course.hours if q.course else '—' }}</td>
+                        <td><strong>{{ course.program_name if course else '—' }}</strong></td>
+                        <td>{{ course.organization if course else '—' }}</td>
+                        <td>{{ course.start_date.strftime('%d.%m.%Y') if course.start_date else '—' }}</td>
+                        <td>{{ course.end_date.strftime('%d.%m.%Y') if course.end_date else '—' }}</td>
+                        <td>{{ course.place if course else '—' }}</td>
+                        <td>{{ course.hours if course else '—' }}</td>
+                        <td>
+                            <a href="" class="details-icon" title="Подробнее">
+                                <i class="bi bi-eye-fill"></i>
+                            </a>
+                            <a href="" class="edit-icon" title="Редактировать">
+                                <i class="bi bi-pencil-fill"></i>
+                            </a>
+                        </td>
                     </tr>
                     {% else %}
                     <tr>
