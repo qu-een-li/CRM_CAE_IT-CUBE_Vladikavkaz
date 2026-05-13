@@ -43,6 +43,7 @@ def add_teacher_qualification():
         course.hours = int(request.form.get('hours')) if request.form.get('hours') else None
         course.organization = request.form.get('organization')
         course.link = request.form.get('link')
+        course.place = request.form.get('place')
 
         db_sess.add(course)
         db_sess.commit()

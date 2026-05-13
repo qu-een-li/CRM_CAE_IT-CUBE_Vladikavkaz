@@ -107,6 +107,14 @@
                 </div>
             </div>
 
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="place" class="form-label">Место проведения</label>
+                    <input type="text" class="form-control" id="place" name="place"
+                           value="{{ course.place if course else '' }}">
+                </div>
+            </div>
+
             <div class="mb-3">
                 <label for="organization" class="form-label">Организатор</label>
                 <input type="text" class="form-control" id="organization" name="organization"
