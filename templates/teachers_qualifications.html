@@ -85,6 +85,8 @@
                     <tr>
                         <th>Название программы</th>
                         <th>Организация</th>
+                        <th>Дата начала</th>
+                        <th>Дата конца</th>
                         <th>Место</th>
                         <th>Часы</th>
                     </tr>
@@ -94,6 +96,8 @@
                     <tr>
                         <td>{{ q.course.program_name if q.course else '—' }}</td>
                         <td>{{ q.course.organization if q.course else '—' }}</td>
+                        <td>{{ q.course.start_date if q.course else '—' }}</td>
+                        <td>{{ q.course.end_date if q.course else '—' }}</td>
                         <td>{{ q.course.place if q.course else '—' }} </td>
                         <td>{{ q.course.hours if q.course else '—' }}</td>
                     </tr>

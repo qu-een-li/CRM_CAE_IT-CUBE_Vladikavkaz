@@ -12,6 +12,8 @@ class QualificationCourse(SqlAlchemyBase):
     hours = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
     organization = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     place = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    start_date = sqlalchemy.Column(sqlalchemy.Date, nullable=True)
+    end_date = sqlalchemy.Column(sqlalchemy.Date, nullable=True)
     link = sqlalchemy.Column(sqlalchemy.String, nullable=True)
 
     teacher_qualifications = relationship("TeacherQualification", back_populates="course")
