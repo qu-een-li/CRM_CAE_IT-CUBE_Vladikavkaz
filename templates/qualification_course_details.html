@@ -95,6 +95,11 @@
         </div>
 
         <div class="info-row">
+            <div class="info-label">Уровень конкурса:</div>
+            <div class="info-value">{{ course.level.name if course.level else 'Не указан' }}</div>
+        </div>
+
+        <div class="info-row">
             <div class="info-label">Описание курса:</div>
             <div class="info-value">{{ course.description if course.description else 'Не указано' }}</div>
         </div>

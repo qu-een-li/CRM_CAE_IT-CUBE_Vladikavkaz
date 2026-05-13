@@ -1,5 +1,6 @@
 from flask import render_template, flash, redirect, url_for, request
 from data import db_session
+from data.level_contest import Level_contest
 from data.qualification_course import QualificationCourse
 from data.teacher_qualification import TeacherQualification
 from data.teacher import Teacher
@@ -31,6 +32,7 @@ def qualification_course_details(course_id):
 @app.route('/add_qualification_course', methods=['GET', 'POST'])
 def add_qualification_course():
     db_sess = db_session.create_session()
+    levels = db_sess.query(Level_contest).all()
 
     if request.method == 'POST':
         course = QualificationCourse()
@@ -54,6 +56,7 @@ def add_qualification_course():
         course.organization = request.form.get('organization')
         course.link = request.form.get('link')
         course.place = request.form.get('place')
+        course.level_id = int(request.form.get("level_id"))
 
         db_sess.add(course)
         db_sess.commit()
@@ -62,6 +65,7 @@ def add_qualification_course():
 
     return render_template('add_edit_qualification_courses.html',
                            title='Добавить курс повышения квалификации',
+                           levels=levels,
                            course=None)
 
 
@@ -72,7 +76,7 @@ def edit_qualification_course(course_id):
     if not course:
         flash('Курс не найден', 'danger')
         return redirect(url_for('qualification_courses'))
-
+    levels = db_sess.query(Level_contest).all()
     if request.method == 'POST':
         course.program_name = request.form.get('program_name')
 
@@ -105,6 +109,7 @@ def edit_qualification_course(course_id):
         course.place = request.form.get('place')
         course.link = request.form.get('link')
         course.description = request.form.get('description')
+        course.level_id = int(request.form.get("level_id"))
 
         db_sess.commit()
         flash('Курс успешно обновлен!', 'success')
@@ -112,4 +117,5 @@ def edit_qualification_course(course_id):
 
     return render_template('add_edit_qualification_courses.html',
                            title='Редактировать курс',
+                           levels=levels,
                            course=course)

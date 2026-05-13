@@ -115,6 +115,21 @@
                 </div>
             </div>
 
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="level_id" class="form-label">Уровень конкурса</label>
+                    <select class="form-select" id="level_id" name="level_id" required>
+                        <option value="">Выберите уровень</option>
+                        {% for level in levels %}
+                        <option value="{{ level.id }}"
+                                {% if course and course.level_id == level.id %}selected{% endif %}>
+                            {{ level.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
             <div class="mb-3">
                 <label for="organization" class="form-label">Организатор</label>
                 <input type="text" class="form-control" id="organization" name="organization"
