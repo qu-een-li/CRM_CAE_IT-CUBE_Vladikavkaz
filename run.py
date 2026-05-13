@@ -28,9 +28,9 @@ for loc in locales:
     except locale.Error:
         continue
 
+
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+db_session.global_init("db/reg_form.db")
 if __name__ == "__main__":
-
-    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-    db_session.global_init("db/reg_form.db")
     app.run(port=PORT, host=HOST, debug=True)
