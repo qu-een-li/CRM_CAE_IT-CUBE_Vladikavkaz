@@ -49,3 +49,26 @@ def add_teacher_qualification():
                            courses=courses,
                            title='Добавить запись о повышении квалификации',
                            preselected_teacher_id=preselected_teacher_id)
+
+
+@app.route("/delete_teacher_qualification/<int:qualification_id>", methods=["POST"])
+def delete_teacher_qualification(qualification_id):
+    """Удаление записи о повышении квалификации"""
+    db_sess = db_session.create_session()
+    qualification = db_sess.query(TeacherQualification).get(qualification_id)
+
+    if not qualification:
+        flash("Запись не найдена", "danger")
+        return redirect(url_for("teachers_qualifications_list"))
+
+    teacher_id = qualification.teacher_id
+
+    try:
+        db_sess.delete(qualification)
+        db_sess.commit()
+        flash("Запись о повышении квалификации успешно удалена", "success")
+    except Exception as e:
+        db_sess.rollback()
+        flash(f"Ошибка при удалении: {str(e)}", "danger")
+
+    return redirect(url_for("teacher_profile", teacher_id=teacher_id))
