@@ -12,32 +12,37 @@ from config import API_HOST, API_PORT
 
 @app.route("/directions")
 def list_directions():
-    directions = [Direction.from_dict(direction)
-                  for direction in api_request('v1/directions')]
+    """Отображения списка направлений"""
+
+    directions = [Direction.from_dict(direction) for direction in api_request("v1/directions")]
     return render_template("directions.html", directions=directions)
 
 
 @app.route("/direction/<int:direction_id>/groups")
 def show_groups_from_direction(direction_id: int):
-    direction = api_request(
-        f'v1/directions/{direction_id}', params={'add_fields': ["groups"]})
-    groups: list[Group] = [Group.from_dict(
-        group) for group in direction['groups']]
+    """Отображения списка групп в направлении"""
+    direction = api_request(f"v1/directions/{direction_id}", params={"add_fields": ["groups"]})
+    groups: list[Group] = [Group.from_dict(group) for group in direction["groups"]]
     for group in groups:
-        group.students = [Student.from_dict(
-            student) for student in api_request(f'v1/groups/{group.id}/students')]
+        group.students = [Student.from_dict(student) for student in api_request(f"v1/groups/{group.id}/students")]
     direction = Direction.from_dict(direction)
     matrix = [[i.name_of_group for i in groups]]
     for row in zip_longest(*[i.students for i in groups], fillvalue=""):
         matrix.append(list(row))
     print(matrix)
     return render_template(
-        "show_groups_of_direction.html", table_data=matrix, direction_name=direction.name, groups=groups, api_address=f"http://{API_HOST}:{API_PORT}/api/v1"
+        "show_groups_of_direction.html",
+        table_data=matrix,
+        direction_name=direction.name,
+        groups=groups,
+        api_address=f"http://{API_HOST}:{API_PORT}/api/v1",
     )
 
 
 @app.route("/add_group", methods=["POST"])
 def create_group():
+    """создание группы"""
+
     data = request.json
     session = create_session()
 

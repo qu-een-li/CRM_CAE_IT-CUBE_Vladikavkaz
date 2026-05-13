@@ -11,8 +11,8 @@
         background-color: #f8f9fa;
     }
     .form-check-input:checked {
-        background-color: #28a745;
-        border-color: #28a745;
+        background-color: #a72828;
+        border-color: #a72828;
     }
     .card {
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
@@ -23,23 +23,25 @@
 
 {% block content %}
 <div class="container mt-4">
-    <form method="POST" action="">
-        {% csrf_token %} {# Если используете Django, оставьте эту строку #}
-        
+    <form id="attendanceForm">
         <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">Список группы</h5>
-            </div>
+            <div class="card-header text-white" style="background-color: red !important;">
+                <h5 class="mb-0">Список группы "{{group.name_of_group}}" на {{current_date}}</h5>
+            </div>           
             <ul class="list-group list-group-flush">
                 {% for s in students %}
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     <div>
                         <span class="fw-bold">{{ loop.index }}.</span> 
-                        {{ s.name }}
+                        {{ s.name_student }}
                     </div>
                     <div class="form-check form-switch">
-                        <!-- Передаем ID ученика в качестве значения -->
-                        <input class="form-check-input" type="checkbox" name="attendance" value="{{ s.id }}" id="student_{{ s.id }}">
+                        <!-- Изменили: checkbox теперь просто имеет data-id -->
+                        <input class="form-check-input attendance-checkbox" 
+                               type="checkbox" 
+                               data-student-id="{{ s.id }}" 
+                               id="student_{{ s.id }}"
+                               {%if s.were_present%}checked{%endif%}>
                         <label class="form-check-label" for="student_{{ s.id }}">Присутствовал</label>
                     </div>
                 </li>
@@ -51,4 +53,39 @@
         </div>
     </form>
 </div>
+{%endblock%}
+{%block extra_js%}
+<script>
+document.getElementById('attendanceForm').addEventListener('submit', function(e) {
+    e.preventDefault(); 
+
+    const attendanceData = {};
+    const checkboxes = document.querySelectorAll('.attendance-checkbox');
+    
+    // Собираем словарь { "id": true/false }
+    checkboxes.forEach(cb => {
+        const studentId = cb.getAttribute('data-student-id');
+        attendanceData[studentId] = cb.checked;
+    });
+
+    const scheduleId = "{{ past_schedule_id }}"; 
+
+    fetch(`/update_students_check_in/${scheduleId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': "{{ csrf_token() }}" 
+        },
+        body: JSON.stringify(attendanceData)
+    })
+    .then(response => {
+        if (response.ok) {
+            window.location.reload(); // Или редирект
+        } else {
+            alert('Ошибка при сохранении');
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
+</script>
 {% endblock %}

@@ -6,8 +6,9 @@ from data.db_session import create_session
 from forms.loginform import LoginForm
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route("/login", methods=["GET", "POST"])
 def login():
+    """Форма входа в аккаунт"""
     form = LoginForm()
 
     if form.validate_on_submit():
@@ -15,20 +16,20 @@ def login():
         password = form.password.data
         try:
             db_sess = create_session()
-            user = db_sess.query(User).filter(
-                User.user_name == username).first()
+            user = db_sess.query(User).filter(User.user_name == username).first()
             if user and user.check_password(password):
                 login_user(user, remember=True)
-                return redirect('/')
+                return redirect("/")
             else:
-                flash('Неверные данные!')
+                flash("Неверные данные!")
         finally:
             db_sess.close()
 
-    return render_template('login.html', title='Авторизация', form=form)
+    return render_template("login.html", title="Авторизация", form=form)
 
 
-@app.route('/logout')
+@app.route("/logout")
 def logout():
+    """Выход из аккаунта"""
     logout_user()
-    return redirect(url_for('login'))
+    return redirect(url_for("login"))

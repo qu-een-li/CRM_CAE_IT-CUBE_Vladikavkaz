@@ -3,16 +3,16 @@ from flask import abort
 
 
 class DictConvertable:
+    """Класс родитель для преобразования таблицы sqlalchemy в словарь и получения из словаря обьекта таблицы."""
+
     def to_dict(self, *fields):
         """Преобразует объект модели SQLALCHEMY в словарь. Если переданы fields, возвращает только их."""
-        columns = [
-            c for c in self.__table__.columns if not fields or c.name in fields]
+        columns = [c for c in self.__table__.columns if not fields or c.name in fields]
 
         return {
             c.name: (
                 atr.isoformat()
-                if (atr := getattr(self, c.name)) is not None
-                and isinstance(atr, (date, datetime, time))
+                if (atr := getattr(self, c.name)) is not None and isinstance(atr, (date, datetime, time))
                 else atr
             )
             for c in columns

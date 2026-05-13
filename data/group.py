@@ -7,19 +7,16 @@ from data.parents_for_models import DictConvertable
 
 
 class Group(SqlAlchemyBase, DictConvertable):
+    """Таблица с группами, хранит название, учителя, учеников, направление откуда она, аудиторию, где проводятся занятия и событиям в ней"""
+
     __tablename__ = "groups"
 
-    id = sqlalchemy.Column(
-        sqlalchemy.Integer, primary_key=True, autoincrement=True)
+    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     name_of_group = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-    teacher_id = sqlalchemy.Column(
-        sqlalchemy.Integer, sqlalchemy.ForeignKey("teachers.id"), nullable=False)
-    direction_id = sqlalchemy.Column(
-        sqlalchemy.Integer, sqlalchemy.ForeignKey("directions.id"), nullable=False)
-    study_period_id = sqlalchemy.Column(
-        sqlalchemy.Integer, sqlalchemy.ForeignKey("study_periods.id"), nullable=False)
-    auditorium_id = sqlalchemy.Column(
-        sqlalchemy.Integer, sqlalchemy.ForeignKey("auditoriums.id"), nullable=True)
+    teacher_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("teachers.id"), nullable=False)
+    direction_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("directions.id"), nullable=False)
+    study_period_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("study_periods.id"), nullable=False)
+    auditorium_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("auditoriums.id"), nullable=True)
 
     level_of_education = sqlalchemy.Column(
         sqlalchemy.String, sqlalchemy.Enum("вводный", "углубленный", "проектный"), nullable=False
@@ -34,8 +31,7 @@ class Group(SqlAlchemyBase, DictConvertable):
     schedules = orm.relationship("Schedule", back_populates="group")
     study_period = orm.relationship("Study_period")
     direction = orm.relationship("Direction", back_populates="groups")
-    students = orm.relationship(
-        "Student", secondary=student_in_group, back_populates="groups")
+    students = orm.relationship("Student", secondary=student_in_group, back_populates="groups")
     # после выбора типа группы это ьудет только для семестровых и только для мастер-классов
 
     first_lesson_date = sqlalchemy.Column(sqlalchemy.Date, nullable=True)

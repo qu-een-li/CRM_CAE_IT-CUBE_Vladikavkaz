@@ -5,11 +5,12 @@ from data.parents_for_models import DictConvertable
 
 
 class Direction(SqlAlchemyBase, DictConvertable):
+    """Таблица направлений"""
+
     __tablename__ = "directions"
-    id = sqlalchemy.Column(
-        sqlalchemy.Integer, primary_key=True, autoincrement=True, nullable=False)
+    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True, nullable=False)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-    groups = orm.relationship('Group', back_populates='direction')
+    groups = orm.relationship("Group", back_populates="direction")
 
     @staticmethod
     def init_data(db_session):
@@ -23,7 +24,7 @@ class Direction(SqlAlchemyBase, DictConvertable):
             "Основы компьютерной грамотности",
             "Машинное обучение",
             "3D-моделирование",
-            "Яндекс-Лицей"
+            "Яндекс-Лицей",
         ]
 
         for direction_name in directions:

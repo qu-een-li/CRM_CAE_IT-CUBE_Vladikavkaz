@@ -4,6 +4,8 @@ from sqlalchemy import orm
 
 
 class Contest(SqlAlchemyBase):
+    """Таблица конкурсов"""
+
     __tablename__ = "contests"
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True, nullable=False)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=False)

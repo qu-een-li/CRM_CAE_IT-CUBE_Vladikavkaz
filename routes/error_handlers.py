@@ -2,6 +2,7 @@ from app import app
 from flask import render_template
 
 
+# отображения страниц с ошибками
 @app.errorhandler(404)
 def not_found_page(e):
     parameters = {
