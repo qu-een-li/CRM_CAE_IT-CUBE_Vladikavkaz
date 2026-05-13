@@ -135,19 +135,13 @@
         </div>
 
         <div class="d-flex justify-content-between btn-back">
-            <a href="/teachers_qualifications" class="btn btn-outline-secondary">
+            <a href="/qualification_courses" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i> Назад к списку
             </a>
             <div>
-                <a href="/edit_teacher_qualification/{{ course.id }}" class="btn btn-danger">
+                <a href="/edit_qualification_course/{{ course.id }}" class="btn btn-danger">
                     <i class="bi bi-pencil-fill"></i> Редактировать
                 </a>
-                <form method="post" action="/delete_teacher_qualification/{{ course.id }}" style="display: inline;" 
-                      onsubmit="return confirm('Удалить курс «{{ course.program_name }}»?')">
-                    <button type="submit" class="btn btn-outline-danger" style="margin-left: 10px;">
-                        <i class="bi bi-trash-fill"></i> Удалить
-                    </button>
-                </form>
             </div>
         </div>
     </div>

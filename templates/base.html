@@ -71,8 +71,8 @@
                 <li><a class="dropdown-item" href="{{ url_for('teachers_contests_list') or '#' }}"><i class="bi bi-person-video3 me-2"></i>Конкурсы для наставников</a></li>
             </ul>
         </li>
-        <li class="{% if request.path == '/teachers_qualifications' %}active{% endif %}">
-            <a href="/teachers_qualifications" class="menu-link">
+        <li class="{% if request.path == '/qualification_courses' %}active{% endif %}">
+            <a href="/qualification_courses" class="menu-link">
                 <i class="bi bi-person-video3 me-2"></i>Курсы Повышения Квалификации
             </a>
         </li>

@@ -145,18 +145,12 @@
                         <td>{{ course.hours if course.hours else '—' }}</td>
                         <td><span class="status-badge {{ status_class }}">{{ status }}</span></td>
                         <td class="text-nowrap">
-                            <a href="/teachers_qualifications/{{ course.id }}" class="action-icon view" title="Подробнее">
+                            <a href="/qualification_courses/{{ course.id }}" class="action-icon view" title="Подробнее">
                                 <i class="bi bi-eye-fill"></i>
                             </a>
-                            <a href="/edit_teacher_qualification/{{ course.id }}" class="action-icon edit" title="Редактировать">
+                            <a href="/edit_qualification_course/{{ course.id }}" class="action-icon edit" title="Редактировать">
                                 <i class="bi bi-pencil-fill"></i>
                             </a>
-                            <form method="post" action="/delete_teacher_qualification/{{ course.id }}" style="display: inline;"
-                                  onsubmit="return confirm('Удалить курс «{{ course.program_name }}»?')">
-                                <button type="submit" class="action-icon delete" title="Удалить">
-                                    <i class="bi bi-trash-fill"></i>
-                                </button>
-                            </form>
                         </td>
                     </tr>
                     {% else %}

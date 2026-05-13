@@ -7,29 +7,29 @@ from datetime import date, datetime
 from app import app
 
 
-@app.route("/teachers_qualifications")
-def teachers_qualifications():
+@app.route("/qualification_courses")
+def qualification_courses():
     db_sess = db_session.create_session()
     courses = db_sess.query(QualificationCourse).all()
     today = date.today()
-    return render_template("teachers_qualifications.html",
+    return render_template("qualification_courses.html",
                            courses=courses,
                            today=today,
                            date=date)
 
 
-@app.route("/teachers_qualifications/<int:course_id>")
-def teachers_qualification_details(course_id):
+@app.route("/qualification_courses/<int:course_id>")
+def qualification_course_details(course_id):
     db_sess = db_session.create_session()
     course = db_sess.query(QualificationCourse).get(course_id)
     if not course:
         flash("Курс не найден", "danger")
-        return redirect(url_for('teachers_qualifications'))
-    return render_template("teachers_qualification_details.html", course=course, date=date)
+        return redirect(url_for('qualification_courses'))
+    return render_template("qualification_course_details.html", course=course, date=date)
 
 
-@app.route('/add_teacher_qualification', methods=['GET', 'POST'])
-def add_teacher_qualification():
+@app.route('/add_qualification_course', methods=['GET', 'POST'])
+def add_qualification_course():
     db_sess = db_session.create_session()
 
     if request.method == 'POST':
@@ -58,20 +58,20 @@ def add_teacher_qualification():
         db_sess.add(course)
         db_sess.commit()
         flash('Курс успешно добавлен!', 'success')
-        return redirect(url_for('teachers_qualifications'))
+        return redirect(url_for('qualification_courses'))
 
-    return render_template('add_edit_teacher_qualification.html',
+    return render_template('add_edit_qualification_courses.html',
                            title='Добавить курс повышения квалификации',
                            course=None)
 
 
-@app.route('/edit_teacher_qualification/<int:course_id>', methods=['GET', 'POST'])
-def edit_teacher_qualification(course_id):
+@app.route('/edit_qualification_course/<int:course_id>', methods=['GET', 'POST'])
+def edit_qualification_course(course_id):
     db_sess = db_session.create_session()
     course = db_sess.query(QualificationCourse).get(course_id)
     if not course:
         flash('Курс не найден', 'danger')
-        return redirect(url_for('teachers_qualifications'))
+        return redirect(url_for('qualification_courses'))
 
     if request.method == 'POST':
         course.program_name = request.form.get('program_name')
@@ -103,14 +103,13 @@ def edit_teacher_qualification(course_id):
         course.hours = int(request.form.get('hours')) if request.form.get('hours') else None
         course.organization = request.form.get('organization')
         course.place = request.form.get('place')
-        course.level = request.form.get('level')
         course.link = request.form.get('link')
         course.description = request.form.get('description')
 
         db_sess.commit()
         flash('Курс успешно обновлен!', 'success')
-        return redirect(url_for('teachers_qualification_details', course_id=course.id))
+        return redirect(url_for('qualification_course_details', course_id=course.id))
 
-    return render_template('add_edit_teacher_qualification.html',
+    return render_template('add_edit_qualification_courses.html',
                            title='Редактировать курс',
                            course=course)

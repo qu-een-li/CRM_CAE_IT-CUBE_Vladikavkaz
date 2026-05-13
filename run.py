@@ -1,6 +1,6 @@
 from app import app
 from data import db_session
-from routes import main, students, search, schedule, attendance, teachers, contests, groups, error_handlers, user, teachers_contests, teachers_qualifications
+from routes import main, students, search, schedule, attendance, teachers, contests, groups, error_handlers, user, teachers_contests, qualification_courses
 import os
 from config import UPLOAD_FOLDER, PORT, HOST
 import locale
