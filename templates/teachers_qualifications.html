@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}Повышение квалификации | IT-Куб Владикавказ{% endblock %}
+{% block title %}Курсы повышения квалификации | IT-Куб Владикавказ{% endblock %}
 
-{% block page_title %}Повышение квалификации{% endblock %}
-{% block page_subtitle %}Курсы и программы переподготовки{% endblock %}
+{% block page_title %}Курсы повышения квалификации{% endblock %}
+{% block page_subtitle %}Программы обучения для наставников{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -31,7 +31,7 @@
         max-height: 70vh;
         overflow-y: auto;
     }
-    .edit-icon, .details-icon, .delete-icon {
+    .action-icon {
         color: #6c757d;
         font-size: 1.1rem;
         cursor: pointer;
@@ -39,32 +39,45 @@
         background: none;
         border: none;
         padding: 0;
+        text-decoration: none;
+        display: inline-block;
     }
-    .edit-icon:hover {
+    .action-icon:hover {
+        opacity: 0.8;
+    }
+    .action-icon.delete {
         color: #dc3545;
     }
-    .details-icon:hover {
+    .action-icon.delete:hover {
+        color: #bb2d3b;
+    }
+    .action-icon.edit:hover {
+        color: #dc3545;
+    }
+    .action-icon.view:hover {
         color: #0d6efd;
-    }
-    .delete-icon:hover {
-        color: #dc3545;
     }
     .btn-add {
         margin-bottom: 20px;
     }
-    .doc-link {
-        max-width: 150px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+    .status-badge {
         display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
     }
-    .doc-link a {
-        color: #0d6efd;
-        text-decoration: none;
+    .status-active {
+        background: #d4edda;
+        color: #155724;
     }
-    .doc-link a:hover {
-        text-decoration: underline;
+    .status-upcoming {
+        background: #fff3cd;
+        color: #856404;
+    }
+    .status-ended {
+        background: #f8d7da;
+        color: #721c24;
     }
 </style>
 {% endblock %}
@@ -72,9 +85,9 @@
 {% block content %}
 <div class="container mt-4" style="max-width: 98%;">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">Список курсов повышения квалификации</h4>
+        <h4 class="mb-0">Список курсов</h4>
         <a href="/add_teacher_qualification" class="btn btn-danger btn-add">
-            <i class="bi bi-plus-circle"></i> Добавить запись
+            <i class="bi bi-plus-circle"></i> Добавить курс
         </a>
     </div>
 
@@ -83,37 +96,73 @@
             <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th>Название программы</th>
-                        <th>Организация</th>
+                        <th>Название курса</th>
+                        <th>Организатор</th>
                         <th>Дата начала</th>
-                        <th>Дата конца</th>
-                        <th>Место</th>
+                        <th>Дата окончания</th>
+                        <th>Место проведения</th>
                         <th>Часы</th>
-                        <th style="width: 80px;">Действия</th>
+                        <th>Статус</th>
+                        <th style="width: 120px;">Действия</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for course in courses %}
+                    {% set today = today if today else date.today() %}
+                    {% set status = '' %}
+                    {% set status_class = '' %}
+
+                    {% if course.start_date and course.end_date %}
+                        {% if today >= course.start_date and today <= course.end_date %}
+                            {% set status = 'Активен' %}
+                            {% set status_class = 'status-active' %}
+                        {% elif today < course.start_date %}
+                            {% set status = 'Предстоит' %}
+                            {% set status_class = 'status-upcoming' %}
+                        {% else %}
+                            {% set status = 'Завершен' %}
+                            {% set status_class = 'status-ended' %}
+                        {% endif %}
+                    {% elif course.start_date %}
+                        {% if today < course.start_date %}
+                            {% set status = 'Предстоит' %}
+                            {% set status_class = 'status-upcoming' %}
+                        {% else %}
+                            {% set status = 'Активен' %}
+                            {% set status_class = 'status-active' %}
+                        {% endif %}
+                    {% else %}
+                        {% set status = 'Даты не указаны' %}
+                        {% set status_class = 'status-ended' %}
+                    {% endif %}
+
                     <tr>
-                        <td><strong>{{ course.program_name if course else '—' }}</strong></td>
-                        <td>{{ course.organization if course else '—' }}</td>
+                        <td><strong>{{ course.program_name }}</strong></td>
+                        <td>{{ course.organization if course.organization else '—' }}</td>
                         <td>{{ course.start_date.strftime('%d.%m.%Y') if course.start_date else '—' }}</td>
                         <td>{{ course.end_date.strftime('%d.%m.%Y') if course.end_date else '—' }}</td>
-                        <td>{{ course.place if course else '—' }}</td>
-                        <td>{{ course.hours if course else '—' }}</td>
-                        <td>
-                            <a href="" class="details-icon" title="Подробнее">
+                        <td>{{ course.place if course.place else '—' }}</td>
+                        <td>{{ course.hours if course.hours else '—' }}</td>
+                        <td><span class="status-badge {{ status_class }}">{{ status }}</span></td>
+                        <td class="text-nowrap">
+                            <a href="/teachers_qualifications/{{ course.id }}" class="action-icon view" title="Подробнее">
                                 <i class="bi bi-eye-fill"></i>
                             </a>
-                            <a href="" class="edit-icon" title="Редактировать">
+                            <a href="/edit_teacher_qualification/{{ course.id }}" class="action-icon edit" title="Редактировать">
                                 <i class="bi bi-pencil-fill"></i>
                             </a>
+                            <form method="post" action="/delete_teacher_qualification/{{ course.id }}" style="display: inline;"
+                                  onsubmit="return confirm('Удалить курс «{{ course.program_name }}»?')">
+                                <button type="submit" class="action-icon delete" title="Удалить">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     {% else %}
                     <tr>
                         <td colspan="8" class="text-center py-4">
-                            <i class="bi bi-info-circle"></i> Пока нет добавленных записей о повышении квалификации
+                            <i class="bi bi-info-circle"></i> Пока нет добавленных курсов
                         </td>
                     </tr>
                     {% endfor %}

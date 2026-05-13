@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.program_name }} | IT-Куб Владикавказ{% endblock %}
+
+{% block page_title %}Информация о курсе повышения квалификации{% endblock %}
+{% block page_subtitle %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .course-detail {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    .info-row {
+        display: flex;
+        padding: 12px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .info-label {
+        width: 180px;
+        font-weight: 600;
+        color: #495057;
+    }
+    .info-value {
+        flex: 1;
+        color: #212529;
+    }
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    .status-active {
+        background: #d4edda;
+        color: #155724;
+    }
+    .status-upcoming {
+        background: #fff3cd;
+        color: #856404;
+    }
+    .status-ended {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    .btn-back {
+        margin-top: 20px;
+    }
+    .course-link {
+        word-break: break-all;
+    }
+    .course-link a {
+        color: #0d6efd;
+        text-decoration: none;
+    }
+    .course-link a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="course-detail">
+        <h2 class="text-center mb-4">{{ course.program_name }}</h2>
+
+        <div class="info-row">
+            <div class="info-label">Дата начала:</div>
+            <div class="info-value">{{ course.start_date.strftime('%d.%m.%Y') if course.start_date else 'Не указана' }}</div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">Дата окончания:</div>
+            <div class="info-value">{{ course.end_date.strftime('%d.%m.%Y') if course.end_date else 'Не указана' }}</div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">Организатор:</div>
+            <div class="info-value">{{ course.organization if course.organization else 'Не указан' }}</div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">Место проведения:</div>
+            <div class="info-value">{{ course.place if course.place else 'Не указано' }}</div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">Объем часов:</div>
+            <div class="info-value">{{ course.hours if course.hours else 'Не указано' }}</div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">Описание курса:</div>
+            <div class="info-value">{{ course.description if course.description else 'Не указано' }}</div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">Ссылка на курс:</div>
+            <div class="info-value course-link">
+                {% if course.link %}
+                    <a href="{{ course.link }}" target="_blank">{{ course.link }}</a>
+                {% else %}
+                    Не указана
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">Статус:</div>
+            <div class="info-value">
+                {% set today = date.today() %}
+                {% if course.start_date and course.end_date %}
+                    {% if today >= course.start_date and today <= course.end_date %}
+                        <span class="status-badge status-active">Активен</span>
+                    {% elif today < course.start_date %}
+                        <span class="status-badge status-upcoming">Предстоит</span>
+                    {% else %}
+                        <span class="status-badge status-ended">Завершен</span>
+                    {% endif %}
+                {% elif course.start_date %}
+                    {% if today < course.start_date %}
+                        <span class="status-badge status-upcoming">Предстоит</span>
+                    {% else %}
+                        <span class="status-badge status-active">Активен</span>
+                    {% endif %}
+                {% else %}
+                    <span class="status-badge status-ended">Даты не указаны</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between btn-back">
+            <a href="/teachers_qualifications" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Назад к списку
+            </a>
+            <div>
+                <a href="/edit_teacher_qualification/{{ course.id }}" class="btn btn-danger">
+                    <i class="bi bi-pencil-fill"></i> Редактировать
+                </a>
+                <form method="post" action="/delete_teacher_qualification/{{ course.id }}" style="display: inline;" 
+                      onsubmit="return confirm('Удалить курс «{{ course.program_name }}»?')">
+                    <button type="submit" class="btn btn-outline-danger" style="margin-left: 10px;">
+                        <i class="bi bi-trash-fill"></i> Удалить
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
