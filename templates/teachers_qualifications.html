@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Повышение квалификации | IT-Куб Владикавказ{% endblock %}
+
+{% block page_title %}Повышение квалификации{% endblock %}
+{% block page_subtitle %}Курсы и программы переподготовки{% endblock %}
+
+{% block extra_css %}
+<style>
+    .qualifications-table {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        width: 98%;
+        margin: 0 auto;
+    }
+    .table th {
+        background-color: #dc3545;
+        color: white;
+        position: sticky;
+        top: 0;
+    }
+    .table td {
+        vertical-align: middle;
+    }
+    .table-hover tbody tr:hover {
+        background-color: rgba(220, 53, 69, 0.1);
+    }
+    .table-container {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+    .edit-icon, .details-icon, .delete-icon {
+        color: #6c757d;
+        font-size: 1.1rem;
+        cursor: pointer;
+        margin: 0 5px;
+        background: none;
+        border: none;
+        padding: 0;
+    }
+    .edit-icon:hover {
+        color: #dc3545;
+    }
+    .details-icon:hover {
+        color: #0d6efd;
+    }
+    .delete-icon:hover {
+        color: #dc3545;
+    }
+    .btn-add {
+        margin-bottom: 20px;
+    }
+    .doc-link {
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: inline-block;
+    }
+    .doc-link a {
+        color: #0d6efd;
+        text-decoration: none;
+    }
+    .doc-link a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4" style="max-width: 98%;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Список курсов повышения квалификации</h4>
+        <a href="/add_teacher_qualification" class="btn btn-danger btn-add">
+            <i class="bi bi-plus-circle"></i> Добавить запись
+        </a>
+    </div>
+
+    <div class="qualifications-table">
+        <div class="table-container">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Название программы</th>
+                        <th>Организация</th>
+                        <th>Место</th>
+                        <th>Часы</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for q in qualifications %}
+                    <tr>
+                        <td>{{ q.course.program_name if q.course else '—' }}</td>
+                        <td>{{ q.course.organization if q.course else '—' }}</td>
+                        <td>{{ q.course.place if q.course else '—' }} </td>
+                        <td>{{ q.course.hours if q.course else '—' }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4">
+                            <i class="bi bi-info-circle"></i> Пока нет добавленных записей о повышении квалификации
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
