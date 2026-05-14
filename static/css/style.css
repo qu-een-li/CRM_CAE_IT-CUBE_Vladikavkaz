@@ -22,6 +22,37 @@ body {
     transition: all 0.3s;
     z-index: 1000;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    /* Активирует вертикальную прокрутку при выходе за границы экрана */
+    overflow-x: hidden;
+    /* Запрещает появление горизонтальной полосы прокрутки */
+    scrollbar-width: thin;
+    /* Уменьшает ширину скроллбара для браузеров Firefox */
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+    /* Цвет скроллбара в Firefox */
+}
+
+/* Стилизация полосы прокрутки для браузеров Chrome, Safari и WebKit Edge */
+.sidebar::-webkit-scrollbar {
+    width: 5px;
+    /* Ширина полосы прокрутки */
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: transparent;
+    /* Прозрачный фон дорожки */
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    /* Цвет бегунка */
+    border-radius: 10px;
+    /* Округление углов бегунка */
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+    /* Цвет бегунка при наведении */
 }
 
 .sidebar-header {
