@@ -307,3 +307,50 @@ def route_to_create_group_students_attendance(group_id: int):
         as_attachment=True,
         download_name="attendance_report.xlsx",
     )
+
+
+@app.route("/reports/teacher_contests")
+def teacher_contests_report():
+    """Отчет по конкурсам преподавателей"""
+
+    from data.teacher_in_contests import Teacher_in_Contests
+    from data import db_session
+    import io
+    import pandas as pd
+    from flask import send_file
+
+    db_sess = db_session.create_session()
+
+    teacher_contests = db_sess.query(Teacher_in_Contests).all()
+
+    data = []
+    for tc in teacher_contests:
+        teacher = tc.name_teacher
+        contest = tc.name_contest
+
+        teacher_name = f"{teacher.surename} {teacher.name}" if teacher else "—"
+        contest_name = contest.name if contest else "—"
+        place = tc.place if tc.place else "—"
+        rank = tc.rank if tc.rank else "—"
+
+        data.append([teacher_name, contest_name, place, rank])
+
+    if not data:
+        data = [["Нет данных", "Нет данных", "Нет данных", "Нет данных"]]
+
+    df = pd.DataFrame(data, columns=["Преподаватель", "Конкурс", "Место", "Результат"])
+
+    output = io.BytesIO()
+
+    # Используем xlsxwriter (как в ваших работающих отчетах)
+    writer = pd.ExcelWriter(output, engine="xlsxwriter")
+    df.to_excel(writer, sheet_name="Конкурсы", index=False)
+    writer.close()
+    output.seek(0)
+
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name="teacher_contests_report.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
