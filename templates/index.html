@@ -244,66 +244,126 @@
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<div class="col-md-6">
-    <div class="card report-card animate__animated animate__fadeInLeft h-100">
-        <div class="card-body">
-            <h5><i class="bi bi-trophy-fill text-danger"></i> Отчет по конкурсам преподавателей</h5>
-            <p class="text-muted">Сформируйте отчет по участию в конкурсах</p>
+        <div class="col-md-6">
+            <div class="card report-card animate__animated animate__fadeInLeft h-100">
+                <div class="card-body">
+                    <h5><i class="bi bi-trophy-fill text-danger"></i> Отчет по конкурсам преподавателей</h5>
+                    <p class="text-muted">Сформируйте отчет по участию в конкурсах</p>
 
-            <div class="mb-3">
-                <label class="form-label">Преподаватель:</label>
-                <select class="form-select" id="teacherContestsSelect">
-                    <option value="">Все преподаватели</option>
-                    {% for teacher in teachers %}
-                    <option value="{{ teacher.id }}">{{ teacher.fio }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="row mb-3">
-                <div class="col">
-                    <label class="form-label">Начало (месяц):</label>
-                    <input type="month" class="form-control" id="contestsStartDate">
+                    <div class="mb-3">
+                        <label class="form-label">Преподаватель:</label>
+                        <select class="form-select" id="teacherContestsSelect">
+                            <option value="">Все преподаватели</option>
+                            {% for teacher in teachers %}
+                            <option value="{{ teacher.id }}">{{ teacher.fio }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label class="form-label">Начало (месяц):</label>
+                            <input type="month" class="form-control" id="contestsStartDate">
+                        </div>
+                        <div class="col">
+                            <label class="form-label">Конец (месяц):</label>
+                            <input type="month" class="form-control" id="contestsEndDate">
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-danger w-100" onclick="downloadContestsReport()">
+                        <i class="bi bi-download me-1"></i> Сформировать отчет
+                    </button>
                 </div>
-                <div class="col">
-                    <label class="form-label">Конец (месяц):</label>
-                    <input type="month" class="form-control" id="contestsEndDate">
-                </div>
             </div>
-            <button type="button" class="btn btn-danger w-100" onclick="downloadContestsReport()">
-                <i class="bi bi-download me-1"></i> Сформировать отчет
-            </button>
         </div>
+
+        <div class="col-md-6">
+            <div class="card report-card animate__animated animate__fadeInRight h-100">
+                <div class="card-body">
+                    <h5><i class="bi bi-mortarboard-fill text-danger"></i> Отчет по повышению квалификации</h5>
+                    <p class="text-muted">Сформируйте отчет по курсам повышения квалификации</p>
+
+                    <div class="mb-3">
+                        <label class="form-label">Преподаватель:</label>
+                        <select class="form-select" id="qualificationTeacherSelect">
+                            <option value="">Все преподаватели</option>
+                            {% for teacher in teachers %}
+                            <option value="{{ teacher.id }}">{{ teacher.fio }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label class="form-label">Начало (месяц):</label>
+                            <input type="month" class="form-control" id="qualificationStartDate">
+                        </div>
+                        <div class="col">
+                            <label class="form-label">Конец (месяц):</label>
+                            <input type="month" class="form-control" id="qualificationEndDate">
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-danger w-100" onclick="downloadQualificationReport()">
+                        <i class="bi bi-download me-1"></i> Сформировать отчет
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
 <script>
-function downloadContestsReport() {
-    const teacherId = document.getElementById('teacherContestsSelect').value;
-    const startDate = document.getElementById('contestsStartDate').value;
-    const endDate = document.getElementById('contestsEndDate').value;
+    function downloadQualificationReport() {
+        const teacherId = document.getElementById('qualificationTeacherSelect').value;
+        const startDate = document.getElementById('qualificationStartDate').value;
+        const endDate = document.getElementById('qualificationEndDate').value;
 
-    let url = '/reports/teacher_contests';
-    const params = [];
+        let url = '/reports/qualifications';
+        const params = [];
 
-    if (teacherId && teacherId !== '') {
-        params.push('teacher_id=' + encodeURIComponent(teacherId));
-    }
-    if (startDate && startDate !== '') {
-        params.push('start_date=' + encodeURIComponent(startDate));
-    }
-    if (endDate && endDate !== '') {
-        params.push('end_date=' + encodeURIComponent(endDate));
-    }
+        if (teacherId && teacherId !== '') {
+            params.push('teacher_id=' + encodeURIComponent(teacherId));
+        }
+        if (startDate && startDate !== '') {
+            params.push('start_date=' + encodeURIComponent(startDate));
+        }
+        if (endDate && endDate !== '') {
+            params.push('end_date=' + encodeURIComponent(endDate));
+        }
 
-    if (params.length > 0) {
-        url += '?' + params.join('&');
-    }
+        if (params.length > 0) {
+            url += '?' + params.join('&');
+        }
 
-    window.location.href = url;
-}
+        window.location.href = url;
+    }
+</script>
+
+<script>
+    function downloadContestsReport() {
+        const teacherId = document.getElementById('teacherContestsSelect').value;
+        const startDate = document.getElementById('contestsStartDate').value;
+        const endDate = document.getElementById('contestsEndDate').value;
+
+        let url = '/reports/teacher_contests';
+        const params = [];
+
+        if (teacherId && teacherId !== '') {
+            params.push('teacher_id=' + encodeURIComponent(teacherId));
+        }
+        if (startDate && startDate !== '') {
+            params.push('start_date=' + encodeURIComponent(startDate));
+        }
+        if (endDate && endDate !== '') {
+            params.push('end_date=' + encodeURIComponent(endDate));
+        }
+
+        if (params.length > 0) {
+            url += '?' + params.join('&');
+        }
+
+        window.location.href = url;
+    }
 </script>
 
 {% endblock %}

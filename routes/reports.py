@@ -165,7 +165,6 @@ def route_to_create_teachers_students_attendance(teacher_id: int):
 
     data = []
     for student_name, (total_number, total) in students.items():
-
         data.append(
             {
                 "student": student_name,
@@ -352,5 +351,81 @@ def teacher_contests_report():
         output,
         as_attachment=True,
         download_name="teacher_contests_report.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+
+@app.route("/reports/qualifications")
+def qualification_report():
+    """Отчет по курсам повышения квалификации"""
+
+    from data.teacher_qualification import TeacherQualification
+    from data import db_session
+    import io
+    import pandas as pd
+    from flask import send_file
+    from datetime import datetime
+
+    db_sess = db_session.create_session()
+    qualifications = db_sess.query(TeacherQualification).all()
+
+    data = []
+    for q in qualifications:
+        teacher = q.teacher
+        course = q.course
+
+        # Форматируем ФИО учителя
+        if teacher:
+            if teacher.patronymic:
+                teacher_name = f"{teacher.surename} {teacher.name[0]}.{teacher.patronymic[0]}."
+            else:
+                teacher_name = f"{teacher.surename} {teacher.name[0]}."
+        else:
+            teacher_name = "—"
+
+        # Данные из курса
+        program_name = course.program_name if course else "—"
+        hours = course.hours if course else "—"
+        course_organization = course.organization if course else "—"
+
+        # Данные из связующей таблицы
+        reg_number = q.registration_number if q.registration_number else "—"
+        issue_date = q.issue_date.strftime("%d.%m.%Y") if q.issue_date else "—"
+        certificate_number = q.certificate_number if q.certificate_number else "—"
+        link = q.link if q.link else "—"
+
+        data.append([teacher_name, program_name, course_organization, hours,
+                     reg_number, certificate_number, issue_date, link])
+
+    if not data:
+        data = [["Нет данных", "—", "—", "—", "—", "—", "—", "—"]]
+
+    df = pd.DataFrame(data, columns=["Преподаватель", "Курс", "Организация", "Часы",
+                                     "Рег. номер", "Номер сертификата", "Дата выдачи", "Ссылка"])
+
+    output = io.BytesIO()
+    writer = pd.ExcelWriter(output, engine="xlsxwriter")
+    df.to_excel(writer, sheet_name="Квалификация", index=False)
+
+    # Настраиваем ширину колонок
+    workbook = writer.book
+    worksheet = writer.sheets["Квалификация"]
+
+    worksheet.set_column("A:A", 25)
+    worksheet.set_column("B:B", 40)
+    worksheet.set_column("C:C", 30)
+    worksheet.set_column("D:D", 10)
+    worksheet.set_column("E:E", 20)
+    worksheet.set_column("F:F", 20)
+    worksheet.set_column("G:G", 15)
+    worksheet.set_column("H:H", 30)
+
+    writer.close()
+    output.seek(0)
+
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name=f"qualifications_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
