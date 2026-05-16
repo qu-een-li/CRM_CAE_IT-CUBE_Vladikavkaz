@@ -12,7 +12,7 @@
 #cccccc !important; 
 }
 </style>
-{% for matrix, week_interval in list_of_matrix %}
+{% for matrix, week_interval, upper_headers in list_of_matrix %}
     {# Сохраняем индекс текущей недели #}
     {% set week_idx = loop.index0 %}
     
@@ -22,6 +22,12 @@
                 <th colspan="8" style="background-color:rgb(54, 54, 54); color:aliceblue; text-align: right; font-size: 1.4rem">
                     {{ week_interval }}
                 </th>
+            </tr>
+            <tr style="background-color: #495057; color: aliceblue; text-align: center; font-size: 1.1rem;">
+                <th></th> {# Пустая ячейка для выравнивания над колонкой "Время" #}
+                {% for day_numeric in upper_headers %}
+                    <th>{{ day_numeric }}</th>
+                {% endfor %}
             </tr>
             <tr>
                 <th scope="col" style="width: 8%;">Время</th>

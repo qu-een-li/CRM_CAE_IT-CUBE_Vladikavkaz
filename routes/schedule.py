@@ -95,8 +95,10 @@ def get_more_days():
         matrix = []
         for time_key in unique_times:
             row = [time_key]
+            days_numerics = []
             for day_offset in range(7):
                 cur_date = current_week_start + timedelta(days=day_offset)
+                days_numerics.append(cur_date.day)
                 events = []
                 for s in schedules:
                     s_time = f'{s.start_time.strftime("%H:%M")}-{s.end_time.strftime("%H:%M")}'
@@ -107,7 +109,7 @@ def get_more_days():
             matrix.append(row)
 
         week_end = current_week_start + timedelta(days=6)
-        list_of_matrix_and_interval.append((matrix, get_week_range(current_week_start, week_end)))
+        list_of_matrix_and_interval.append((matrix, get_week_range(current_week_start, week_end), days_numerics))
 
         current_week_start += timedelta(days=7)
 
