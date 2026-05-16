@@ -30,7 +30,7 @@ class User(SqlAlchemyBase, DictConvertable, UserMixin):
     # Поле роли с использованием Enum
     role = sqlalchemy.Column(sqlalchemy.Enum(UserRole), nullable=False)
 
-    # ID связанной сущности (например, если есть таблица TeacherProfiles)
+    # ID связанной сущности (например, если есть таблица Teacher)
     id_in_column_of_role = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
 
     # Пароль (обычно String)
@@ -43,7 +43,7 @@ class User(SqlAlchemyBase, DictConvertable, UserMixin):
     registration_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
 
     def __repr__(self):
-        return f"<User> {self.id} {self.user_name} ({self.role.value})"
+        return f"User({self.id} {self.user_name} ({self.role.value}))"
 
     def set_password(self, password):
         """Создает хеш пароля."""

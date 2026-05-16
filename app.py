@@ -9,8 +9,11 @@ from api.api_schools import schools_api
 from data.user import User
 from flask_wtf.csrf import CSRFProtect
 from flask_login import current_user
+
 app = Flask(__name__)
 app.config["SECRET_KEY"] = KEY_CSRF
+app.config["WTF_I18N_ENABLED"] = True
+app.config["BABEL_DEFAULT_LOCALE"] = "ru"
 csrf = CSRFProtect(app)
 app.register_blueprint(regions_api)
 app.register_blueprint(cities_api)
@@ -22,8 +25,8 @@ login_manager.init_app(app)
 
 @app.before_request
 def check_login():
-    if not current_user.is_authenticated and request.endpoint not in ['login', 'static']:
-        return redirect('/login')
+    if not current_user.is_authenticated and request.endpoint not in ["login", "static"]:
+        return redirect("/login")
 
 
 @login_manager.user_loader

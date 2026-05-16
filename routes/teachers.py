@@ -7,11 +7,13 @@ from data.teacher import Teacher
 from data.contest_for_teachers import Contest_for_Teachers
 from data.teacher_qualification import TeacherQualification
 from data.qualification_course import QualificationCourse
+from data.user import User, UserRole
 from forms.teacher_form import TeacherForm
 import os
 from datetime import datetime, date
 from config import UPLOAD_FOLDER
 from werkzeug.utils import secure_filename
+from re import match
 
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
@@ -65,6 +67,26 @@ def add_teacher():
             teacher.birthday = datetime.strptime(form.birthday.data, "%d.%m.%Y").date()
 
             session.add(teacher)
+            session.flush()
+            if form.allow_login.data:
+                if not form.user_name.data:
+                    form.user_name.errors.append("Без этого поля человек не сможет входить в систему")
+                if not form.password.data:
+                    form.password.errors.append("Без этого поля человек не сможет входить в систему")
+                else:
+                    if len(form.password.data) <= 3:
+                        form.password.errors.append("Пароль должен быть больше 3-ех символов")
+                    elif not match(r'^[a-zA-Z0-9!@#$%^&*()_+=\-\[\]{}|;:\'",./<>?`~ ]+$', form.password.data):
+                        form.password.errors.append(
+                            "Пароль может содержать только английские буквы, цифры и спецсимволы"
+                        )
+                if form.user_name.errors or form.password.errors:
+                    return render_template("add_teacher.html", form=form)
+                user = User(user_name=form.user_name.data)
+                user.set_password(form.password.data)
+                user.id_in_column_of_role = teacher.id
+                user.role = UserRole.TEACHER
+                session.add(user)
             session.commit()
 
             flash("Наставник успешно добавлен", "success")
@@ -158,10 +180,12 @@ def teacher_profile(teacher_id):
 
         teacher_contests = session.query(Teacher_in_Contests).filter_by(teacher_id=teacher_id).all()
 
-        return render_template("teacher_profile.html",
-                               teacher=teacher,
-                               qualifications=qualifications,
-                               teacher_contests=teacher_contests,
-                               date=date)
+        return render_template(
+            "teacher_profile.html",
+            teacher=teacher,
+            qualifications=qualifications,
+            teacher_contests=teacher_contests,
+            date=date,
+        )
     finally:
         session.close()

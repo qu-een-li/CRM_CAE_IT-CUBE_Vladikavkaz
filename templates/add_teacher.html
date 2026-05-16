@@ -50,7 +50,6 @@
     }
 </style>
 {% endblock %}
-
 {% block content %}
 <div class="container mt-4">
     <div class="teacher-container">
@@ -135,6 +134,7 @@
                     {% endfor %}
                 </div>
             </div>
+            
             <div class="mb-3">
                 <label for="photo" class="form-label">Фотография</label>
                 {{ form.photo(class="form-control", id="photo-input", accept="image/*") }}
@@ -142,12 +142,39 @@
                 {% for error in form.photo.errors %}
                 <div class="invalid-feedback">{{ error }}</div>
                 {% endfor %}
-                <div class="photo-preview" id="photo-preview">
+                <div class="photo-preview" id="photo-preview" style="display: none;">
                     <img id="preview-image" src="#" alt="Предпросмотр">
                 </div>
             </div>
+
+            <!-- БЛОК С ЧЕКБОКСОМ -->
+            <div class="form-check mb-4">
+                {{ form.allow_login(class="form-check-input", id="allow-login-checkbox") }}
+                <label class="form-check-label fw-bold" for="allow-login-checkbox">
+                    Разрешить вход в систему
+                </label>
+            </div>
+
+            <!-- ДИНАМИЧЕСКИЙ БЛОК АВТОРИЗАЦИИ (скрыт по умолчанию с помощью d-none) -->
+            <div id="credentials-section" class="row mb-3 d-none">
+                <div class="col-md-6 mb-3">
+                    <label for="user_name" class="form-label">Имя пользователя *</label>
+                    {{ form.user_name(class="form-control", id="user-name-input", placeholder="Введите логин") }}
+                    {% for error in form.user_name.errors %}
+                    <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="password" class="form-label">Пароль *</label>
+                    {{ form.password(class="form-control", id="password-input", placeholder="Введите пароль") }}
+                    {% for error in form.password.errors %}
+                    <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
             <div class="d-flex justify-content-between pt-3">
-                <button type="reset" class="btn btn-outline-secondary">Сбросить</button>
+                <button type="reset" id="form-reset-btn" class="btn btn-outline-secondary">Сбросить</button>
                 {{ form.submit(class="btn btn-register") }}
             </div>
         </form>
@@ -197,6 +224,43 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     document.getElementById('teacher-birthday-icon').addEventListener('click', function() {
         teacherPicker.open();
+    });
+
+    // ЛОГИКА ДЛЯ ПОЛЕЙ АВТОРИЗАЦИИ
+    const allowLoginCheckbox = document.getElementById('allow-login-checkbox');
+    const credentialsSection = document.getElementById('credentials-section');
+    const userNameInput = document.getElementById('user-name-input');
+    const passwordInput = document.getElementById('password-input');
+    const resetBtn = document.getElementById('form-reset-btn');
+
+    function toggleCredentials() {
+        if (allowLoginCheckbox.checked) {
+            credentialsSection.classList.remove('d-none');
+            userNameInput.setAttribute('required', 'required');
+            passwordInput.setAttribute('required', 'required');
+        } else {
+            credentialsSection.classList.add('d-none');
+            userNameInput.removeAttribute('required');
+            passwordInput.removeAttribute('required');
+            // Очищаем скрытые поля при выключении галочки
+            userNameInput.value = '';
+            passwordInput.value = '';
+        }
+    }
+
+    // Слушатель изменения состояния галочки
+    allowLoginCheckbox.addEventListener('change', toggleCredentials);
+
+    // Проверка при загрузке страницы (если сервер вернул ошибки валидации)
+    toggleCredentials();
+
+    // Скрытие секции при полном сбросе формы
+    resetBtn.addEventListener('click', function() {
+        setTimeout(() => {
+            toggleCredentials();
+            photoPreview.style.display = 'none';
+            previewImage.src = '#';
+        }, 10);
     });
 });
 </script>

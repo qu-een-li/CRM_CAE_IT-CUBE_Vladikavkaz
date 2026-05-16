@@ -28,7 +28,12 @@ def create_attendance_report(teacher_name, course_name, period_start, period_end
             }
         ]
     df = pd.DataFrame(students_data)
-    df.columns = ["ФИО обучающегося", "Суммарно количество", "Суммарно", "% пропущенных"]
+    df.columns = [
+        "ФИО обучающегося",
+        "Суммарно количество занятий за период в соответствии с календарно-тематическим планом",
+        "Суммарно посещенных занятий за период",
+        "% пропущенных занятий",
+    ]
     # Добавляем индекс (№ п/п)
     df.index = range(1, len(df) + 1)
     df.index.name = "№ п/п"
@@ -175,7 +180,7 @@ def route_to_create_teachers_students_attendance(teacher_id: int):
         )
     excel_file = create_attendance_report(
         formatted_teacher_name,
-        courses,
+        courses.capitalize(),
         format_date(start_date, format="MMM y", locale="ru_RU") if start_date else "♾️",
         format_date(end_date, format="MMM y", locale="ru_RU") if end_date else "♾️",
         data,
@@ -351,7 +356,7 @@ def teacher_contests_report():
         output,
         as_attachment=True,
         download_name="teacher_contests_report.xlsx",
-        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
 
 
@@ -394,14 +399,26 @@ def qualification_report():
         certificate_number = q.certificate_number if q.certificate_number else "—"
         link = q.link if q.link else "—"
 
-        data.append([teacher_name, program_name, course_organization, hours,
-                     reg_number, certificate_number, issue_date, link])
+        data.append(
+            [teacher_name, program_name, course_organization, hours, reg_number, certificate_number, issue_date, link]
+        )
 
     if not data:
         data = [["Нет данных", "—", "—", "—", "—", "—", "—", "—"]]
 
-    df = pd.DataFrame(data, columns=["Преподаватель", "Курс", "Организация", "Часы",
-                                     "Рег. номер", "Номер сертификата", "Дата выдачи", "Ссылка"])
+    df = pd.DataFrame(
+        data,
+        columns=[
+            "Преподаватель",
+            "Курс",
+            "Организация",
+            "Часы",
+            "Рег. номер",
+            "Номер сертификата",
+            "Дата выдачи",
+            "Ссылка",
+        ],
+    )
 
     output = io.BytesIO()
     writer = pd.ExcelWriter(output, engine="xlsxwriter")
@@ -427,5 +444,5 @@ def qualification_report():
         output,
         as_attachment=True,
         download_name=f"qualifications_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
-        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
