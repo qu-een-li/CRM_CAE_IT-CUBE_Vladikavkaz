@@ -1,4 +1,4 @@
-from app import app
+from app import app, socketio
 from data import db_session
 from routes import (
     main,
@@ -15,7 +15,8 @@ from routes import (
     reports,
     qualification_courses,
     teachers_qualifications,
-    teachers_in_contests
+    teachers_in_contests,
+    notification
 )
 import os
 from config import UPLOAD_FOLDER, PORT, HOST
@@ -36,4 +37,4 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 db_session.global_init("db/reg_form.db")
 if __name__ == "__main__":
-    app.run(port=PORT, host=HOST, debug=True)
+    socketio.run(app, port=PORT, host=HOST)
