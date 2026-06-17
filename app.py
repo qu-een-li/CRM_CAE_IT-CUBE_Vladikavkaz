@@ -43,9 +43,7 @@ def shutdown_session(exception=None):
 
 
 socketio = SocketIO(app, cors_allowed_origins="*",
-                    logger=True, engineio_logger=True)  # <-- ДОБАВИТЬ
-
-# 2. Добавляем логику подключения (прямо под инициализацией)
+                    logger=True, engineio_logger=True)
 
 
 @socketio.on('connect')
@@ -60,14 +58,12 @@ def handle_connect():
 
 def send_notification_count(user_id):
 
-    # 1. Получаем непрочитанные уведомления из БД (например, последние 5 штук)
     ses = db_session.create_session()
     notifications_all = ses.query(
         Notification).filter_by(user_id=user_id).all()
     notifications = [i for i in notifications_all if i.is_read == False]
     unread_count = len(notifications)
 
-    # 2. Формируем список текстов для отправки в JS
     notif_list = []
     for n in notifications:
         notif_list.append({
@@ -75,7 +71,6 @@ def send_notification_count(user_id):
             'message': n.body
         })
 
-    # 3. Отправляем и цифру, и сами сообщения
     socketio.emit('update_badge', {
         'count': unread_count,
         'notifications': notif_list
