@@ -1,0 +1,75 @@
+{% extends "report_template.html" %}
+{% block title %}Журнал посещаемости по датам | IT-Куб Владикавказ{% endblock %}
+{% block content %}
+    <div class="container">
+        <div class="report-header">
+            Журнал учета посещаемости учебной группы
+        </div>
+
+        <!-- Мета-информация -->
+        <table class="meta-table">
+            <tr>
+                <td style="width: 10%; text-align: center;">педагог</td>
+                <td class="border-bottom" style="width: 33%;">{{ group.teacher.name if group.teacher else "Не указан" }}</td>
+            </tr>
+            <tr>
+                <!-- Пустая строка для rowspan -->
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr style="height: 15px;"></tr>
+            <tr>
+                <td>группа:</td>
+                <td style="width: 15%;"><strong>{{ group.name_of_group }}</strong></td>
+            </tr>
+        </table>
+
+        <!-- Таблица посещаемости по датам -->
+        <div class="table-responsive" style="overflow-x: auto; margin-top: 20px;">
+            <table class="main-table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th style="width: 5%; text-align: center;">№ п/п</th>
+                        <th style="width: 25%; text-align: left;">ФИО обучающегося</th>
+                        {# Динамически выводим все даты в заголовке #}
+                        {% for date in dates.keys() %}
+                        <th style="text-align: center; min-width: 60px; font-size: 12px;">{{ date }}</th>
+                        {% else %}
+                        <th style="text-align: center;">Даты занятий отсутствуют</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if not student_names %}
+                    <tr>
+                        <td class="text-center">1</td>
+                        <td class="text-left" colspan="{{ dates.keys()|length + 1 }}">В группе нет студентов</td>
+                    </tr>
+                    {% else %}
+                        {% for name in student_names|sort %}
+                        <tr>
+                            <td class="text-center">{{ loop.index }}</td>
+                            <td class="text-left" style="font-weight: 500;">{{ name }}</td>
+                            {# Проверяем присутствие студента на каждую дату #}
+                            {% for date, present_students in dates.items() %}
+                                {% if name in present_students %}
+                                <td class="text-center" style="background-color: #C6EFCE; color: #006100; font-weight: bold;">V</td>
+                                {% else %}
+                                <td class="text-center" style="background-color: #FFC7CE; color: #9C0006;">X</td>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Итоговый блок -->
+        <div class="footer-summary" style="margin-top: 20px;">
+            <p>Всего обучающихся в группе: <span class="footer-val">{{ student_names|length }}</span></p>
+            <p>Всего проведенных занятий за период: <span class="footer-val">{{ dates.keys()|length }}</span></p>
+        </div>
+    </div>
+{% endblock %}

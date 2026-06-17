@@ -16,7 +16,7 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = KEY_CSRF
 app.config["WTF_I18N_ENABLED"] = True
 app.config["BABEL_DEFAULT_LOCALE"] = "ru"
-# csrf = CSRFProtect(app)
+csrf = CSRFProtect(app)
 app.register_blueprint(regions_api)
 app.register_blueprint(cities_api)
 app.register_blueprint(schools_api)
@@ -57,7 +57,6 @@ def handle_connect():
 
 
 def send_notification_count(user_id):
-
     ses = db_session.create_session()
     notifications_all = ses.query(
         Notification).filter_by(user_id=user_id).all()

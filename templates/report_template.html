@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Система учета | IT-Куб Владикавказ{% endblock %}</title>
+    <title>{% block title %}Отчет | IT-Куб Владикавказ{% endblock %}</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -12,6 +12,145 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_red.css">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const downloadBtn = document.querySelector('.download-btn');
+            
+            if (downloadBtn) {
+                window.addEventListener('scroll', function() {
+                    // Если страницу прокрутили вниз больше чем на 60px (высота navbar)
+                    if (window.scrollY > 60) {
+                        downloadBtn.classList.add('scrolled');
+                    } else {
+                        downloadBtn.classList.remove('scrolled');
+                    }
+                });
+            }
+        });
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            position: relative;
+        }
+        /* Шапка как в Excel */
+        .report-header {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
+        .meta-table {
+            width: 100%;
+            margin-bottom: 20px;
+            border-collapse: collapse;
+        }
+        .meta-table td {
+            padding: 6px;
+            vertical-align: middle;
+        }
+        .border-bottom {
+            border-bottom: 1px solid #000;
+        }
+        .border-all {
+            border: 1px solid #000;
+            padding: 10px !important;
+            background-color: #fafafa;
+        }
+        /* Главная таблица */
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .main-table th {
+            border: 1px solid #000;
+            background-color: #f2f2f2;
+            padding: 10px;
+            font-size: 13px;
+            text-align: center;
+        }
+        .main-table td {
+            border: 1px solid #000;
+            padding: 8px;
+            font-size: 14px;
+        }
+        .text-center { text-align: center; }
+        .text-left { text-align: left; }
+        .text-right { text-align: right; }
+        
+        /* Подвал таблицы */
+        .footer-summary {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        .footer-summary p {
+            margin: 5px 0;
+        }
+        .footer-val {
+            font-weight: bold;
+            text-decoration: underline;
+            margin-left: 5px;
+        }
+        .download-btn {
+            position: fixed;
+            top: 100px; 
+            right: 40px;
+            background-color: #1f7246; /* Цвет Excel */
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            /* Добавляем плавность для свойства top */
+            transition: top 0.25s ease-out, background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+            z-index: 1000;
+        }
+
+        .download-btn:hover {
+            background-color: #154c2e;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        }
+
+        /* Класс, который активируется при скролле страницы вниз */
+        .download-btn.scrolled {
+            top: 20px; /* Кнопка поднимается выше, когда navbar скрылся */
+        }
+
+        /* Адаптивность для мобильных */
+        @media (max-width: 1200px) {
+            .download-btn {
+                position: static;
+                display: inline-flex;
+                margin-bottom: 20px;
+                float: right;
+            }
+            .download-btn.scrolled {
+                position: static;
+            }
+            .clearfix::after {
+                content: "";
+                clear: both;
+                display: table;
+            }
+        }
+    </style>
+
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -122,30 +261,90 @@
         </div>
     </nav>
 
-    <div class="welcome-section animate__animated animate__fadeIn">
-        <div class="container py-4">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <h1 class="display-6 fw-bold">
-                        <i class="bi bi-speedometer2 me-3 text-danger"></i>{% block page_title %}CRM для центра дополнительного образования
+<div class="clearfix">
+    <!-- Кнопка скачать -->
+    <a href="{{ download_url }}" class="download-btn">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v2.5a.5.5 0 0 1 .5-.5z"/>
+            <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+        </svg>
+        Скачать Excel
+    </a>
+</div>
 
-{%
-                        endblock %}
-                    </h1>
-                    <p class="lead">{% block page_subtitle %}управление данными об учащихся, педагогах, участиях в конкурсах{%
-                        endblock %}</p>
-                </div>
-                <div class="col-md-4 text-md-end">
-                    <div class="date-time">
-                        <div class="time h3 text-danger" id="current-time">12:45</div>
-                        <div class="date" id="current-date">Воскресенье, 6 апреля 2025</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+{%block content%}
+<div class="container">
+    <div class="report-header">
+        Сводная ведомость учета посещаемости
     </div>
 
-    {% block content %}{% endblock %}
+    <!-- Мета-информация -->
+    <table class="meta-table">
+        <tr>
+            <td style="width: 12%;">направление:</td>
+            <td colspan="2" rowspan="2" class="border-all" style="width: 45%;">{{ course_name }}</td>
+            <td style="width: 10%; text-align: center;">педагог</td>
+            <td class="border-bottom" style="width: 33%;">{{ teacher_name }}</td>
+        </tr>
+        <tr>
+            <!-- Пустая строка для rowspan -->
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr style="height: 15px;"></tr>
+        <tr>
+            <td>за период</td>
+            <td style="width: 15%;"><strong>{{ period_start }}</strong></td>
+            <td style="width: 15%;">по {{ period_end }}</td>
+            <td>года</td>
+            <td></td>
+        </tr>
+    </table>
+
+    <!-- Таблица успеваемости -->
+    <table class="main-table">
+        <thead>
+            <tr>
+                <th style="width: 5%;">№ п/п</th>
+                <th style="width: 45%;">ФИО обучающегося</th>
+                <th style="width: 20%;">Суммарно количество занятий за период в соответствии с КТП</th>
+                <th style="width: 15%;">Суммарно посещенных занятий за период</th>
+                <th style="width: 15%;">% пропущенных занятий</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if not students %}
+            <tr>
+                <td class="text-center">1</td>
+                <td class="text-left">Ни одного студента</td>
+                <td class="text-right">0</td>
+                <td class="text-right">0</td>
+                <td class="text-right">0%</td>
+            </tr>
+            {% else %}
+                {% for student in students %}
+                <tr>
+                    <td class="text-center">{{ loop.index }}</td>
+                    <td class="text-left">{{ student.name }}</td>
+                    <td class="text-right">{{ student.total_number }}</td>
+                    <td class="text-right">{{ student.total }}</td>
+                    <td class="text-right">{{ student.percent_skipped }}%</td>
+                </tr>
+                {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+
+    <!-- Итоговый блок -->
+    <div class="footer-summary">
+        <p>Количество обучающихся: <span class="footer-val">{{ total_students }}</span></p>
+        <p>Процент пропущенных занятий составляет: <span class="footer-val">{{ avg_skipped_percent }}%</span></p>
+    </div>
+</div>
+
+{% endblock %}
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>

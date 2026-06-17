@@ -9,10 +9,25 @@ from data.students_to_past_schedule import Student_to_past_schedule
 from data.schedule import Schedule
 from app import app
 import io
-from flask import send_file, request, flash, redirect
+from flask import send_file, request, flash, redirect, render_template, url_for, abort
 from datetime import datetime
 import calendar
 from babel.dates import format_date
+
+
+@app.route('/reports')
+def reports_page():
+    """Главная страница репортов"""
+    ses = create_session()
+    teachers = ses.query(Teacher).all()
+    for teacher in teachers:
+        if teacher.patronymic:
+            teacher.fio = f"{teacher.surename} {teacher.name[0]}.{teacher.patronymic[0]}.".title(
+            )
+        else:
+            teacher.fio = f"{teacher.surename} {teacher.name[0]}.".title()
+    groups = ses.query(Group).all()
+    return render_template("reports.html", teachers=teachers, groups=groups)
 
 
 def create_attendance_report(teacher_name, course_name, period_start, period_end, students_data):
@@ -45,12 +60,17 @@ def create_attendance_report(teacher_name, course_name, period_start, period_end
     worksheet = workbook.add_worksheet("Посещаемость")
 
     # Настройки форматов
-    header_format = workbook.add_format({"bold": True, "align": "center", "valign": "vcenter", "font_size": 14})
-    table_header_format = workbook.add_format({"border": 1, "align": "center", "valign": "vcenter", "text_wrap": True})
-    cell_format = workbook.add_format({"border": 1, "align": "left", "valign": "vcenter"})
-    num_format = workbook.add_format({"border": 1, "align": "right", "valign": "vcenter"})
+    header_format = workbook.add_format(
+        {"bold": True, "align": "center", "valign": "vcenter", "font_size": 14})
+    table_header_format = workbook.add_format(
+        {"border": 1, "align": "center", "valign": "vcenter", "text_wrap": True})
+    cell_format = workbook.add_format(
+        {"border": 1, "align": "left", "valign": "vcenter"})
+    num_format = workbook.add_format(
+        {"border": 1, "align": "right", "valign": "vcenter"})
 
-    worksheet.merge_range("B1:F1", "Сводная ведомость учета посещаемости", header_format)
+    worksheet.merge_range(
+        "B1:F1", "Сводная ведомость учета посещаемости", header_format)
 
     worksheet.write("A2", "направление:")
     worksheet.merge_range("C2:D3", course_name, cell_format)
@@ -65,7 +85,8 @@ def create_attendance_report(teacher_name, course_name, period_start, period_end
     for col_num, value in enumerate(df.columns.values):
         worksheet.write(4, col_num + 1, value, table_header_format)
 
-    percent_fmt = workbook.add_format({"border": 1, "num_format": "0%", "align": "right"})
+    percent_fmt = workbook.add_format(
+        {"border": 1, "num_format": "0%", "align": "right"})
     srednaya_percent = 0
     for row_num, row_data in enumerate(df.values):
         for col_num, cell_value in enumerate(row_data):
@@ -89,7 +110,8 @@ def create_attendance_report(teacher_name, course_name, period_start, period_end
     footer_row = 5 + len(df) + 1
     worksheet.write(footer_row, 2, "Количество обучающихся:", cell_format)
     worksheet.write(footer_row, 3, str(len(students_data)))
-    worksheet.write(footer_row + 1, 2, "Процент пропущенных занятий составляет:")
+    worksheet.write(footer_row + 1, 2,
+                    "Процент пропущенных занятий составляет:")
     srednaya_percent /= len(students_data)
     worksheet.write(footer_row + 1, 3, str(int((srednaya_percent) * 100)))
 
@@ -100,6 +122,122 @@ def create_attendance_report(teacher_name, course_name, period_start, period_end
 
 
 @app.route("/reports/teacher/<int:teacher_id>/attendance/students")
+def route_view_teachers_students_attendance(teacher_id: int):
+    """Просмотр отчета успеваемости учеников в формате HTML."""
+
+    # 1. Получение параметров дат (копия вашей логики)
+    start_month_str = request.args.get("start_date")
+    end_month_str = request.args.get("end_date")
+
+    start_date = None
+    end_date = None
+
+    if start_month_str:
+        start_date = datetime.strptime(start_month_str, "%Y-%m").date()
+    if end_month_str:
+        temp_date = datetime.strptime(end_month_str, "%Y-%m").date()
+        last_day = calendar.monthrange(temp_date.year, temp_date.month)[1]
+        end_date = temp_date.replace(day=last_day)
+
+    if start_date and end_date and start_date >= end_date:
+        flash("Дата начала не может быть позже даты конца.", "error")
+        return redirect(request.referrer or "/")
+
+    # 2. Сбор данных из БД (копия вашей логики)
+    ses = create_session()
+    teacher = ses.get(Teacher, teacher_id)
+    if not teacher:
+        abort(404, description="Преподаватель не найден")
+
+    if teacher.patronymic:
+        formatted_teacher_name = f"{teacher.surename} {teacher.name[0]}.{teacher.patronymic[0]}.".title(
+        )
+    else:
+        formatted_teacher_name = f"{teacher.surename} {teacher.name[0]}.".title(
+        )
+
+    groups = ses.query(Group).filter_by(teacher_id=teacher_id).all()
+    directions = []
+    students = {}
+    schedules = []
+
+    for group in groups:
+        if group.direction not in directions:
+            directions.append(group.direction)
+        for schedule in group.schedules:
+            if schedule not in schedules:
+                schedules.append(schedule)
+                for past_schedule in ses.query(PastSchedule).filter_by(schedule_id=schedule.id).all():
+                    if start_date and past_schedule.date < start_date:
+                        continue
+                    if end_date and past_schedule.date > end_date:
+                        continue
+                    for student in past_schedule.students:
+                        if student.name_student not in students:
+                            students[student.name_student] = [0, 0]
+                        students[student.name_student][1] += 1
+
+                        is_present = ses.query(Student_to_past_schedule).filter_by(
+                            student_id=student.id,
+                            past_schedule_id=past_schedule.id
+                        ).first().were_present
+
+                        students[student.name_student][0] += 1 if is_present else 0
+
+    # 3. Форматирование строк направлений (копия вашей логики)
+    courses = ""
+    if len(directions):
+        if len(directions) == 1:
+            courses = directions[0].name
+        else:
+            courses = ", ".join(
+                [direction.name for direction in directions[:-1]])
+            courses += f" и {directions[-1].name}"
+        courses = courses.title()
+
+    # 4. Формирование списка студентов и расчет среднего %
+    students_list = []
+    srednaya_percent = 0
+
+    for student_name, (total_number, total) in students.items():
+        percent_skipped = 100 - int(round(total_number / total, 2) * 100)
+        srednaya_percent += (percent_skipped / 100)
+        students_list.append({
+            "name": student_name,
+            "total_number": total_number,
+            "total": total,
+            "percent_skipped": percent_skipped
+        })
+
+    # Расчет финальных показателей для подвала таблицы
+    total_students = len(students_list)
+    avg_skipped_percent = int(
+        (srednaya_percent / total_students) * 100) if total_students > 0 else 0
+
+    # Форматирование дат для заголовка
+    period_start_formatted = format_date(
+        start_date, format="MMM y", locale="ru_RU") if start_date else "♾️"
+    period_end_formatted = format_date(
+        end_date, format="MMM y", locale="ru_RU") if end_date else "♾️"
+
+    # Сохраняем query-параметры, чтобы кнопка «Скачать» знала, за какой период выгружать Excel
+    download_url = url_for(
+        'route_to_create_teachers_students_attendance', teacher_id=teacher_id, **request.args)
+
+    return render_template(
+        "attendance_report.html",
+        teacher_name=formatted_teacher_name,
+        course_name=courses.capitalize(),
+        period_start=period_start_formatted,
+        period_end=period_end_formatted,
+        students=students_list,
+        total_students=total_students,
+        avg_skipped_percent=avg_skipped_percent,
+        download_url=download_url
+    )
+
+
+@app.route("/reports/teacher/<int:teacher_id>/attendance/students/download")
 def route_to_create_teachers_students_attendance(teacher_id: int):
     """route для отчета успеваемости учеников преподавателя."""
 
@@ -126,9 +264,11 @@ def route_to_create_teachers_students_attendance(teacher_id: int):
     ses = create_session()
     teacher = ses.get(Teacher, teacher_id)
     if teacher.patronymic:
-        formatted_teacher_name = f"{teacher.surename} {teacher.name[0]}.{teacher.patronymic[0]}.".title()
+        formatted_teacher_name = f"{teacher.surename} {teacher.name[0]}.{teacher.patronymic[0]}.".title(
+        )
     else:
-        formatted_teacher_name = f"{teacher.surename} {teacher.name[0]}.".title()
+        formatted_teacher_name = f"{teacher.surename} {teacher.name[0]}.".title(
+        )
     groups = ses.query(Group).filter_by(teacher_id=teacher_id).all()
     directions: list[Direction] = []
     students: dict[str, list[int, int]] = {}
@@ -164,7 +304,8 @@ def route_to_create_teachers_students_attendance(teacher_id: int):
         if len(directions) == 1:
             courses = directions[0].name
         else:
-            courses = ", ".join([direction.name for direction in directions[:-1]])
+            courses = ", ".join(
+                [direction.name for direction in directions[:-1]])
             courses += f" и {directions[-1].name}"
         courses = courses.title()
 
@@ -181,8 +322,10 @@ def route_to_create_teachers_students_attendance(teacher_id: int):
     excel_file = create_attendance_report(
         formatted_teacher_name,
         courses.capitalize(),
-        format_date(start_date, format="MMM y", locale="ru_RU") if start_date else "♾️",
-        format_date(end_date, format="MMM y", locale="ru_RU") if end_date else "♾️",
+        format_date(start_date, format="MMM y",
+                    locale="ru_RU") if start_date else "♾️",
+        format_date(end_date, format="MMM y",
+                    locale="ru_RU") if end_date else "♾️",
         data,
     )
     return send_file(
@@ -202,7 +345,8 @@ def create_attendance_report_group(students_names: list[str], attendance_dict: d
     df = pd.DataFrame(index=students_names)
 
     for date, attended_students in attendance_dict.items():
-        df[date] = df.index.map(lambda name: "V" if name in attended_students else "X")
+        df[date] = df.index.map(
+            lambda name: "V" if name in attended_students else "X")
 
     df.sort_index(inplace=True)
 
@@ -217,13 +361,16 @@ def create_attendance_report_group(students_names: list[str], attendance_dict: d
 
         # 1. Определяем форматы (цвета и стили)
         format_v = workbook.add_format(
-            {"bg_color": "#C6EFCE", "font_color": "#006100", "align": "center", "border": 1}
+            {"bg_color": "#C6EFCE", "font_color": "#006100",
+                "align": "center", "border": 1}
         )  # Светло-зеленый
         format_x = workbook.add_format(
-            {"bg_color": "#FFC7CE", "font_color": "#9C0006", "align": "center", "border": 1}
+            {"bg_color": "#FFC7CE", "font_color": "#9C0006",
+                "align": "center", "border": 1}
         )  # Розовый
         format_header = workbook.add_format(
-            {"bold": True, "bg_color": "#4F81BD", "font_color": "white", "border": 1, "align": "center"}
+            {"bold": True, "bg_color": "#4F81BD",
+                "font_color": "white", "border": 1, "align": "center"}
         )
 
         # 2. Условное форматирование для всей таблицы данных
@@ -238,11 +385,13 @@ def create_attendance_report_group(students_names: list[str], attendance_dict: d
 
         # Применяем правила: если "V", то зеленый, если "X", то красный
         worksheet.conditional_format(
-            1, 1, rows, cols, {"type": "cell", "criteria": "equal to", "value": '"V"', "format": format_v}
+            1, 1, rows, cols, {
+                "type": "cell", "criteria": "equal to", "value": '"V"', "format": format_v}
         )
 
         worksheet.conditional_format(
-            1, 1, rows, cols, {"type": "cell", "criteria": "equal to", "value": '"X"', "format": format_x}
+            1, 1, rows, cols, {
+                "type": "cell", "criteria": "equal to", "value": '"X"', "format": format_x}
         )
 
         # 3. Принудительно красим заголовки (даты и заголовок имен)
@@ -257,6 +406,77 @@ def create_attendance_report_group(students_names: list[str], attendance_dict: d
 
 @app.route("/reports/group/<int:group_id>/attendance/students")
 def route_to_create_group_students_attendance(group_id: int):
+    """Роут для веб-отображения отчета посещаемости учеников группы."""
+    start_month_str = request.args.get("start_date")  # придет "2025-09"
+    end_month_str = request.args.get("end_date")    # придет "2026-01"
+
+    start_date = None
+    end_date = None
+
+    if start_month_str:
+        start_date = datetime.strptime(start_month_str, "%Y-%m").date()
+
+    if end_month_str:
+        temp_date = datetime.strptime(end_month_str, "%Y-%m").date()
+        last_day = calendar.monthrange(temp_date.year, temp_date.month)[1]
+        end_date = temp_date.replace(day=last_day)
+
+    if start_date and end_date:
+        if start_date >= end_date:
+            flash("Дата начала не может быть позже даты конца.", "error")
+            return redirect(request.referrer or "/")
+
+    ses = create_session()
+    group = ses.get(Group, group_id)
+    if not group:
+        abort(404, description="Группа не найдена")
+
+    students = group.students
+    schedules = group.schedules
+
+    # Сбор прошедших занятий
+    past_schedules: list[PastSchedule] = []
+    for schedule in schedules:
+        # Добавляем фильтрацию по датам, чтобы не выгружать лишнее в HTML
+        query = ses.query(PastSchedule).filter_by(schedule_id=schedule.id)
+        if start_date:
+            query = query.filter(PastSchedule.date >= start_date)
+        if end_date:
+            query = query.filter(PastSchedule.date <= end_date)
+        past_schedules += query.all()
+
+    dates: dict[str, list[str]] = {}
+    for past_schedule in past_schedules:
+        date = past_schedule.date
+        dates[date] = []
+        for student in past_schedule.students:
+            student_to_past_schedule = (
+                ses.query(Student_to_past_schedule)
+                .filter_by(past_schedule_id=past_schedule.id, student_id=student.id)
+                .first()
+            )
+            if not student_to_past_schedule or not student_to_past_schedule.were_present or student not in students:
+                continue
+            if student.name_student in dates[date]:
+                print("студент не должен повторяться")
+            dates[date].append(student.name_student)
+
+    # Сортировка и форматирование дат
+    dates = dict(sorted(dates.items(), key=lambda item: item[0]))
+    dates = {date.isoformat(): old_value for date, old_value in dates.items()}
+    student_names = [i.name_student for i in students]
+    download_url = url_for(
+        'route_to_create_group_students_attendance_download', group_id=group_id, **request.args)
+    return render_template(
+        "group_attendance_report.html",
+        group=group,
+        dates=dates,
+        student_names=student_names,
+        download_url=download_url)
+
+
+@app.route("/reports/group/<int:group_id>/attendance/students/download")
+def route_to_create_group_students_attendance_download(group_id: int):
     """route для отчета успеваемости учеников группы."""
     start_month_str = request.args.get("start_date")  # придет "2025-09"
     end_month_str = request.args.get("end_date")  # придет "2026-01"
@@ -284,7 +504,8 @@ def route_to_create_group_students_attendance(group_id: int):
 
     past_schedules: list[PastSchedule] = []
     for schedule in schedules:
-        past_schedules += ses.query(PastSchedule).filter_by(schedule_id=schedule.id).all()
+        past_schedules += ses.query(PastSchedule).filter_by(
+            schedule_id=schedule.id).all()
     dates: dict[str, list[str]] = {}
     for past_schedule in past_schedules:
         date = past_schedule.date
@@ -304,12 +525,14 @@ def route_to_create_group_students_attendance(group_id: int):
     dates = dict(sorted(dates.items(), key=lambda item: item[0]))
     dates = {date.isoformat(): old_value for date, old_value in dates.items()}
     student_names = [i.name_student for i in students]
-    excel_file = create_attendance_report_group(students_names=student_names, attendance_dict=dates)
+    excel_file = create_attendance_report_group(
+        students_names=student_names, attendance_dict=dates)
     return send_file(
         excel_file,
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         as_attachment=True,
         download_name="attendance_report.xlsx",
+
     )
 
 
@@ -342,7 +565,8 @@ def teacher_contests_report():
     if not data:
         data = [["Нет данных", "Нет данных", "Нет данных", "Нет данных"]]
 
-    df = pd.DataFrame(data, columns=["Преподаватель", "Конкурс", "Место", "Результат"])
+    df = pd.DataFrame(
+        data, columns=["Преподаватель", "Конкурс", "Место", "Результат"])
 
     output = io.BytesIO()
 
@@ -400,7 +624,8 @@ def qualification_report():
         link = q.link if q.link else "—"
 
         data.append(
-            [teacher_name, program_name, course_organization, hours, reg_number, certificate_number, issue_date, link]
+            [teacher_name, program_name, course_organization, hours,
+                reg_number, certificate_number, issue_date, link]
         )
 
     if not data:

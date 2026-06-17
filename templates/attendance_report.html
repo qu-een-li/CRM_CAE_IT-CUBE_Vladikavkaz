@@ -1,0 +1,73 @@
+{% extends "report_template.html" %}
+{% block title %}Отчет по посещаемости в группах преподавателя | IT-Куб Владикавказ{% endblock %}
+{%block content%}
+    <div class="container">
+        <div class="report-header">
+            Сводная ведомость учета посещаемости
+        </div>
+
+        <!-- Мета-информация -->
+        <table class="meta-table">
+            <tr>
+                <td style="width: 12%;">направление:</td>
+                <td colspan="2" rowspan="2" class="border-all" style="width: 45%;">{{ course_name }}</td>
+                <td style="width: 10%; text-align: center;">педагог</td>
+                <td class="border-bottom" style="width: 33%;">{{ teacher_name }}</td>
+            </tr>
+            <tr>
+                <!-- Пустая строка для rowspan -->
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr style="height: 15px;"></tr>
+            <tr>
+                <td>за период</td>
+                <td style="width: 15%;"><strong>{{ period_start }}</strong></td>
+                <td style="width: 15%;">по {{ period_end }}</td>
+                <td>года</td>
+                <td></td>
+            </tr>
+        </table>
+
+        <!-- Таблица успеваемости -->
+        <table class="main-table">
+            <thead>
+                <tr>
+                    <th style="width: 5%;">№ п/п</th>
+                    <th style="width: 45%;">ФИО обучающегося</th>
+                    <th style="width: 20%;">Суммарно количество занятий за период в соответствии с КТП</th>
+                    <th style="width: 15%;">Суммарно посещенных занятий за период</th>
+                    <th style="width: 15%;">% пропущенных занятий</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if not students %}
+                <tr>
+                    <td class="text-center">1</td>
+                    <td class="text-left">Ни одного студента</td>
+                    <td class="text-right">0</td>
+                    <td class="text-right">0</td>
+                    <td class="text-right">0%</td>
+                </tr>
+                {% else %}
+                    {% for student in students %}
+                    <tr>
+                        <td class="text-center">{{ loop.index }}</td>
+                        <td class="text-left">{{ student.name }}</td>
+                        <td class="text-right">{{ student.total_number }}</td>
+                        <td class="text-right">{{ student.total }}</td>
+                        <td class="text-right">{{ student.percent_skipped }}%</td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+
+        <!-- Итоговый блок -->
+        <div class="footer-summary">
+            <p>Количество обучающихся: <span class="footer-val">{{ total_students }}</span></p>
+            <p>Процент пропущенных занятий составляет: <span class="footer-val">{{ avg_skipped_percent }}%</span></p>
+        </div>
+    </div>
+{% endblock %}
