@@ -1,5 +1,5 @@
 from app import app
-from flask import render_template, request
+from flask import render_template, request, flash, redirect, url_for
 from forms.add_schedule import AddScheduleForm
 from data.group import Group
 from data.schedule import Schedule
@@ -7,6 +7,7 @@ from data.teacher import Teacher
 from datetime import timedelta, datetime
 from babel.dates import format_date
 from api.api_base import api_request
+from data.db_session import create_session
 
 
 def get_week_range(d1, d2):
@@ -32,38 +33,90 @@ def get_full_teachers_initials_by_column(teacher: Teacher):
 def add_schedule():
     """Добавить событие (на данный момент только еженедельное)"""
     form = AddScheduleForm()
-    form.group.choices = [
-        (
-            group.id,
-            f'"{group.name_of_group}" c {get_full_teachers_initials_by_column(Teacher.from_dict(api_request(f'v1/teachers/{group.teacher_id}')))}',
-        )
-        for group in map(Group.from_dict, api_request("/v1/groups/"))
-    ]
+
+    # Заполняем choices для группы и создаем словарь с длительностью
+    groups_duration = {}
+    try:
+        groups_data = api_request("/v1/groups/")
+        groups_list = list(map(Group.from_dict, groups_data))
+
+        form.group.choices = [
+            (
+                group.id,
+                f'"{group.name_of_group}" с {get_full_teachers_initials_by_column(
+                    Teacher.from_dict(api_request(
+                        f'v1/teachers/{group.teacher_id}'))
+                )}',
+            )
+            for group in groups_list
+        ]
+
+        # Создаем словарь: id группы -> длительность
+        for group in groups_list:
+            duration_str = f"{group.duration.hour:02d}:{group.duration.minute:02d}:{group.duration.second:02d}"
+            groups_duration[group.id] = duration_str
+
+    except Exception as e:
+        flash(f"Ошибка при загрузке групп: {str(e)}", "error")
+        form.group.choices = []
+
     if form.validate_on_submit():
-        is_there_problem = False
         schedule = Schedule()
         schedule.group_id = int(form.group.data)
-        schedule.date = form.datetime.data.date()
         dt = form.datetime.data
-        duration = timedelta(hours=form.duration.data.hour, minutes=form.duration.data.minute)
-        end_dt = duration + dt
-        schedule.start_time = dt.time()
-        schedule.end_time = end_dt.time()
+        schedule.date = dt.date()
 
-        # проверка, что занятие кончиться в тот же день когда и началось
-        if dt.hour * 60 + dt.minute + duration.seconds / 60 >= 24 * 60:
-            form.duration.errors.append("the lesson may not start and end on different days")
-            is_there_problem = True
-        if not is_there_problem:
-            print(api_request("v1/schedules/", method="POST", data=schedule.to_dict()))
-    return render_template("add_schedule.html", form=form)
+        ses = create_session()
+        try:
+            group = ses.get(Group, schedule.group_id)
+            if not group:
+                form.group.errors.append("Группа не найдена")
+                return render_template("add_schedule.html", form=form, groups_duration=groups_duration)
+
+            duration = timedelta(
+                hours=group.duration.hour,
+                minutes=group.duration.minute,
+                seconds=group.duration.second
+            )
+
+            end_dt = dt + duration
+            schedule.start_time = dt.time()
+            schedule.end_time = end_dt.time()
+
+            # Проверка, что занятие заканчивается в тот же день
+            if end_dt.date() != dt.date():
+                form.datetime.errors.append(
+                    "Занятие не должно начинаться и заканчиваться в разные дни"
+                )
+                return render_template("add_schedule.html", form=form, groups_duration=groups_duration)
+
+            # Отправляем данные через API
+            response = api_request(
+                "v1/schedules/",
+                method="POST",
+                data=schedule.to_dict()
+            )
+
+            if response:
+                flash("Событие успешно добавлено!", "success")
+                return redirect(url_for('add_schedule'))
+            else:
+                flash("Ошибка при добавлении события", "error")
+
+        except Exception as e:
+            flash(f"Произошла ошибка: {str(e)}", "error")
+        finally:
+            ses.close()
+
+    return render_template("add_schedule.html", form=form, groups_duration=groups_duration)
 
 
 @app.route("/show_schedules")
 def show_schedules():
     """Страница расписания"""
     group_id = request.args.get("group_id")
-    id_and_group_names = api_request("v1/groups", data={"fields": ["id", "name_of_group"]})
+    id_and_group_names = api_request(
+        "v1/groups", data={"fields": ["id", "name_of_group"]})
     return render_template("show_schedules.html", id_and_group_names=id_and_group_names, group_id_filter=group_id)
 
 
@@ -85,11 +138,13 @@ def get_more_days():
         schedules = [s for s in schedules if s.group_id == int(group_id)]
 
     unique_times = sorted(
-        list(set(f'{s.start_time.strftime("%H:%M")}-{s.end_time.strftime("%H:%M")}' for s in schedules))
+        list(set(
+            f'{s.start_time.strftime("%H:%M")}-{s.end_time.strftime("%H:%M")}' for s in schedules))
     )
 
     for _ in range(n_of_weeks):
-        week_days_iso = [(current_week_start + timedelta(days=(d))).date().isoformat() for d in range(7)]
+        week_days_iso = [(current_week_start + timedelta(days=(d))
+                          ).date().isoformat() for d in range(7)]
         days_lists.append(week_days_iso)
 
         matrix = []
@@ -103,13 +158,16 @@ def get_more_days():
                 for s in schedules:
                     s_time = f'{s.start_time.strftime("%H:%M")}-{s.end_time.strftime("%H:%M")}'
                     if s_time == time_key and s.is_schedule_at_date(cur_date):
-                        group_info = api_request(f"/v1/groups/{s.group_id}", params={"fields": ["name_of_group", "id"]})
-                        events.append({"title": group_info["name_of_group"], "id": s.id})
+                        group_info = api_request(
+                            f"/v1/groups/{s.group_id}", params={"fields": ["name_of_group", "id"]})
+                        events.append(
+                            {"title": group_info["name_of_group"], "id": s.id})
                 row.append(events)
             matrix.append(row)
 
         week_end = current_week_start + timedelta(days=6)
-        list_of_matrix_and_interval.append((matrix, get_week_range(current_week_start, week_end), days_numerics))
+        list_of_matrix_and_interval.append(
+            (matrix, get_week_range(current_week_start, week_end), days_numerics))
 
         current_week_start += timedelta(days=7)
 

@@ -27,15 +27,12 @@
 #     SqlAlchemyBase.metadata.create_all(engine)
 
 
-from sqlalchemy.orm import Session, scoped_session  # Добавили scoped_session
-import sqlalchemy.orm as orm
 import sqlalchemy as sa
+import sqlalchemy.orm as orm
+from sqlalchemy.orm import Session, scoped_session
 
-
-def create_session() -> Session:
-    global __factory
-    return __factory()
-
+# Добавили импорт event для перехвата событий подключения
+from sqlalchemy import event
 
 SqlAlchemyBase = orm.declarative_base()
 
@@ -53,8 +50,19 @@ def global_init(db_file):
 
     conn_str = f"sqlite:///{db_file.strip()}?check_same_thread=False"
     print(f"Подключение к базе данных по адресу {conn_str}")
-    # SQLite по умолчанию использует StaticPool, но лучше настроить явно
+
     engine = sa.create_engine(conn_str, echo=False)
+
+    # --- НАЧАЛО ИЗМЕНЕНИЙ: Обучаем SQLite кириллице ---
+    @event.listens_for(engine, "connect")
+    def setup_sqlite_custom_functions(dbapi_connection, connection_record):
+        # Проверяем наличие метода create_function (актуально только для встроенного драйвера SQLite)
+        if hasattr(dbapi_connection, 'create_function'):
+            # Переопределяем стандартную функцию LOWER внутри SQLite на Python-функцию .lower()
+            # Она принимает 1 аргумент (текст) и безопасно приводит его к нижнему регистру
+            dbapi_connection.create_function(
+                "lower", 1, lambda val: val.lower() if val is not None else "")
+    # --- КОНЕЦ ИЗМЕНЕНИЙ ---
 
     # Оборачиваем sessionmaker в scoped_session
     __factory = scoped_session(orm.sessionmaker(bind=engine))

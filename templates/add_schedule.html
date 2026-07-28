@@ -41,7 +41,19 @@
         white-space: nowrap;
         overflow: hidden;
     }
-
+    .duration-info {
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        background-color: #f8f9fa;
+        border-left: 3px solid #dc3545;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        color: #6c757d;
+        display: none;
+    }
+    .duration-info.show {
+        display: block;
+    }
 </style>
 {% endblock %}
 
@@ -57,33 +69,38 @@
         </div>
         {% endif %}
 
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
         <form action="/add_schedule" method="post" novalidate class="needs-validation">
             {{ form.hidden_tag() }}
             <div class="mb-3">
                 <div>
                     <label for="group" class="form-label">Занятие</label>
-                    {{ form.group(class="form-select")}}
+                    {{ form.group(class="form-select", id="group_select")}}
                     {% for error in form.group.errors %}
                     <div class="invalid-feedback">{{ error }}</div>
                     {% endfor %}
+                    
+                    <!-- Примечание о длительности -->
+                    <div id="duration_note" class="duration-info">
+                        <i class="bi bi-clock"></i> Длительность занятий в группе - <span id="duration_value"></span>
+                    </div>
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="col-md-6 mb-3">
+                <div class="mb-3">
                     <label for="datetime" class="form-label">Дата и время начала</label>
                     {{ form.datetime(class="form-control") }}
                     {% for error in form.datetime.errors %}
                     <div class="invalid-feedback">{{ error }}</div>
                     {% endfor %}
                 </div>
-                <div class="col-md-6 mb-3">
-                    <label for="duration" class="form-label">Длительность</label>
-                    {{ form.duration(class="form-control") }}
-                    {% for error in form.duration.errors %}
-                    <div class="invalid-feedback">{{ error }}</div>
-                    {% endfor %}
-                </div>
-            </div>
             </div>
             <div class="d-flex justify-content-between pt-3">
                 <button type="reset" class="btn btn-outline-secondary">Сбросить</button>
@@ -92,5 +109,30 @@
         </form>
     </div>
 </div>
-{% endblock %}
 
+<script>
+// Передаем данные о длительности из Python в JavaScript
+const groupsDuration = {{ groups_duration | tojson }};
+
+document.getElementById('group_select').addEventListener('change', function() {
+    const groupId = this.value;
+    const durationNote = document.getElementById('duration_note');
+    const durationValue = document.getElementById('duration_value');
+    
+    if (groupId && groupsDuration[groupId]) {
+        durationValue.textContent = groupsDuration[groupId];
+        durationNote.classList.add('show');
+    } else {
+        durationNote.classList.remove('show');
+    }
+});
+
+// Проверяем начальное значение (если форма была отправлена с ошибкой)
+window.addEventListener('DOMContentLoaded', function() {
+    const groupSelect = document.getElementById('group_select');
+    if (groupSelect.value) {
+        groupSelect.dispatchEvent(new Event('change'));
+    }
+});
+</script>
+{% endblock %}

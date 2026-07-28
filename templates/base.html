@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Система учета | IT-Куб Владикавказ{% endblock %}</title>
@@ -42,6 +43,11 @@
                 <i class="bi bi-person-badge-fill me-2"></i>Добавить наставника
             </a>
         </li>
+        <li class="{% if request.path == '/add_group' %}active{% endif %}">
+            <a href="/add_group" class="menu-link">
+                <i class="bi-plus-square-dotted"></i> Создать группу
+            </a>
+        </li>
         <li class="{% if request.path == '/teachers' %}active{% endif %}">
             <a href="/teachers" class="menu-link">
                 <i class="bi bi-person-video3 me-2"></i>Список наставников
@@ -79,11 +85,6 @@
         <li>
             <a href="/reports" class="menu-link">
                 <i class="bi bi-file-earmark-bar-graph-fill me-2"></i>Отчеты
-            </a>
-        </li>
-        <li>
-            <a href="#export" class="menu-link">
-                <i class="bi bi-file-excel-fill me-2"></i>Экспорт
             </a>
         </li>
         <li>

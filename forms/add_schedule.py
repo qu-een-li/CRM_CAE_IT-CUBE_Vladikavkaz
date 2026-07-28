@@ -7,5 +7,5 @@ class AddScheduleForm(FlaskForm):
     group = SelectField('Группа', validators=[DataRequired()])
     datetime = DateTimeLocalField('Дата и время начала',
                                   validators=[DataRequired()])
-    duration = TimeField('Длительность', validators=[DataRequired()])
+    # duration = TimeField('Длительность', validators=[DataRequired()])
     submit = SubmitField('Добавить')

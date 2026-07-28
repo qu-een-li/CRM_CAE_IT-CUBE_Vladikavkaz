@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Создание группы | IT-Куб Владикавказ{% endblock %}
+{% block page_title %}Создание учебной группы{% endblock %}
+{% block page_subtitle %}Заполните данные для создания новой группы{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        width: 98%;
+        margin: 0 auto;
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+    }
+    
+    .form-section-title {
+        color: #dc3545;
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #dc3545;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 6px;
+        border: 1px solid #ced4da;
+        padding: 0.6rem 0.75rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+    
+    .btn-submit {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white;
+        font-weight: 600;
+        padding: 0.75rem 2rem;
+        border-radius: 6px;
+        transition: background-color 0.15s ease-in-out;
+    }
+    
+    .btn-submit:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+        color: white;
+    }
+    
+    .alert-info {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .invalid-feedback-custom {
+        color: #dc3545;
+        font-size: 0.85rem;
+        margin-top: 0.3rem;
+    }
+    
+    .is-invalid {
+        border-color: #dc3545 !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4" style="max-width: 98%;">
+    <div class="form-card">
+        <!-- action="" — отправка на тот же URL, что и GET -->
+        <form method="POST" action="" novalidate>
+            {{ form.hidden_tag() }}
+
+            <!-- Основная информация -->
+            <div class="form-section">
+                <h3 class="form-section-title">Основная информация</h3>
+                
+                <div class="alert-info">
+                    <i class="bi bi-info-circle"></i> Заполните все обязательные поля для создания новой учебной группы
+                </div>
+                
+                <!-- Название группы -->
+                <div class="row mb-3">
+                    <div class="col-12">
+                        {{ form.name.label(class="form-label") }}
+                        {{ form.name(class="form-control" ~ (" is-invalid" if form.name.errors else ""), placeholder="Введите название группы") }}
+                        {% for error in form.name.errors %}
+                            <div class="invalid-feedback-custom">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Преподаватель и Направление -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        {{ form.teachers.label(class="form-label") }}
+                        {{ form.teachers(class="form-select" ~ (" is-invalid" if form.teachers.errors else "")) }}
+                        {% for error in form.teachers.errors %}
+                            <div class="invalid-feedback-custom">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.directions.label(class="form-label") }}
+                        {{ form.directions(class="form-select" ~ (" is-invalid" if form.directions.errors else "")) }}
+                        {% for error in form.directions.errors %}
+                            <div class="invalid-feedback-custom">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Период обучения и Аудитория -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        {{ form.study_periods.label(class="form-label") }}
+                        {{ form.study_periods(class="form-select" ~ (" is-invalid" if form.study_periods.errors else "")) }}
+                        {% for error in form.study_periods.errors %}
+                            <div class="invalid-feedback-custom">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.auditories.label(class="form-label") }}
+                        {{ form.auditories(class="form-select" ~ (" is-invalid" if form.auditories.errors else "")) }}
+                        {% for error in form.auditories.errors %}
+                            <div class="invalid-feedback-custom">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Глубина знаний -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        {{ form.levels_of_education.label(class="form-label") }}
+                        {{ form.levels_of_education(class="form-select") }}
+                        {% for error in form.levels_of_education.errors %}
+                            <div class="invalid-feedback-custom">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Описание -->
+                <div class="mb-3">
+                    {{ form.description.label(class="form-label") }}
+                    {{ form.description(class="form-control", rows="4", placeholder="Опишите предназначение группы") }}
+                    {% for error in form.description.errors %}
+                        <div class="invalid-feedback-custom">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    {{ form.duration.label(class="form-label") }}
+                    <!-- Добавляем класс is-invalid если есть ошибки -->
+                    {{ form.duration(class="form-control" ~ (" is-invalid" if form.duration.errors else "")) }}
+                    {% for error in form.duration.errors %}
+                        <div class="invalid-feedback-custom">{{ error }}</div>
+                    {% endfor %}
+                    <small class="text-muted">Формат: ЧЧ:ММ</small>
+                </div>
+            </div>
+
+            <!-- Кнопка отправки -->
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-submit">
+                    <i class="bi bi-plus-circle"></i> Создать группу
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

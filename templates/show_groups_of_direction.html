@@ -107,7 +107,54 @@
 .menu-item select:focus {
   border-color: #007bff; /* Цвет рамки при клике */
 }
-
+  /* Стили для кликабельных заголовков групп */
+  thead th a {
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+    padding: 8px 12px;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  
+  thead th a:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #333;
+  }
+  
+  /* Добавляем иконку-стрелку при наведении */
+  thead th a::after {
+    content: '→';
+    position: absolute;
+    right: 8px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    font-size: 0.9em;
+    color: #666;
+  }
+  
+  thead th a:hover::after {
+    opacity: 1;
+  }
+  
+  /* Легкое подчеркивание при наведении */
+  thead th a:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-color: #999;
+  }
+  
+  /* Курсор pointer для всей ячейки */
+  thead th {
+    cursor: pointer;
+  }
+  
+  /* Убираем стандартное подчеркивание ссылок */
+  thead th a {
+    text-decoration: none;
+  }
 </style>
 {%endblock%}
 {% block extra_js %}
@@ -251,15 +298,19 @@ async function move_student_from_group_to_another(student_id, group_id_old, grou
   <caption>
     Содержание направления "{{direction_name}}"
   </caption>
-  <thead>
-    <tr>
-      <th scope="col">#</th>
-
-        {%for header in table_data[0]%}
-      <th scope="col" style="text-align:center;">{{header}}</th>
-        {%endfor%}
-    </tr>
-  </thead>
+<thead>
+  <tr>
+    <th scope="col">#</th>
+    {% for header in table_data[0] %}
+      <th scope="col" style="text-align:center;">
+        <a href="/groups/{{ groups[loop.index0].id }}" 
+           title="Перейти к группе '{{ header }}'">
+          {{ header }}
+        </a>
+      </th>
+    {% endfor %}
+  </tr>
+</thead>
     <tbody>
       {% for row in table_data[1:] %}
         <tr>

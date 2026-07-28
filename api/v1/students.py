@@ -185,8 +185,8 @@ class StudentsInGroupListResource(Resource):
         try:
             group = session.query(Group).get(group_id)
             students = group.students
-            if not students:
-                abort(404, message="Students not found")
+            # if not students:
+            #     abort(404, message="Students not found")
             return [item.to_dict(*fields) for item in students]
         finally:
             session.close()

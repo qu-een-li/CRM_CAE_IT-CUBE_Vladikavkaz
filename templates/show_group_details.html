@@ -1,0 +1,404 @@
+{% extends "base.html" %}
+
+{% block title %}Группа "{{ group.name_of_group }}" | IT-Куб Владикавказ{% endblock %}
+{% block page_title %}Участники группы{% endblock %}
+{% block page_subtitle %}Список учеников в группе "{{ group.name_of_group }}"{% endblock %}
+
+{% block extra_css %}
+<style>
+  .table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.035) !important;
+    transition: background-color 0.2s ease;
+  }
+  
+  .delete-btn {
+    background: none;
+    border: 1px solid #dc3545;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 4px 8px;
+    font-size: 13px;
+    transition: all 0.2s ease;
+    color: #dc3545;
+    background-color: transparent;
+  }
+
+  .delete-btn:hover {
+    background-color: #dc3545;
+    color: white;
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+  }
+
+  .add-btn {
+    background: none;
+    border: 1px solid #28a745;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 4px 8px;
+    font-size: 13px;
+    transition: all 0.2s ease;
+    color: #28a745;
+    background-color: transparent;
+  }
+
+  .add-btn:hover {
+    background-color: #28a745;
+    color: white;
+    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #6c757d;
+    font-style: italic;
+  }
+
+  /* Стили для модального окна */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .modal-overlay.active {
+    display: flex;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease;
+  }
+
+  @keyframes modalSlideIn {
+    from {
+      transform: translateY(-50px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #6c757d;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .modal-close:hover {
+    color: #000;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+
+  .search-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+  }
+
+  .search-results {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+
+  .search-result-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s;
+  }
+
+  .search-result-item:last-child {
+    border-bottom: none;
+  }
+
+  .search-result-item:hover {
+    background-color: #f8f9fa;
+  }
+
+  .search-result-item.selected {
+    background-color: #e7f3ff;
+  }
+
+  .no-results {
+    padding: 20px;
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+  }
+
+  .loading {
+    padding: 20px;
+    text-align: center;
+    color: #6c757d;
+  }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+
+function delete_student_from_group(student_id, group_id) {
+    if (!confirm('Вы уверены, что хотите удалить этого ученика из группы? Это действие нельзя отменить.')) {
+        return;
+    }
+
+    const url = `/groups/${group_id}/${student_id}`;
+
+    fetch(url, {
+        method: 'DELETE', 
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            const row = document.getElementById(`student-row-${student_id}`);
+            if (row) {
+                row.style.opacity = '0';
+                setTimeout(() => row.remove(), 300);
+            }
+            
+            const remainingRows = document.querySelectorAll('tbody tr:not(.add-student-row)');
+            if (remainingRows.length === 0) {
+                document.querySelector('tbody').innerHTML = '<tr><td colspan="3" class="empty-state">В группе пока нет участников</td></tr>';
+            }
+        } else {
+            alert('Произошла ошибка при удалении (код ' + response.status + ')');
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка запроса:', error);
+        alert('Не удалось связаться с сервером');
+    });
+}
+
+// Функции для модального окна добавления участника
+let searchTimeout;
+let currentGroupId = "{{ group.id }}";
+
+function openAddStudentModal() {
+    document.getElementById('addStudentModal').classList.add('active');
+    document.getElementById('studentSearchInput').focus();
+}
+
+function closeAddStudentModal() {
+    document.getElementById('addStudentModal').classList.remove('active');
+    document.getElementById('studentSearchInput').value = '';
+    document.getElementById('searchResults').innerHTML = '';
+}
+
+function searchStudents(query) {
+    clearTimeout(searchTimeout);
+    
+    if (!query || query.trim().length < 2) {
+        document.getElementById('searchResults').innerHTML = '';
+        return;
+    }
+
+    // Показываем индикатор загрузки
+    document.getElementById('searchResults').innerHTML = '<div class="loading">Поиск...</div>';
+
+    // Debounce для уменьшения количества запросов
+    searchTimeout = setTimeout(() => {
+        const url = `/students/search?q=${encodeURIComponent(query)}`;
+        
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Ошибка поиска');
+                }
+                return response.json();
+            })
+            .then(students => {
+                displaySearchResults(students);
+            })
+            .catch(error => {
+                console.error('Ошибка поиска:', error);
+                document.getElementById('searchResults').innerHTML = 
+                    '<div class="no-results">Ошибка при поиске</div>';
+            });
+    }, 300);
+}
+
+function displaySearchResults(students) {
+    const resultsContainer = document.getElementById('searchResults');
+    
+    if (!students || students.length === 0) {
+        resultsContainer.innerHTML = '<div class="no-results">Ученики не найдены</div>';
+        return;
+    }
+
+    let html = '';
+    students.forEach(student => {
+        const studentName = student.name_student || student.full_name || 'Без имени';
+        html += `
+            <div class="search-result-item" onclick="addStudentToGroup('${student.id}')">
+                ${studentName}
+            </div>
+        `;
+    });
+    
+    resultsContainer.innerHTML = html;
+}
+
+function addStudentToGroup(studentId) {
+    // Получаем токен из мета-тега
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    
+    const url = `/group/${currentGroupId}/add/student/${studentId}`;
+    
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRFToken': csrfToken // <-- Добавляем токен сюда
+        },
+        body: JSON.stringify({}) 
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            // Попробуем прочитать текст ошибки, если это не JSON
+            return response.text().then(text => {
+                throw new Error(`Ошибка ${response.status}: ${text}`);
+            });
+        }
+    })
+    .then(data => {
+        closeAddStudentModal();
+        window.location.reload();
+    })
+    .catch(error => {
+        console.error('Ошибка добавления:', error);
+        alert('Не удалось добавить ученика: ' + error.message);
+    });
+}
+
+// Закрытие модального окна при клике вне его
+document.getElementById('addStudentModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeAddStudentModal();
+    }
+});
+
+// Обработка нажатия Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeAddStudentModal();
+    }
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4" style="max-width: 98%;">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-bordered table-hover" style="width:100%; border-collapse: collapse;">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col" style="width: 50px;">#</th>
+                        <th scope="col">ФИО Ученика</th>
+                        <th scope="col" style="width: 150px; text-align: center;">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if students %}
+                        {% for student in students %}
+                        <tr id="student-row-{{ student.id }}">
+                            <th scope="row">{{ loop.index }}</th>
+                            <td style="vertical-align: middle;">
+                                {{ student.name_student if student.name_student else student.full_name }}
+                            </td>
+                            <td style="text-align: center; vertical-align: middle;">
+                                <button class="delete-btn" 
+                                        onclick="delete_student_from_group('{{ student.id }}', '{{ group.id }}')">
+                                    <i class="bi bi-trash"></i> Удалить
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="3" class="empty-state">
+                                В этой группе пока нет зарегистрированных участников
+                            </td>
+                        </tr>
+                    {% endif %}
+                    
+                    <!-- Строка с кнопкой добавления участника -->
+                    <tr class="add-student-row">
+                        <td colspan="3" style="text-align: center; padding: 15px;">
+                            <button class="add-btn" onclick="openAddStudentModal()">
+                                <i class="bi bi-plus-circle"></i> Добавить участника
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для добавления участника -->
+<div id="addStudentModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Добавить участника в группу</h3>
+            <button class="modal-close" onclick="closeAddStudentModal()">&times;</button>
+        </div>
+        <input 
+            type="text" 
+            id="studentSearchInput" 
+            class="search-input" 
+            placeholder="Начните вводить имя ученика..."
+            oninput="searchStudents(this.value)"
+        >
+        <div id="searchResults" class="search-results"></div>
+    </div>
+</div>
+{% endblock %}
