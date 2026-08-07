@@ -33,12 +33,12 @@ CRM система для ЦДО имеет следующий функцион�
 
 Папка проекта с документами 
 
-https://drive.google.com/drive/folders/1Djv-nK3yAf257FGMJqcDqXTqzmPxilBi?usp=sharing
+
 
 
 Таблица эффективности преподавателя\
 
-https://drive.google.com/drive/folders/1LgF_OGrRa0zWhbWyTRgMPN4dmw5yaP3E
+
 
 
 Телемост для встреч
