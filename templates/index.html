@@ -1,380 +1,147 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row mb-4 g-4">
-    <div class="col-md-3">
-        <div class="card dashboard-card animate__animated animate__fadeInUp" data-delay="400">
-            <div class="card-body text-center p-4">
-                <div class="card-icon mb-3 text-danger">
-                    <i class="bi bi-calendar4-week"></i>
-                </div>
-                <h5>Расписание</h5>
-                <p class="small text-muted">Расписание по неделям</p>
-                <a href="/show_schedules" class="btn btn-danger btn-sm stretched-link">Перейти</a>
-            </div>
-        </div>
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 animate__animated animate__fadeIn">
+        <h2 class="fw-bold m-0"><i class="bi bi-grid-3x3-gap-fill text-danger me-2"></i>Главная</h2>
+        <span class="text-muted small d-none d-md-block">Направления, группы и количество записанных детей</span>
     </div>
-    <div class="col-md-3">
-        <div class="card dashboard-card animate__animated animate__fadeInUp" data-delay="300">
-            <div class="card-body text-center p-4">
-                <div class="card-icon mb-3 text-danger">
-                    <i class="bi bi-search"></i>
-                </div>
-                <h5>Поиск ученика</h5>
-                <p class="small text-muted">Поиск по базе данных</p>
-                <a href="/search" class="btn btn-danger btn-sm stretched-link">Перейти</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card dashboard-card animate__animated animate__fadeInUp" data-delay="100">
-            <div class="card-body text-center p-4">
-                <div class="card-icon mb-3 text-danger">
-                    <i class="bi bi-person-plus-fill"></i>
-                </div>
-                <h5>Добавить учащегося</h5>
-                <p class="small text-muted">Новая регистрация в системе</p>
-                <a href="/add" class="btn btn-danger btn-sm stretched-link">Перейти</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card dashboard-card animate__animated animate__fadeInUp" data-delay="200">
-            <div class="card-body text-center p-4">
-                <div class="card-icon mb-3 text-danger">
-                    <i class="bi bi-people-fill"></i>
-                </div>
-                <h5>Списки учащихся</h5>
-                <p class="small text-muted">Все зарегистрированные ученики</p>
-                <a href="/students" class="btn btn-danger btn-sm stretched-link">Перейти</a>
-            </div>
-        </div>
-    </div>
-
-<!-- отчет -->
-<div id="reports" class="mb-5">
-    <h3 class="mb-4 animate__animated animate__fadeIn">
-        <i class="bi bi-file-earmark-text text-danger"></i>Формирование отчетов
-    </h3>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    {% for category, message in messages %}
-    <div class="alert alert-{{ category }} alert-dismissible fade show animate__animated animate__fadeInDown"
-         role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
 
     <div class="row g-4">
-        <div class="col-md-6">
-            <div class="card report-card animate__animated animate__fadeInLeft h-100">
-                <div class="card-body">
-                    <h5> Отчет по посещаемости в группах
-                        преподавателя</h5>
-                    <p class="text-muted">Сформируйте отчет по выбранному преподавателю</p>
-                    <form class="report-form" id="teacherReportForm">
-                        <div class="mb-3">
-                            <label class="form-label">Преподаватель:</label>
-                            <select class="form-select" id="teacherSelect" required>
-                                <option value="" disabled selected>Выберите преподавателя</option>
-                                {% for teacher in teachers %}
-                                <option value="{{ teacher.id }}">{{ teacher.fio }}</option>
-                                {% endfor %}
-                            </select>
+        {% for dir_id, dir_data in directions.items() %}
+        <div class="col-lg-4 col-md-6 animate__animated animate__fadeInUp" data-delay="{{ loop.index0 * 100 }}">
+            
+            <!-- ИСПРАВЛЕНИЕ: Убраны d-block h-100, оставлена только ссылка-обертка -->
+            <a href="/direction/{{ dir_id }}/groups" class="text-decoration-none text-reset">
+                <div class="card direction-card h-100 shadow-sm border-0 rounded-3 overflow-hidden position-relative clickable-card">
+                    
+                    <!-- Шапка направления -->
+                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center px-3 py-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi {{ dir_data.icon }} fs-5"></i>
+                            <h5 class="m-0 fw-semibold" style="font-size: 1rem;">{{ dir_data.name }}</h5>
                         </div>
-                        <div class="row mb-3">
-                            <div class="col">
-                                <label class="form-label">Начало (месяц):</label>
-                                <!-- type="month" позволяет выбирать только месяц и год -->
-                                <input type="month" class="form-control" id="startDate">
-                            </div>
-                            <div class="col">
-                                <label class="form-label">Конец (месяц):</label>
-                                <input type="month" class="form-control" id="endDate">
-                            </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-secondary rounded-pill font-monospace">
+                                {{ dir_data.groups|length }} групп{{ 'а' if dir_data.groups|length == 1 else '' if dir_data.groups|length in [2,3,4] else '' }}
+                            </span>
+                            <i class="bi bi-chevron-right opacity-75 chevron-icon"></i>
                         </div>
+                    </div>
 
-                        <button type="submit" class="btn btn-danger">
-                            <i class="bi bi-door-open"></i> Перейти
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
+                    <!-- Список групп -->
+                    <div class="card-body p-0 bg-light">
+                        {% if dir_data.groups %}
+                        <ul class="list-group list-group-flush">
+                            {% for group in dir_data.groups %}
+                            <li class="list-group-item px-3 py-3 border-bottom bg-white clickable-row position-relative">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1 pe-2">
+                                        <h6 class="mb-1 fw-bold text-truncate" title="{{ group.title }}" style="font-size: 0.95rem;">
+                                            {{ group.title }}
+                                        </h6>
+                                        
+                                        <div class="d-flex flex-wrap gap-2 mt-2">
+                                            {% if group.schedule and group.schedule != 'none' %}
+                                            <span class="badge bg-light text-dark border fw-normal" style="font-size: 0.75rem;">
+                                                <i class="bi bi-calendar-week me-1 text-primary"></i>{{ group.schedule }}
+                                            </span>
+                                            {% else %}
+                                            <span class="badge bg-light text-muted border fw-normal" style="font-size: 0.75rem;">
+                                                <i class="bi bi-calendar-x me-1"></i>Расписание не задано
+                                            </span>
+                                            {% endif %}
 
-
-        <div class="col-md-6">
-            <div class="card report-card animate__animated animate__fadeInLeft h-100">
-                <div class="card-body">
-                    <h5><i class="bi bi-file-earmark-text text-danger"></i> Отчет по посещаемости в группах
-                        преподавателя</h5>
-                    <p class="text-muted">Сформируйте отчет по выбранной группе</p>
-                    <form class="report-form" id="groupReportForm">
-                        <div class="mb-3">
-                            <label class="form-label">Группа:</label>
-                            <select class="form-select" id="groupSelect" required>
-                                <option value="" disabled selected>Выберите группу</option>
-                                {% for group in groups %}
-                                <option value="{{ group.id }}">{{ group.name_of_group }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <button type="submit" class="btn btn-danger">
-                            <i class="bi bi-door-open"></i> Перейти
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card report-card animate__animated animate__fadeInLeft h-100">
-                <div class="card-body">
-                    <h5><i class="bi bi-trophy-fill text-danger"></i> Отчет по конкурсам преподавателей</h5>
-                    <p class="text-muted">Сформируйте отчет по участию в конкурсах</p>
-
-                    <div class="mb-3">
-                        <label class="form-label">Преподаватель:</label>
-                        <select class="form-select" id="teacherContestsSelect">
-                            <option value="">Все преподаватели</option>
-                            {% for teacher in teachers %}
-                            <option value="{{ teacher.id }}">{{ teacher.fio }}</option>
+                                            {% if group.tag %}
+                                            <span class="badge bg-info bg-opacity-10 text-info border border-info fw-normal" style="font-size: 0.75rem;">
+                                                {{ group.tag }}
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex flex-column align-items-end gap-2 ms-2 flex-shrink-0">
+                                        <span class="badge bg-danger rounded-pill d-flex align-items-center gap-1">
+                                            <i class="bi bi-people-fill" style="font-size: 0.75rem;"></i>
+                                            {{ group.n_of_students }}
+                                        </span>
+                                        <i class="bi bi-chevron-right text-muted small chevron-icon"></i>
+                                    </div>
+                                </div>
+                                
+                                <!-- Ссылка на группу -->
+                                <a href="/groups/{{ group.id }}" class="stretched-link"></a>
+                            </li>
                             {% endfor %}
-                        </select>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col">
-                            <label class="form-label">Начало (месяц):</label>
-                            <input type="month" class="form-control" id="contestsStartDate">
+                        </ul>
+                        {% else %}
+                        <div class="p-5 text-center text-muted d-flex flex-column align-items-center justify-content-center h-100">
+                            <i class="bi bi-inbox fs-1 mb-2 opacity-25"></i>
+                            <small>Пока нет групп в этом направлении</small>
                         </div>
-                        <div class="col">
-                            <label class="form-label">Конец (месяц):</label>
-                            <input type="month" class="form-control" id="contestsEndDate">
-                        </div>
+                        {% endif %}
                     </div>
-                    <button type="button" class="btn btn-danger w-100" onclick="downloadContestsReport()">
-                        <i class="bi bi-download me-1"></i> Сформировать
-                    </button>
                 </div>
-            </div>
+            </a>
         </div>
-
-        <div class="col-md-6">
-            <div class="card report-card animate__animated animate__fadeInRight h-100">
-                <div class="card-body">
-                    <h5><i class="bi bi-mortarboard-fill text-danger"></i> Отчет по повышению квалификации</h5>
-                    <p class="text-muted">Сформируйте отчет по курсам повышения квалификации</p>
-
-                    <div class="mb-3">
-                        <label class="form-label">Преподаватель:</label>
-                        <select class="form-select" id="qualificationTeacherSelect">
-                            <option value="">Все преподаватели</option>
-                            {% for teacher in teachers %}
-                            <option value="{{ teacher.id }}">{{ teacher.fio }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col">
-                            <label class="form-label">Начало (месяц):</label>
-                            <input type="month" class="form-control" id="qualificationStartDate">
-                        </div>
-                        <div class="col">
-                            <label class="form-label">Конец (месяц):</label>
-                            <input type="month" class="form-control" id="qualificationEndDate">
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-danger w-100" onclick="downloadQualificationReport()">
-                        <i class="bi bi-download me-1"></i> Сформировать
-                    </button>
-                </div>
-            </div>
-        </div>
-
+        {% endfor %}
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
-<script>
-    function downloadQualificationReport() {
-        const teacherId = document.getElementById('qualificationTeacherSelect').value;
-        const startDate = document.getElementById('qualificationStartDate').value;
-        const endDate = document.getElementById('qualificationEndDate').value;
-
-        let url = '/reports/qualifications';
-        const params = [];
-
-        if (teacherId && teacherId !== '') {
-            params.push('teacher_id=' + encodeURIComponent(teacherId));
-        }
-        if (startDate && startDate !== '') {
-            params.push('start_date=' + encodeURIComponent(startDate));
-        }
-        if (endDate && endDate !== '') {
-            params.push('end_date=' + encodeURIComponent(endDate));
-        }
-
-        if (params.length > 0) {
-            url += '?' + params.join('&');
-        }
-
-        window.location.href = url;
+<style>
+    /* Базовые стили */
+    .direction-card .card-header { 
+        background-color: #2c3e50 !important; 
+        transition: background-color 0.2s ease;
     }
-</script>
-
-
-<script>
-    function downloadContestsReport() {
-        const teacherId = document.getElementById('teacherContestsSelect').value;
-        const startDate = document.getElementById('contestsStartDate').value;
-        const endDate = document.getElementById('contestsEndDate').value;
-
-        let url = '/reports/teacher_contests';
-        const params = [];
-
-        if (teacherId && teacherId !== '') {
-            params.push('teacher_id=' + encodeURIComponent(teacherId));
-        }
-        if (startDate && startDate !== '') {
-            params.push('start_date=' + encodeURIComponent(startDate));
-        }
-        if (endDate && endDate !== '') {
-            params.push('end_date=' + encodeURIComponent(endDate));
-        }
-
-        if (params.length > 0) {
-            url += '?' + params.join('&');
-        }
-
-        window.location.href = url;
+    
+    .list-group-item:last-child { 
+        border-bottom: none !important; 
     }
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const reportRegion = document.getElementById('report-region');
-        const reportCity = document.getElementById('report-city');
-        const reportSchool = document.getElementById('report-school');
-        const reportButton = document.getElementById('report-school-button');
-        const reportForm = document.getElementById('school-report-form');
 
-        fetch('/api/regions')
-            .then(response => response.json())
-            .then(regions => {
-                regions.forEach(region => {
-                    reportRegion.innerHTML += `<option value="${region.id}">${region.title}</option>`;
-                });
+    /* === ИНДИКАТОРЫ КЛИКАБЕЛЬНОСТИ (Исправленные) === */
+    
+    /* Курсор для всей карточки и строк */
+    .clickable-card,
+    .clickable-row {
+        cursor: pointer;
+    }
 
+    /* Эффект наведения на карточку направления */
+    .clickable-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+        border: 1px solid #dee2e6 !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .clickable-card:hover .card-header {
+        background-color: #1a252f !important;
+    }
+    
+    /* Анимация стрелок при наведении на карточку */
+    .clickable-card:hover .chevron-icon {
+        transform: translateX(3px);
+        color: #fff !important;
+        transition: transform 0.2s ease, color 0.2s ease;
+    }
 
-                const rsoOption = Array.from(reportRegion.options).find(opt =>
-                    opt.text.includes('Республика Северная Осетия — Алания')
-                );
-                if (rsoOption) {
-                    rsoOption.selected = true;
-                    reportRegion.dispatchEvent(new Event('change'));
-                }
-            });
+    /* Эффект наведения на строку группы */
+    .clickable-row:hover {
+        background-color: #e9ecef !important;
+        transition: background-color 0.15s ease;
+    }
+    
+    /* Анимация стрелки группы */
+    .clickable-row:hover .chevron-icon {
+        color: #2c3e50 !important;
+        transform: translateX(3px);
+        transition: all 0.2s ease;
+    }
 
-        //меняем регион
-        reportRegion.addEventListener('change', function() {
-            const regionId = this.value;
-            reportCity.disabled = !regionId;
-            reportSchool.disabled = true;
-            reportButton.disabled = true;
-            reportCity.innerHTML = '<option value="">Выберите город</option>';
-            reportSchool.innerHTML = '<option value="">Сначала выберите город</option>';
-
-            if (regionId) {
-                fetch(`/api/cities/${regionId}`)
-                    .then(response => response.json())
-                    .then(cities => {
-                        cities.forEach(city => {
-                            reportCity.innerHTML += `<option value="${city.id}">${city.title}</option>`;
-                        });
-                    });
-            }
-        });
-
-        //меняем город
-        reportCity.addEventListener('change', function() {
-            const cityId = this.value;
-            reportSchool.disabled = !cityId;
-            reportButton.disabled = true;
-            reportSchool.innerHTML = '<option value="">Выберите школу</option>';
-
-            if (cityId) {
-                fetch(`/api/schools/${cityId}`)
-                    .then(response => response.json())
-                    .then(schools => {
-                        schools.forEach(school => {
-                            reportSchool.innerHTML += `<option value="${school.id}">${school.title}</option>`;
-                        });
-                    });
-            }
-        });
-
-        //кнопка активна/неактиванн
-        reportSchool.addEventListener('change', function() {
-            reportButton.disabled = !this.value;
-        });
-
-        //отправка формы отчетв
-        reportForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const region = reportRegion.options[reportRegion.selectedIndex].text;
-            const city = reportCity.options[reportCity.selectedIndex].text;
-            const school = reportSchool.options[reportSchool.selectedIndex].text;
-
-            alert(`Будет сформирован отчет по:\nРегион: ${region}\nГород: ${city}\nШкола: ${school}`);
-        });
-    });
-</script>
-<script>
-    document.getElementById('teacherReportForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        const teacherId = document.getElementById('teacherSelect').value;
-        const startDate = document.getElementById('startDate').value;
-        const endDate = document.getElementById('endDate').value;
-
-        if (teacherId) {
-            let url = `/reports/teacher/${teacherId}/attendance/students`;
-
-            // Создаем параметры запроса
-            const params = new URLSearchParams();
-            if (startDate) params.append('start_date', startDate);
-            if (endDate) params.append('end_date', endDate);
-
-            // Если параметры есть, добавляем их к URL
-            const queryString = params.toString();
-            if (queryString) {
-                url += `?${queryString}`;
-            }
-
-            window.location.href = url;
-        }
-    });
-</script>
-<script>
-
-    document.getElementById('groupReportForm').addEventListener('submit', function(e) {
-        // Отменяем стандартную отправку формы
-        e.preventDefault();
-
-        // Получаем ID выбранной группы (преподавателя)
-        const groupId = document.getElementById('groupSelect').value;
-
-        if (groupId) {
-            // Перенаправляем пользователя по указанному пути
-            window.location.href = `/reports/group/${groupId}/attendance/students`;
-        }
-    });
-
-</script>
-
+    /* Фикс для stretched-link чтобы не вылезал за пределы li */
+    .clickable-row .stretched-link::after {
+        z-index: 1;
+    }
+</style>
 {% endblock %}
-

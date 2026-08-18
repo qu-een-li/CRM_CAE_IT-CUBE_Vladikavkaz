@@ -31,6 +31,7 @@ def show_groups_from_direction(direction_id: int):
     """Отображения списка групп в направлении"""
     direction = api_request(
         f"v1/directions/{direction_id}", params={"add_fields": ["groups"]})
+    print(direction)
     groups: list[Group] = [Group.from_dict(
         group) for group in direction["groups"]]
     for group in groups:
