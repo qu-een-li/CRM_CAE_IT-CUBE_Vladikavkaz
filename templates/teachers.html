@@ -144,19 +144,14 @@
                                 </div>
                             {% endif %}
                         </td>
-                        <td>{{ teacher.surename }} {{ teacher.name }} {% if teacher.patronymic %}{{ teacher.patronymic }}{% endif %}</td>
+                        <td><a href="/teachers/{{ teacher.id }}" title="Профиль" style="color: black;">
+                                {{ teacher.surename }} {{ teacher.name }} {% if teacher.patronymic %}{{ teacher.patronymic }}{% endif %}
+                            </a>
+                        </td>
                         <td>{{ teacher.birthday.strftime('%d.%m.%Y') if teacher.birthday else '' }}</td>
                         <td>{{ teacher.phone }}</td>
                         <td>{{ teacher.email }}</td>
                         <td>{{ teacher.status }}</td>
-                        <td>
-                            <a href="/teachers/{{ teacher.id }}" class="text-primary me-2" title="Профиль">
-                                <i class="bi bi-eye-fill"></i>
-                            </a>
-                            <a href="/edit_teacher/{{ teacher.id }}" class="text-danger" title="Редактировать">
-                                <i class="bi bi-pencil-fill"></i>
-                            </a>
-                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
