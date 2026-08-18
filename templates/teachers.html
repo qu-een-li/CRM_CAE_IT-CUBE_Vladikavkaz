@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
-{% block title %}Список наставников | IT-Куб Владикавказ{% endblock %}
+{% block title %}Наставники | IT-Куб Владикавказ{% endblock %}
 
-{% block page_title %}Список наставников{% endblock %}
+{% block page_title %}Наставники{% endblock %}
 {% block page_subtitle %}Все зарегистрированные наставники{% endblock %}
 
 {% block extra_css %}
@@ -117,11 +117,11 @@
                     <tr>
                         <th>Фото</th>
                         <th>ФИО наставника</th>
-                        <th>Дата рождения</th>
                         <th>Телефон</th>
                         <th>Email</th>
-                        <th>Статус</th>
-                        <th style="width: 30px;"></th>
+                        <th>Категория</th>
+                        <th>Ставка</th>
+                        <th>Стаж</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -148,10 +148,17 @@
                                 {{ teacher.surename }} {{ teacher.name }} {% if teacher.patronymic %}{{ teacher.patronymic }}{% endif %}
                             </a>
                         </td>
-                        <td>{{ teacher.birthday.strftime('%d.%m.%Y') if teacher.birthday else '' }}</td>
                         <td>{{ teacher.phone }}</td>
                         <td>{{ teacher.email }}</td>
-                        <td>{{ teacher.status }}</td>
+                        <td>
+                            {% if teacher.category %}
+                                {{ teacher.category }}
+                            {% else %}
+                                без категории
+                            {% endif %}
+                        </td>
+                        <td>{{ teacher.rate }}</td>
+                        <td>{{ teacher.get_experience() }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
