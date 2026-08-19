@@ -38,7 +38,7 @@ CRM система для ЦДО имеет следующий функцион�
 
 Таблица эффективности преподавателя\
 
-
+https://docs.google.com/spreadsheets/d/1zvjHrIrNw6EHgMwecFA79O7ORwo55rXyRKxpXRQmgzI/edit?gid=1758488722#gid=1758488722
 
 
 Телемост для встреч
