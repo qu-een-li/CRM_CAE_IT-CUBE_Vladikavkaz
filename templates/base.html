@@ -17,111 +17,222 @@
 </head>
 <body>
 <div class="sidebar animate__animated animate__fadeInLeft">
-    <div class="sidebar-header text-center py-4">
-        <img src="{{ url_for('static', filename='images/it-cube.png') }}" alt="IT-Куб" class="logo mb-3">
-        <h4 class="text-white">IT-Куб Владикавказ</h4>
-        <p class="text-muted small">CRM для ЦДО</p>
+    <!-- Шапка сайдбара -->
+    <div class="sidebar-header text-center py-4 border-bottom border-secondary border-opacity-25">
+        <img src="{{ url_for('static', filename='images/it-cube.png') }}" alt="IT-Куб" class="logo mb-3" style="max-width: 60px; filter: brightness(0) invert(1); opacity: 0.9;">
+        <h5 class="text-white fw-bold mb-1">IT-Куб Владикавказ</h5>
+        <p class="text-muted small mb-0" style="font-size: 0.75rem;">CRM для ЦДО</p>
     </div>
-    <ul class="sidebar-menu">
-        <li class="{% if request.path == '/' %}active{% endif %}">
-            <a href="/" class="menu-link">
-                <i class="bi bi-house-door-fill me-2"></i>Главная
+
+    <ul class="sidebar-menu list-unstyled px-2 mt-3">
+        
+        <!-- === ОСНОВНЫЕ РАЗДЕЛЫ === -->
+        
+        <li class="mb-1 {% if request.path == '/' %}active{% endif %}">
+            <a href="/" class="menu-link d-flex align-items-center py-2 px-3 rounded text-decoration-none">
+                <i class="bi bi-house-door-fill me-3 fs-5"></i>
+                <span class="fw-medium">Главная</span>
             </a>
         </li>
-        <li class="{% if request.path == '/add' %}active{% endif %}">
-            <a href="/add" class="menu-link">
-                <i class="bi bi-person-plus-fill me-2"></i>Добавить учащегося
+
+        <li class="mb-1 {% if '/schedule' in request.path or '/show_schedules' in request.path %}active{% endif %}">
+            <a href="/show_schedules" class="menu-link d-flex align-items-center py-2 px-3 rounded text-decoration-none">
+                <i class="bi bi-calendar-week-fill me-3 fs-5"></i>
+                <span class="fw-medium">Расписание</span>
             </a>
         </li>
-        <li class="{% if request.path == '/students' %}active{% endif %}">
-            <a href="/students" class="menu-link">
-                <i class="bi bi-people-fill me-2"></i>Список учащихся
+
+        <!-- Конкурсы (выпадающий список) -->
+        <li class="mb-1 dropdown-container {% if 'contest' in request.path %}active{% endif %}">
+            <a href="#" class="menu-link dropdown-toggle-custom d-flex align-items-center justify-content-between py-2 px-3 rounded text-decoration-none" data-bs-toggle="collapse" data-bs-target="#contestsSubmenu" aria-expanded="{% if 'contest' in request.path %}true{% else %}false{% endif %}">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-trophy-fill me-3 fs-5"></i>
+                    <span class="fw-medium">Конкурсы</span>
+                </div>
+                <i class="bi bi-chevron-down small transition-icon"></i>
+            </a>
+            <div class="collapse {% if 'contest' in request.path %}show{% endif %}" id="contestsSubmenu">
+                <ul class="list-unstyled ps-4 mt-1">
+                    <li><a class="dropdown-item small text-muted hover-white py-1" href="{{ url_for('contests_list') }}">Для учащихся</a></li>
+                    <li><a class="dropdown-item small text-muted hover-white py-1" href="{{ url_for('teachers_contests_list') or '#' }}">Для наставников</a></li>
+                </ul>
+            </div>
+        </li>
+
+        <li class="mb-1 {% if request.path == '/reports' %}active{% endif %}">
+            <a href="/reports" class="menu-link d-flex align-items-center py-2 px-3 rounded text-decoration-none">
+                <i class="bi bi-file-earmark-bar-graph-fill me-3 fs-5"></i>
+                <span class="fw-medium">Отчеты</span>
             </a>
         </li>
-        <li class="{% if request.path == '/add_teacher' %}active{% endif %}">
-            <a href="/add_teacher" class="menu-link">
-                <i class="bi bi-person-badge-fill me-2"></i>Добавить наставника
+
+        <!-- Направления (Вынесено из "Добавить" в основное меню) -->
+        <li class="mb-3 {% if request.path == '/directions' %}active{% endif %}">
+            <a href="/directions" class="menu-link d-flex align-items-center py-2 px-3 rounded text-decoration-none">
+                <i class="bi bi-compass-fill me-3 fs-5"></i>
+                <span class="fw-medium">Направления</span>
             </a>
         </li>
-        <li class="{% if request.path == '/add_group' %}active{% endif %}">
-            <a href="/add_group" class="menu-link">
-                <i class="bi-plus-square-dotted"></i> Создать группу
+
+        <!-- === БЛОК "ДОБАВИТЬ" === -->
+        <li class="dropdown-container mb-1">
+            <a href="#" class="menu-link dropdown-toggle-custom d-flex align-items-center justify-content-between py-2 px-3 rounded text-decoration-none" data-bs-toggle="collapse" data-bs-target="#addSubmenu" aria-expanded="false">
+                <div class="d-flex align-items-center">
+                    <span class="bg-danger rounded-circle me-3" style="width: 8px; height: 8px;"></span>
+                    <span class="fw-medium">Добавить</span>
+                </div>
+                <i class="bi bi-chevron-down small transition-icon"></i>
+            </a>
+            
+            <div class="collapse" id="addSubmenu">
+                <ul class="list-unstyled ps-4 mt-1">
+                    <li class="{% if request.path == '/add_group' %}active-sub{% endif %}">
+                        <a href="/add_group" class="d-flex align-items-center justify-content-between py-2 text-decoration-none text-muted small hover-white">
+                            <span>Группу</span>
+                            <i class="bi bi-plus-lg text-success"></i>
+                        </a>
+                    </li>
+                    <li class="{% if request.path == '/add' %}active-sub{% endif %}">
+                        <a href="/add" class="d-flex align-items-center justify-content-between py-2 text-decoration-none text-muted small hover-white">
+                            <span>Учащегося</span>
+                            <i class="bi bi-plus-lg text-success"></i>
+                        </a>
+                    </li>
+                    <li class="{% if request.path == '/add_teacher' %}active-sub{% endif %}">
+                        <a href="/add_teacher" class="d-flex align-items-center justify-content-between py-2 text-decoration-none text-muted small hover-white">
+                            <span>Наставника</span>
+                            <i class="bi bi-plus-lg text-success"></i>
+                        </a>
+                    </li>
+                    <!-- Событие -->
+                    <li class="{% if request.path == '/add_schedule' %}active-sub{% endif %}">
+                        <a href="/add_schedule" class="d-flex align-items-center justify-content-between py-2 text-decoration-none text-muted small hover-white">
+                            <span>Событие</span>
+                            <i class="bi bi-plus-lg text-success"></i>
+                        </a>
+                    </li>
+                    <!-- Курсы ПК (Добавление) - ИСПРАВЛЕНА ССЫЛКА -->
+                    <li class="{% if request.path == '/add_qualification_course' %}active-sub{% endif %}">
+                        <a href="/add_qualification_course" class="d-flex align-items-center justify-content-between py-2 text-decoration-none text-muted small hover-white">
+                            <span>Курсы ПК</span>
+                            <i class="bi bi-plus-lg text-success"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </li>
+
+        <!-- === СПИСКИ И ПРОЧЕЕ === -->
+        
+        <li class="mt-3 mb-1 {% if request.path == '/students' %}active{% endif %}">
+            <a href="/students" class="menu-link d-flex align-items-center py-2 px-3 rounded text-decoration-none">
+                <i class="bi bi-people-fill me-3 fs-5"></i>
+                <span class="fw-medium">Список учащихся</span>
             </a>
         </li>
-        <li class="{% if request.path == '/teachers' %}active{% endif %}">
-            <a href="/teachers" class="menu-link">
-                <i class="bi bi-person-video3 me-2"></i>Наставники
+
+        <li class="mb-1 {% if request.path == '/teachers' %}active{% endif %}">
+            <a href="/teachers" class="menu-link d-flex align-items-center py-2 px-3 rounded text-decoration-none">
+                <i class="bi bi-person-video3 me-3 fs-5"></i>
+                <span class="fw-medium">Наставники</span>
             </a>
         </li>
-        <li class="{% if request.path == '/add_schedule' %}active{% endif %}">
-            <a href="/add_schedule" class="menu-link">
-                <i class="bi bi-calendar-plus"></i> Добавить событие
+
+        <!-- Курсы ПК (Просмотр списка) - ВЫНЕСЕНО ОТДЕЛЬНО -->
+        <li class="mb-1 {% if request.path == '/qualification_courses' %}active{% endif %}">
+            <a href="/qualification_courses" class="menu-link d-flex align-items-center py-2 px-3 rounded text-decoration-none">
+                <i class="bi bi-mortarboard-fill me-3 fs-5"></i>
+                <span class="fw-medium">Курсы ПК</span>
             </a>
         </li>
-        <li class="{% if request.path == '/show_schedules' %}active{% endif %}">
-            <a href="/show_schedules" class="menu-link">
-                <i class="bi bi-calendar4-week"></i> Расписание
+
+        <!-- Настройки -->
+        <li class="mb-1 {% if request.path == '/under_construction' %}active{% endif %}">
+            <a href="/under_construction" class="menu-link d-flex align-items-center py-2 px-3 rounded text-decoration-none">
+                <i class="bi bi-gear-fill me-3 fs-5"></i>
+                <span class="fw-medium">Настройки</span>
             </a>
         </li>
-        <li class="{% if request.path == '/directions' %}active{% endif %}">
-            <a href="/directions" class="menu-link">
-                <i class="bi bi-compass"></i> Направления
-            </a>
-        </li>
-        <li class="dropdown">
-            <a href="#" class="menu-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-trophy-fill me-2"></i>Конкурсы
-            </a>
-            <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="{{ url_for('contests_list') }}"><i class="bi bi-people-fill me-2"></i>Конкурсы для учащихся</a></li>
-                <li><a class="dropdown-item" href="{{ url_for('teachers_contests_list') or '#' }}"><i class="bi bi-person-video3 me-2"></i>Конкурсы для наставников</a></li>
-            </ul>
-        </li>
-        <li class="{% if request.path == '/qualification_courses' %}active{% endif %}">
-            <a href="/qualification_courses" class="menu-link">
-                <i class="bi bi-person-video3 me-2"></i>Курсы Повышения Квалификации
-            </a>
-        </li>
-        <li>
-            <a href="/reports" class="menu-link">
-                <i class="bi bi-file-earmark-bar-graph-fill me-2"></i>Отчеты
-            </a>
-        </li>
-        <li>
-            <a href="/under_construction" class="menu-link">
-                <i class="bi bi-gear-fill me-2"></i>Настройки
-            </a>
-        </li>
+
     </ul>
 </div>
 
+<!-- CSS стили (те же самые, для поддержки дизайна) -->
+<style>
+    .sidebar {
+        background-color: #2b303b; 
+        min-height: 100vh;
+        width: 260px;
+    }
+    .menu-link, .dropdown-item {
+        color: #adb5bd !important; 
+        transition: all 0.2s ease-in-out;
+    }
+    .menu-link:hover, .active .menu-link {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #fff !important;
+    }
+    .hover-white:hover {
+        color: #fff !important;
+        padding-left: 5px;
+    }
+    .transition-icon {
+        transition: transform 0.3s;
+    }
+    [aria-expanded="true"] .transition-icon {
+        transform: rotate(180deg);
+    }
+    .active-sub a {
+        color: #fff !important;
+        font-weight: 500;
+    }
+    .logo {
+        filter: brightness(0) invert(1); 
+    }
+</style>
 <div class="main-content">
-    <nav class="navbar navbar-expand-lg mb-4 shadow-sm bg-white">
-        <div class="container-fluid">
-            <button class="btn sidebar-toggle d-lg-none">
-                <i class="bi bi-list"></i>
-            </button>
-            <span class="navbar-brand fw-bold">Добро пожаловать, <span class="text-danger">Администратор</span>!</span>
-            <div class="d-flex">
-                <div class="dropdown me-3">
-                    <button class="btn btn-outline-danger position-relative dropdown-toggle" data-bs-toggle="dropdown">
-                        <i class="bi bi-bell-fill"></i>
-                        <!-- Добавлен элемент для счетчика со стилями Bootstrap -->
-                        <span id="notification-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">
-                            0
-                        </span>
-                    </button>
-
-                    <ul class="dropdown-menu dropdown-menu-end" id="notification-list" style="min-width: 320px; max-width: 450px;">
-                        <li><h6 class="dropdown-header">Уведомления</h6></li>
-                    </ul>
+    <!-- Навбар (Шапка) -->
+    <nav class="navbar navbar-expand-lg mb-4 shadow-sm bg-white border-bottom">
+        <div class="container-fluid px-4">
+            <!-- Левая часть: Лого и Название -->
+            <div class="d-flex align-items-center me-auto">
+                <div class="bg-danger rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                    <i class="bi bi-cpu-fill text-white fs-5"></i>
                 </div>
-                    <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">
-                        <i class="bi bi-box-arrow-right"></i> Выйти
-                    </a>
+                <div class="d-flex flex-column">
+                    <span class="fw-bold text-dark lh-1 mb-1">IT-Куб Владикавказ</span>
+                    <span class="text-muted small lh-1" style="font-size: 0.75rem;">CRM для центра дополнительного образования</span>
+                </div>
             </div>
+
+            <!-- Центральная часть: Время и Дата -->
+            <div class="d-none d-lg-flex align-items-center mx-auto">
+                <div class="h3 fw-bold text-danger m-0 me-3" id="current-time" style="min-width: 80px;">16:08</div>
+                <div class="text-muted small" id="current-date">понедельник, 17 августа 2026 г.</div>
+            </div>
+
+            <!-- Правая часть: Кнопки -->
+            <div class="d-flex align-items-center ms-auto">
+                <!-- Кнопка АДМИН (вместо колокольчика, как на фото) -->
+                <a href="#" class="btn btn-danger fw-bold me-2 px-3 py-1 rounded-pill" style="font-size: 0.85rem;">
+                    АДМИН
+                </a>
+                
+                <!-- Кнопка Выход -->
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-danger d-flex align-items-center gap-2 px-3 py-1 rounded-pill" style="font-size: 0.85rem;">
+                    <i class="bi bi-box-arrow-right"></i> 
+                    <span>Выход</span>
+                </a>
+            </div>
+            
+            <!-- Мобильная кнопка меню (скрыта на ПК) -->
+            <button class="navbar-toggler d-lg-none ms-3" type="button" data-bs-toggle="collapse" data-bs-target="#mobileMenu">
+                <i class="bi bi-list fs-3"></i>
+            </button>
         </div>
     </nav>
+
+    <!-- Блок welcome-section удален, так как на изображении его нет в шапке -->
 
     <div class="welcome-section animate__animated animate__fadeIn">
         <div class="container py-4">
