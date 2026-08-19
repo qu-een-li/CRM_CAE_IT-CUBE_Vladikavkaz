@@ -229,30 +229,7 @@
         </div>
     </nav>
 
-    <!-- Блок welcome-section удален, так как на изображении его нет в шапке -->
 
-    <div class="welcome-section animate__animated animate__fadeIn">
-        <div class="container py-4">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <h1 class="display-6 fw-bold">
-                        <i class="bi bi-speedometer2 me-3 text-danger"></i>{% block page_title %}CRM для центра дополнительного образования
-
-{%
-                        endblock %}
-                    </h1>
-                    <p class="lead">{% block page_subtitle %}управление данными об учащихся, педагогах, участиях в конкурсах{%
-                        endblock %}</p>
-                </div>
-                <div class="col-md-4 text-md-end">
-                    <div class="date-time">
-                        <div class="time h3 text-danger" id="current-time">12:45</div>
-                        <div class="date" id="current-date">Воскресенье, 6 апреля 2025</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     {% block content %}{% endblock %}
 </div>
