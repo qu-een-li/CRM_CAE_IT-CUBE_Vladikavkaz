@@ -19,7 +19,6 @@ class Teacher(SqlAlchemyBase, DictConvertable):
     phone = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
     email = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     birthday = sqlalchemy.Column(sqlalchemy.Date, nullable=False)
-    status = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     personal_photos = sqlalchemy.Column(
         sqlalchemy.String, nullable=False, default="anonymous.jpg")
 
@@ -30,7 +29,11 @@ class Teacher(SqlAlchemyBase, DictConvertable):
 
     category = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     rate = sqlalchemy.Column(sqlalchemy.Float, nullable=True, default=1.0)
-    date_start_teaching = sqlalchemy.Column(sqlalchemy.Date, nullable=True)
+    experience_start = sqlalchemy.Column(sqlalchemy.Date, nullable=False)
+    graduation_date = sqlalchemy.Column(sqlalchemy.Date, nullable=True)
+    work_condition = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    hire_date = sqlalchemy.Column(sqlalchemy.Date, nullable=False)
+    dismissal_date = sqlalchemy.Column(sqlalchemy.Date, nullable=True)
 
     def get_formatted_teachers_patronymic(self):
         formatted_teacher_name = f"{self.surename} {self.name[0]}.{self.patronymic[0]}.".title(
@@ -44,16 +47,16 @@ class Teacher(SqlAlchemyBase, DictConvertable):
 
     def get_experience(self):
         """Рассчитывает стаж работы"""
-        if not self.date_start_teaching:
+        if not self.experience_start:
             return "Нет данных"
 
         today = date.today()
-        years = today.year - self.date_start_teaching.year
-        months = today.month - self.date_start_teaching.month
+        years = today.year - self.experience_start.year
+        months = today.month - self.experience_start.month
         if months < 0:
             years -= 1
             months += 12
-        elif months == 0 and today.day < self.date_start_teaching.day:
+        elif months == 0 and today.day < self.experience_start.day:
             years -= 1
             months = 11
 
@@ -68,7 +71,7 @@ class Teacher(SqlAlchemyBase, DictConvertable):
 
         if years == 0:
             if months == 0:
-                days = (today - self.date_start_teaching).days
+                days = (today - self.experience_start).days
                 if days < 30:
                     return f"{days} дн."
                 else:
