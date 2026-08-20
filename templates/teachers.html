@@ -2,11 +2,164 @@
 
 {% block title %}Наставники | IT-Куб Владикавказ{% endblock %}
 
-{% block page_title %}Наставники{% endblock %}
-{% block page_subtitle %}Все зарегистрированные наставники{% endblock %}
-
 {% block extra_css %}
 <style>
+    .teachers-page {
+        padding: 1.5rem 0;
+    }
+
+    .page-header {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 20px;
+        width: 98%;
+        margin-left: auto;
+        margin-right: auto;
+        gap: 6px;
+    }
+
+    .header-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .header-title h2 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+        color: #333;
+    }
+
+    .header-icon {
+        color: #dc3545;
+        font-size: 28px;
+        flex-shrink: 0;
+        line-height: 1;
+    }
+
+    .header-content {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .header-subtitle {
+        color: #6c757d;
+        font-size: 14px;
+        margin: 0;
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .btn-add-teacher {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        padding: 8px 18px;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        white-space: nowrap;
+        height: 40px;
+        flex-shrink: 0;
+    }
+
+    .btn-add-teacher:hover {
+        background-color: #c82333;
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-add-teacher i {
+        font-size: 18px;
+    }
+
+    .toggle-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        height: 40px;
+        flex-shrink: 0;
+        margin-left: auto;
+    }
+
+    .toggle-label {
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        user-select: none;
+        line-height: 1;
+        color: #adb5bd;
+    }
+
+    .toggle-label.active {
+        color: #dc3545;
+    }
+
+    .toggle-label:hover {
+        color: #dc3545;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 46px;
+        height: 24px;
+        flex-shrink: 0;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.3s;
+        border-radius: 24px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: 0.3s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background-color: #dc3545;
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(22px);
+    }
+
     .teachers-table {
         background-color: white;
         border-radius: 10px;
@@ -15,63 +168,97 @@
         width: 98%;
         margin: 0 auto;
     }
+
     .table th {
         background-color: #dc3545;
         color: white;
         position: sticky;
         top: 0;
+        font-size: 14px;
+        padding: 12px 10px;
     }
+
     .table td {
         vertical-align: middle;
+        padding: 10px 10px;
+        font-size: 14px;
     }
+
     .table-hover tbody tr:hover {
-        background-color: rgba(220, 53, 69, 0.1);
+        background-color: rgba(220, 53, 69, 0.05);
     }
+
     .table-container {
         max-height: 70vh;
         overflow-y: auto;
     }
-    .edit-icon {
-        color: #6c757d;
-        font-size: 1.1rem;
-        cursor: pointer;
-    }
-    .edit-icon:hover {
-        color: #dc3545;
-    }
+
     .teacher-photo {
-        width: 50px;
-        height: 50px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         object-fit: cover;
         cursor: pointer;
         transition: transform 0.2s;
         border: 2px solid #dc3545;
+        display: block;
     }
+
     .teacher-photo:hover {
         transform: scale(1.1);
     }
+
     .no-photo {
-        width: 50px;
-        height: 50px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         background-color: #f0f0f0;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: transform 0.2s;
         border: 2px solid #dc3545;
     }
-    .no-photo:hover {
-        transform: scale(1.1);
-    }
+
     .no-photo i {
-        font-size: 24px;
+        font-size: 20px;
         color: #999;
     }
 
-    /* Модальное окно для просмотра фото */
+    .teacher-name-link {
+        color: #333;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .teacher-name-link:hover {
+        color: #dc3545;
+        text-decoration: underline;
+    }
+
+    .badge-category {
+        display: inline-block;
+        padding: 2px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .badge-category.without {
+        background-color: #e9ecef;
+        color: #6c757d;
+    }
+
+    .badge-category.first {
+        background-color: #cfe2ff;
+        color: #0d6efd;
+    }
+
+    .badge-category.highest {
+        background-color: #f8d7da;
+        color: #dc3545;
+    }
+
     .modal-photo {
         display: none;
         position: fixed;
@@ -83,9 +270,8 @@
         background-color: rgba(0, 0, 0, 0.9);
         cursor: pointer;
     }
+
     .modal-photo-content {
-        margin: auto;
-        display: block;
         max-width: 90%;
         max-height: 90%;
         position: absolute;
@@ -93,6 +279,7 @@
         left: 50%;
         transform: translate(-50%, -50%);
     }
+
     .close-modal {
         position: absolute;
         top: 20px;
@@ -102,33 +289,146 @@
         font-weight: bold;
         cursor: pointer;
     }
+
     .close-modal:hover {
         color: #dc3545;
+    }
+
+    @media (max-width: 768px) {
+        .header-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .toggle-container {
+            margin-left: 0;
+            justify-content: center;
+        }
+
+        .btn-add-teacher {
+            justify-content: center;
+            width: 100%;
+            font-size: 13px;
+            padding: 6px 14px;
+            height: 36px;
+        }
+
+        .toggle-container {
+            height: 36px;
+            gap: 8px;
+        }
+
+        .toggle-label {
+            font-size: 13px;
+        }
+
+        .switch {
+            width: 40px;
+            height: 20px;
+        }
+
+        .slider:before {
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        .table th,
+        .table td {
+            font-size: 12px;
+            padding: 6px 8px;
+        }
+
+        .teacher-photo,
+        .no-photo {
+            width: 32px;
+            height: 32px;
+        }
+
+        .no-photo i {
+            font-size: 16px;
+        }
+
+        .header-title h2 {
+            font-size: 20px;
+        }
+
+        .header-icon {
+            font-size: 22px;
+        }
+
+        .header-subtitle {
+            font-size: 12px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .table-container {
+            max-height: 50vh;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4" style="max-width: 98%;">
+<div class="container-fluid teachers-page">
+
+    <div class="page-header">
+        <div class="header-title">
+            <i class="bi bi-people-fill header-icon"></i>
+            <h2>Наставники</h2>
+        </div>
+
+        <div class="header-content">
+            <div class="header-subtitle">работающие педагоги и архив уволенных</div>
+
+            <div class="header-actions">
+                <a href="{{ url_for('add_teacher') }}" class="btn-add-teacher">
+                    <i class="bi bi-person-plus-fill"></i> Добавить наставника
+                </a>
+
+                <div class="toggle-container">
+                    <span class="toggle-label {% if show_all == '0' or not show_all %}active{% else %}inactive{% endif %}"
+                          onclick="setFilter('0')">Работающие</span>
+
+                    <label class="switch">
+                        <input type="checkbox" id="filterToggle"
+                               {% if show_all == '1' %}checked{% endif %}
+                               onchange="toggleFilter(this)">
+                        <span class="slider"></span>
+                    </label>
+
+                    <span class="toggle-label {% if show_all == '1' %}active{% else %}inactive{% endif %}"
+                          onclick="setFilter('1')">Все педагоги</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="teachers-table">
         <div class="table-container">
-            <table class="table table-hover">
+            <table class="table table-hover table-sm mb-0">
                 <thead>
                     <tr>
-                        <th>Фото</th>
+                        <th style="width: 60px;">Фото</th>
                         <th>ФИО наставника</th>
                         <th>Телефон</th>
                         <th>Email</th>
                         <th>Категория</th>
-                        <th>Ставка</th>
-                        <th>Стаж</th>
+                        <th style="width: 80px;">Ставка</th>
+                        <th style="width: 80px;">Стаж</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for teacher in teachers %}
                     <tr>
                         <td>
-                            {% if teacher.personal_photos and teacher.personal_photos != "anonymous.jpg"  %}
+                            {% if teacher.personal_photos and teacher.personal_photos != "anonymous.jpg" %}
                                 {% set photo_url = url_for('uploaded_file', filename=teacher.personal_photos) %}
                                 <img src="{{ photo_url }}"
                                      class="teacher-photo"
@@ -144,21 +444,34 @@
                                 </div>
                             {% endif %}
                         </td>
-                        <td><a href="/teachers/{{ teacher.id }}" title="Профиль" style="color: black;">
-                                {{ teacher.surename }} {{ teacher.name }} {% if teacher.patronymic %}{{ teacher.patronymic }}{% endif %}
+                        <td>
+                            <a href="/teachers/{{ teacher.id }}" title="Профиль" class="teacher-name-link">
+                                {{ teacher.surename }} {{ teacher.name }}
+                                {% if teacher.patronymic %}{{ teacher.patronymic }}{% endif %}
                             </a>
                         </td>
                         <td>{{ teacher.phone }}</td>
                         <td>{{ teacher.email }}</td>
                         <td>
-                            {% if teacher.category %}
-                                {{ teacher.category }}
+                            {% if teacher.category == '1 категория' %}
+                                <span class="badge-category first">1 категория</span>
+                            {% elif teacher.category == 'высшая категория' %}
+                                <span class="badge-category highest">высшая категория</span>
+                            {% elif teacher.category %}
+                                <span class="badge-category">{{ teacher.category }}</span>
                             {% else %}
-                                без категории
+                                <span class="badge-category without">без категории</span>
                             {% endif %}
                         </td>
-                        <td>{{ teacher.rate }}</td>
+                        <td>{{ teacher.rate or 1.0 }}</td>
                         <td>{{ teacher.get_experience() }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4" style="color: #6c757d;">
+                            <i class="bi bi-inbox" style="font-size: 28px;"></i><br>
+                            Нет наставников
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -167,7 +480,6 @@
     </div>
 </div>
 
-<!--для просмотра фотки-->
 <div id="photoModal" class="modal-photo" onclick="closePhotoModal()">
     <span class="close-modal">&times;</span>
     <img class="modal-photo-content" id="modalImage">
@@ -177,6 +489,18 @@
 
 {% block extra_js %}
 <script>
+    function toggleFilter(checkbox) {
+        if (checkbox.checked) {
+            window.location.href = "{{ url_for('list_of_teachers', show_all=1) }}";
+        } else {
+            window.location.href = "{{ url_for('list_of_teachers', show_all=0) }}";
+        }
+    }
+
+    function setFilter(value) {
+        window.location.href = "{{ url_for('list_of_teachers', show_all=0) }}".replace('show_all=0', 'show_all=' + value);
+    }
+
     function showPhotoModal(imageUrl) {
         const modal = document.getElementById('photoModal');
         const modalImg = document.getElementById('modalImage');

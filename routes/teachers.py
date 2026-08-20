@@ -101,8 +101,18 @@ def list_of_teachers():
     """Страница списка учителей"""
     try:
         session = db_session.create_session()
-        teachers = session.query(Teacher).all()
-        return render_template("teachers.html", teachers=teachers)
+
+        # по умолчанию 0 - только работающие
+        show_all = request.args.get('show_all', '0')
+
+        if show_all == '1':
+            # Все педагоги
+            teachers = session.query(Teacher).all()
+        else:
+            # Только работающие
+            teachers = session.query(Teacher).filter(Teacher.dismissal_date.is_(None)).all()
+
+        return render_template("teachers.html", teachers=teachers, show_all=show_all)
     finally:
         session.close()
 
