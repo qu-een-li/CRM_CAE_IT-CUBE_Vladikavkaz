@@ -61,13 +61,25 @@ def add_teacher():
                 patronymic=form.patronymic.data,
                 phone=form.phone.data,
                 email=form.email.data,
-                status=form.status.data,
                 personal_photos=photo_filename,
+                category=form.category.data,
+                rate=float(form.rate.data),
+                work_condition=form.work_condition.data
             )
             teacher.birthday = datetime.strptime(form.birthday.data, "%d.%m.%Y").date()
 
+            if form.experience_start.data:
+                teacher.experience_start = datetime.strptime(form.experience_start.data, "%d.%m.%Y").date()
+
+            if form.hire_date.data:
+                teacher.hire_date = datetime.strptime(form.hire_date.data, "%d.%m.%Y").date()
+
+            if form.graduation_date.data:
+                teacher.graduation_date = datetime.strptime(form.graduation_date.data, "%d.%m.%Y").date()
+
             session.add(teacher)
             session.flush()
+
             if form.allow_login.data:
                 if not form.user_name.data:
                     form.user_name.errors.append("Без этого поля человек не сможет входить в систему")
@@ -94,7 +106,6 @@ def add_teacher():
         finally:
             session.close()
     return render_template("add_teacher.html", form=form)
-
 
 @app.route("/teachers")
 def list_of_teachers():
