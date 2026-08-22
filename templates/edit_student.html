@@ -42,15 +42,25 @@
     <div class="registration-container">
         <h2 class="mb-4 text-center"><i class="bi bi-person-lines-fill me-2 text-danger"></i>Форма редактирования ученика</h2>
 
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-        <div class="alert alert-warning">
-            {% for message in messages %}
-       {{ message }}
-            {% endfor %}
+        <!-- Блок сообщений об успехе/ошибке -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Индикатор текущего статуса -->
+        {% if student.is_candidate %}
+        <div class="alert alert-warning text-center mb-4">
+            <i class="bi bi-info-circle-fill"></i> Сейчас этот ученик имеет статус <b>Кандидат</b>. 
+            Заполните все поля, чтобы снять этот статус.
         </div>
         {% endif %}
-        {% endwith %}
 
         <form action="/edit_student/{{ student_id }}" method="post" novalidate class="needs-validation">
             {{ form.hidden_tag() }}

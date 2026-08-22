@@ -1,20 +1,80 @@
-<style>.cell-hover:hover {
-    background-color: #dbdbdb !important; /* Светло-серый (стандарт Bootstrap) */
-    cursor: pointer;                      /* Указатель в виде пальца */
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.1); /* Легкая внутренняя тень для объема */
-    transition: background-color 0.2s;    /* Плавность */
+<style>
+.cell-hover:hover {
+    background-color: #dbdbdb !important;
+    cursor: pointer;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+    transition: background-color 0.2s;
 }
 .cell-hover {
     transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 .fulled-cell:hover {
-    background-color: 
-#cccccc !important; 
+    background-color: #cccccc !important; 
+}
+
+/* Стили для пустых ячеек */
+.empty-cell {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #adb5bd;
+    font-style: italic;
+    position: relative;
+    overflow: hidden;
+}
+
+.empty-cell::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.empty-week-message {
+    text-align: center;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px;
+    margin: 20px 0;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.empty-week-message h4 {
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+}
+
+.empty-week-message p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 1rem;
 }
 </style>
+
 {% for matrix, week_interval, upper_headers in list_of_matrix %}
-    {# Сохраняем индекс текущей недели #}
     {% set week_idx = loop.index0 %}
+    
+    {# Проверяем, есть ли хоть одно событие в неделе #}
+    {% set has_events = false %}
+    {% for row in matrix %}
+        {% for day_events in row[1:] %}
+            {% if day_events %}
+                {% set has_events = true %}
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
     
     <table class="table table-bordered table-hover mb-5">
         <thead class="thead-dark">
@@ -24,7 +84,7 @@
                 </th>
             </tr>
             <tr style="background-color: #495057; color: aliceblue; text-align: center; font-size: 1.1rem;">
-                <th></th> {# Пустая ячейка для выравнивания над колонкой "Время" #}
+                <th></th>
                 {% for day_numeric in upper_headers %}
                     <th>{{ day_numeric }}</th>
                 {% endfor %}
@@ -41,42 +101,54 @@
             </tr>
         </thead>
         <tbody>
-            {% for row in matrix %}
-            <tr>
-                <td class="align-middle font-weight-bold">{{ row[0] }}</td>
+            {% if has_events %}
+                {# Если есть события — показываем обычную таблицу #}
+                {% for row in matrix %}
+                <tr>
+                    <td class="align-middle font-weight-bold">{{ row[0] }}</td>
 
-                {# Перебираем дни, получаем индекс дня (0-6) #}
-                {% for day_events in row[1:] %}
-                {% set day_idx = loop.index0 %}
-                <td class="p-0 cell-hover" style="height: 100%">
-                    {% if day_events %}
-                    <table class="table table-sm m-0 border-0">
-                        <tbody style="display: table; width: 100%; height: 100%;">
-                            {% for event in day_events %}
-                            <tr>
-                                <td class="border-0 p-0">
-                                    {# Формируем ссылку вокруг названия события #}
-                                    <a href="/attendance/create_past_schedule_if_doesnt_exist?schedule_id={{ event.id }}&date={{ days_lists[week_idx][day_idx] }}" 
-                                       class="d-block p-2 text-decoration-none text-dark fulled-cell" 
-                                       style="font-size: 1.1rem; width: 100%; height: 100%;">
-                                        {{ event.title }}
-                                    </a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    {% else %}
-                    <div style="min-height: 100%; font-size: 1.2rem; text-align: center">-</div>
-                    {% endif %}
-                </td>
+                    {% for day_events in row[1:] %}
+                    {% set day_idx = loop.index0 %}
+                    <td class="p-0 cell-hover" style="height: 100%">
+                        {% if day_events %}
+                        <table class="table table-sm m-0 border-0">
+                            <tbody style="display: table; width: 100%; height: 100%;">
+                                {% for event in day_events %}
+                                <tr>
+                                    <td class="border-0 p-0">
+                                        <a href="/attendance/create_past_schedule_if_doesnt_exist?schedule_id={{ event.id }}&date={{ days_lists[week_idx][day_idx] }}" 
+                                           class="d-block p-2 text-decoration-none text-dark fulled-cell" 
+                                           style="font-size: 1.1rem; width: 100%; height: 100%;">
+                                            {{ event.title }}
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <div class="empty-cell">
+                            <span>—</span>
+                        </div>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
                 {% endfor %}
-            </tr>
-            {% endfor %}
+            {% else %}
+                {# Если нет событий — показываем красивое сообщение внутри таблицы #}
+                <tr>
+                    <td colspan="8">
+                        <div class="empty-week-message">
+                            <h4>📭 Нет занятий на этой неделе</h4>
+                            <p>Расписание пусто. Попробуйте выбрать другую неделю или группу.</p>
+                        </div>
+                    </td>
+                </tr>
+            {% endif %}
         </tbody>
     </table>
 {% endfor %}
-
 
 <!-- Передаем JS следующую дату для запроса -->
 <div id="next-date-marker" data-next="{{ next_date }}"></div>

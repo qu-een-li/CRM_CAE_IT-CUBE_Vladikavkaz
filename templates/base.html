@@ -240,8 +240,8 @@
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 <script src="{{ url_for('static', filename='js/phone_mask.js') }}"></script>
 <script src="{{ url_for('static', filename='js/date_mask.js') }}"></script>
-<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-<script>
+<!-- <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script> -->
+<!-- <script>
     const socket = io();
 
     // ID текущего пользователя (передается из Flask)
@@ -320,7 +320,7 @@
             })
             .catch(error => console.error('Ошибка:', error));
     }
-</script>
+</script> -->
 
 {% block extra_js %}{% endblock %}
 </body>

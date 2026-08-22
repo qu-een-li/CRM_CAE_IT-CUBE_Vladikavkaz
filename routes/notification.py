@@ -1,4 +1,6 @@
-from app import app, send_notification_count
+# from app import app, send_notification_count
+from app import app
+
 from flask import request
 from data.notification import Notification
 from data.db_session import create_session

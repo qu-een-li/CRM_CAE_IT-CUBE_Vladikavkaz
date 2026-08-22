@@ -64,16 +64,24 @@
                 <tbody>
                     {% for student in students %}
                         <tr>
-                            <td>{{ student.name_student }}</td>
-                            <td>{{ student.birthday }}</td>
-                            <td>{{ student.document }}</td>
-                            <td>{{ student.city }}</td>
-                            <td>{{ student.school }}</td>
+                            <td>
+                                {{ student.name_student }}
+                                {% if student.is_candidate %}
+                                    <span class="badge bg-warning text-dark ms-2" style="font-size: 0.8em;">Кандидат</span>
+                                {% endif %}
+                            </td>
+                            
+                            <td>{{ student.birthday if student.birthday else '—' }}</td>
+                            <td>{{ student.document if student.document else '—' }}</td>
+                            
+                            <!-- Если нет города/школы (частая ситуация у кандидатов), показываем прочерк -->
+                            <td>{{ student.city if student.city else '—' }}</td>
+                            <td>{{ student.school if student.school else '—' }}</td>
+                            
                             <td>{{ student.PFDO }}</td>
-                            <td>{{ student.student_phone }}</td>
-                            <td>{{ student.school_class }}</td>
-                            <td>{{ student.adres_of_living }}</td>
-<!--                            <td><i class="bi bi-pencil-square edit-icon"></i></td>-->
+                            <td>{{ student.student_phone if student.student_phone else '—' }}</td>
+                            <td>{{ student.school_class if student.school_class else '—' }}</td>
+                            <td>{{ student.adres_of_living if student.adres_of_living else '—' }}</td>
 
                             <td><a href="/edit_student/{{ student.id }}"><i class="bi bi-pencil edit-icon"></i></a></td>
                         </tr>

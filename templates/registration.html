@@ -164,6 +164,23 @@
                 </div>
             </div>
 
+
+
+            {% if show_confirm %}
+            <div class="alert alert-warning border-danger mb-4">
+                <h5 class="alert-heading"><i class="bi bi-exclamation-triangle-fill me-2"></i>Внимание!</h5>
+                <p>Вы заполнили не все обязательные поля. Ученик будет добавлен со статусом <b>"Кандидат"</b>. 
+                   Это означает, что его профиль неполный и требует дальнейшего заполнения.</p>
+                <hr>
+                <div class="form-check">
+                    {{ form.confirm_candidate(class="form-check-input", id="confirmCandidateCheck") }}
+                    <label class="form-check-label fw-bold" for="confirmCandidateCheck">
+                        Я подтверждаю, что хочу добавить ученика как кандидата
+                    </label>
+                </div>
+            </div>
+            {% endif %}
+
             <div class="d-flex justify-content-between pt-3">
                 <button type="reset" class="btn btn-outline-secondary">Сбросить</button>
                 {{ form.submit(class="btn btn-register") }}
@@ -176,98 +193,155 @@
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Инициализация календаря
         const studentBirthdayInput = document.getElementById('student-birthday');
-        const studentPicker = flatpickr(studentBirthdayInput, {
-            locale: "ru",
-            dateFormat: "d.m.Y",
-            maxDate: "today",
-            allowInput: true,
-            clickOpens: true,
-            onClose: function(selectedDates, dateStr, instance) {
-                if (selectedDates.length > 0) {
-                    const date = selectedDates[0];
-                    const day = String(date.getDate()).padStart(2, '0');
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const year = date.getFullYear();
-                    instance.input.value = `${day}.${month}.${year}`;
+        if (studentBirthdayInput) {
+            const studentPicker = flatpickr(studentBirthdayInput, {
+                locale: "ru",
+                dateFormat: "d.m.Y",
+                maxDate: "today",
+                allowInput: true,
+                clickOpens: true,
+                onClose: function(selectedDates, dateStr, instance) {
+                    if (selectedDates.length > 0) {
+                        const date = selectedDates[0];
+                        const day = String(date.getDate()).padStart(2, '0');
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const year = date.getFullYear();
+                        instance.input.value = `${day}.${month}.${year}`;
+                    }
                 }
+            });
+            
+            const icon = document.getElementById('student-birthday-icon');
+            if (icon) {
+                icon.addEventListener('click', function() {
+                    studentPicker.open();
+                });
             }
-        });
-        document.getElementById('student-birthday-icon').addEventListener('click', function() {
-            studentPicker.open();
-        });
+        }
 
+        // Логика каскадных списков
         const regionSelect = document.querySelector('#region');
         const citySelect = document.querySelector('#city');
         const schoolSelect = document.querySelector('#school');
 
+        // Функция загрузки городов
+        function loadCities(regionId, selectedCityId = null) {
+            if (!regionId) return;
+            
+            fetch(`/api/cities/${regionId}`)
+                .then(response => response.json())
+                .then(cities => {
+                    let html = '<option value="">Выберите город</option>';
+                    cities.forEach(c => {
+                        const selected = (selectedCityId && c.id == selectedCityId) ? 'selected' : '';
+                        html += `<option value="${c.id}" ${selected}>${c.title}</option>`;
+                    });
+                    citySelect.innerHTML = html;
+                    
+                    // Если был выбран город, загружаем школы
+                    if (selectedCityId) {
+                        loadSchools(selectedCityId, schoolSelect.dataset.selectedSchool);
+                    }
+                });
+        }
+
+        // Функция загрузки школ
+        function loadSchools(cityId, selectedSchoolId = null) {
+            if (!cityId) return;
+
+            fetch(`/api/schools/${cityId}`)
+                .then(response => response.json())
+                .then(schools => {
+                    let html = '<option value="">Выберите школу</option>';
+                    schools.forEach(s => {
+                        const selected = (selectedSchoolId && s.id == selectedSchoolId) ? 'selected' : '';
+                        html += `<option value="${s.id}" ${selected}>${s.title}</option>`;
+                    });
+                    schoolSelect.innerHTML = html;
+                });
+        }
+
+        // Загрузка регионов при старте
         fetch('/api/regions')
             .then(response => response.json())
             .then(regions => {
-                regionSelect.innerHTML = regions.map(r =>
-                    `<option value="${r.id}">${r.title}</option>`
-                ).join('');
+                let html = '<option value="">Выберите регион</option>';
+                let rsoId = null;
+                
+                regions.forEach(r => {
+                    if (r.title.includes('Республика Северная Осетия — Алания')) {
+                        rsoId = r.id;
+                    }
+                    html += `<option value="${r.id}">${r.title}</option>`;
+                });
+                
+                regionSelect.innerHTML = html;
 
-
-                const rsoOption = Array.from(regionSelect.options).find(opt =>
-                    opt.text.includes('Республика Северная Осетия — Алания')
-                );
-                if (rsoOption) {
-                    rsoOption.selected = true;
+                // Автовыбор Северной Осетии, если ничего не выбрано
+                if (!regionSelect.value && rsoId) {
+                    regionSelect.value = rsoId;
                     regionSelect.dispatchEvent(new Event('change'));
+                } else if (regionSelect.value) {
+                    // Если регион уже выбран (после перезагрузки формы), восстанавливаем города
+                    loadCities(regionSelect.value, citySelect.dataset.selectedCity);
                 }
             });
 
-        //меняем регион
+        // Обработчики изменений
         regionSelect.addEventListener('change', function() {
-            const regionId = this.value;
             citySelect.innerHTML = '<option value="">Выберите город</option>';
             schoolSelect.innerHTML = '<option value="">Выберите школу</option>';
-
-            if (regionId) {
-                fetch(`/api/cities/${regionId}`)
-                    .then(response => response.json())
-                    .then(cities => {
-                        citySelect.innerHTML = '<option value="">Выберите город</option>' +
-                            cities.map(c => `<option value="${c.id}">${c.title}</option>`).join('');
-                    });
+            if (this.value) {
+                loadCities(this.value);
             }
         });
 
-        //меняем город
         citySelect.addEventListener('change', function() {
-            const cityId = this.value;
             schoolSelect.innerHTML = '<option value="">Выберите школу</option>';
-
-            if (cityId) {
-                fetch(`/api/schools/${cityId}`)
-                    .then(response => response.json())
-                    .then(schools => {
-                        schoolSelect.innerHTML = '<option value="">Выберите школу</option>' +
-                            schools.map(s => `<option value="${s.id}">${s.title}</option>`).join('');
-                    });
+            if (this.value) {
+                loadSchools(this.value);
             }
         });
+        
+        // Сохраняем текущие значения в data-атрибуты для восстановления после AJAX
+        if (citySelect.value) citySelect.dataset.selectedCity = citySelect.value;
+        if (schoolSelect.value) schoolSelect.dataset.selectedSchool = schoolSelect.value;
     });
-document.querySelector('form').addEventListener('submit', function(e) {
-    e.preventDefault();
 
-    const formData = new FormData(this);
-
-    fetch('/add', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.text())
-    .then(html => {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        const newContent = doc.querySelector('.registration-container');
-        if (newContent) {
-            document.querySelector('.registration-container').innerHTML = newContent.innerHTML;
-        }
-    })
-    .catch(error => console.error('Error:', error));
-});
+    // Обработка отправки формы через AJAX (опционально, если хотите без перезагрузки страницы)
+    // Но для простоты и надежности работы с Flask-WTF лучше оставить стандартную отправку,
+    // особенно если есть валидация на сервере.
+    // Если вы хотите оставить ваш fetch, убедитесь, что он корректно обрабатывает редиректы.
+    /*
+    document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        fetch('/add', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else {
+                return response.text();
+            }
+        })
+        .then(html => {
+            if (html) {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newContent = doc.querySelector('.registration-container');
+                if (newContent) {
+                    document.querySelector('.registration-container').innerHTML = newContent.innerHTML;
+                    // Здесь нужно заново инициализировать скрипты, если они были удалены
+                }
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+    */
 </script>
 {% endblock %}

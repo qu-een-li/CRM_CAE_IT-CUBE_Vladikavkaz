@@ -5,14 +5,15 @@ from data.group import Group
 from data.teacher import Teacher
 from data.study_period import Study_period
 from data.auditorium import Auditorium
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from data.direction import Direction
 from data.student_in_group import student_in_group
-
+from sqlalchemy import select
 from itertools import zip_longest
 from data.group_service import GroupService
 from api.api_base import api_request
 from data.student import Student
+from data.student_in_group import student_in_group
 from config import API_HOST, API_PORT
 from forms.groupform import GroupForm
 
@@ -20,9 +21,12 @@ from forms.groupform import GroupForm
 @app.route("/directions")
 def list_directions():
     """Отображения списка направлений"""
-
-    directions = [Direction.from_dict(direction)
-                  for direction in api_request("v1/directions")]
+    directions = api_request("v1/directions")
+    if not isinstance(directions, tuple):
+        directions = [Direction.from_dict(direction)
+                      for direction in directions]
+    else:
+        directions = []
     return render_template("directions.html", directions=directions)
 
 
@@ -31,7 +35,6 @@ def show_groups_from_direction(direction_id: int):
     """Отображения списка групп в направлении"""
     direction = api_request(
         f"v1/directions/{direction_id}", params={"add_fields": ["groups"]})
-    print(direction)
     groups: list[Group] = [Group.from_dict(
         group) for group in direction["groups"]]
     for group in groups:
@@ -41,7 +44,6 @@ def show_groups_from_direction(direction_id: int):
     matrix = [[i.name_of_group for i in groups]]
     for row in zip_longest(*[i.students for i in groups], fillvalue=""):
         matrix.append(list(row))
-    print(matrix)
     return render_template(
         "show_groups_of_direction.html",
         table_data=matrix,
@@ -56,15 +58,31 @@ def show_group_details(group_id: int):
     """Отображение списка участников конкретной группы"""
 
     # Получаем данные о группе и студентах через API
+    sess = create_session()
     group_data = api_request(f"v1/groups/{group_id}")
     students_data = api_request(f"v1/groups/{group_id}/students")
 
     # Преобразуем в объекты (если используете классы) или работаем со словарями
     group = Group.from_dict(group_data) if hasattr(
         Group, 'from_dict') else group_data
-    students = [Student.from_dict(s) for s in students_data] if hasattr(
-        Student, 'from_dict') else students_data
+    students = []
 
+    if hasattr(Student, 'from_dict'):
+        today = date.today()
+        for student in students_data:
+            student = Student.from_dict(student)
+            if student.birthday is not None:
+                student.age = (today.year
+                               - student.birthday.year
+                               - ((today.month, today.day) <
+                                  (student.birthday.month, student.birthday.day))
+                               )
+            request = select(student_in_group.c.is_order).where(
+                student_in_group.c.student_id == student.id, student_in_group.c.group_id == group.id)
+            student.is_order = sess.scalars(request).first()
+            students.append(student)
+    else:
+        students = students_data
     # Формируем адрес API для JS (как и в предыдущем примере)
     api_url = f"http://{API_HOST}:{API_PORT}/api/v1"
 

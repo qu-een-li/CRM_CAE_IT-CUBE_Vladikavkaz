@@ -116,7 +116,8 @@ def show_schedules():
     """Страница расписания"""
     group_id = request.args.get("group_id")
     id_and_group_names = api_request(
-        "v1/groups", data={"fields": ["id", "name_of_group"]})
+        "v1/groups", data={"fields": ["id", "name_of_group"]}, retries=1)
+    print(id_and_group_names)
     return render_template("show_schedules.html", id_and_group_names=id_and_group_names, group_id_filter=group_id)
 
 
@@ -133,7 +134,13 @@ def get_more_days():
     list_of_matrix_and_interval = []
     days_lists = []
 
-    schedules = [Schedule.from_dict(d) for d in api_request("/v1/schedules/")]
+    schedules = api_request("/v1/schedules/", retries=1)
+    print(schedules)
+    if not isinstance(schedules, tuple):
+        schedules = [Schedule.from_dict(d)
+                     for d in schedules]
+    else:
+        schedules = []
     if group_id:
         schedules = [s for s in schedules if s.group_id == int(group_id)]
 
@@ -141,13 +148,13 @@ def get_more_days():
         list(set(
             f'{s.start_time.strftime("%H:%M")}-{s.end_time.strftime("%H:%M")}' for s in schedules))
     )
-
     for _ in range(n_of_weeks):
         week_days_iso = [(current_week_start + timedelta(days=(d))
                           ).date().isoformat() for d in range(7)]
         days_lists.append(week_days_iso)
 
         matrix = []
+        days_numerics = []
         for time_key in unique_times:
             row = [time_key]
             days_numerics = []
@@ -159,7 +166,7 @@ def get_more_days():
                     s_time = f'{s.start_time.strftime("%H:%M")}-{s.end_time.strftime("%H:%M")}'
                     if s_time == time_key and s.is_schedule_at_date(cur_date):
                         group_info = api_request(
-                            f"/v1/groups/{s.group_id}", params={"fields": ["name_of_group", "id"]})
+                            f"/v1/groups/{s.group_id}", params={"fields": ["name_of_group", "id"]}, retries=1)
                         events.append(
                             {"title": group_info["name_of_group"], "id": s.id})
                 row.append(events)
@@ -172,7 +179,8 @@ def get_more_days():
         current_week_start += timedelta(days=7)
 
     next_date_str = current_week_start.strftime("%Y-%m-%d")
-
+    print('---')
+    print(list_of_matrix_and_interval)
     return render_template(
         "show_schedules_batch.html",
         list_of_matrix=list_of_matrix_and_interval,

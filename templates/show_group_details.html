@@ -6,23 +6,38 @@
 
 {% block extra_css %}
 <style>
+  /* Общие стили таблицы */
   .table-hover tbody tr:hover {
     background-color: rgba(0, 0, 0, 0.035) !important;
     transition: background-color 0.2s ease;
   }
   
-  .delete-btn {
+  /* Уменьшаем шрифт в таблице для вместимости данных */
+  .student-table td, .student-table th {
+    vertical-align: middle;
+    font-size: 0.9rem;
+    padding: 0.75rem 0.5rem;
+  }
+
+  /* Кнопки действий */
+  .action-btn {
     background: none;
-    border: 1px solid #dc3545;
+    border: 1px solid transparent;
     border-radius: 4px;
     cursor: pointer;
     padding: 4px 8px;
-    font-size: 13px;
+    font-size: 12px;
     transition: all 0.2s ease;
-    color: #dc3545;
-    background-color: transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
   }
 
+  .delete-btn {
+    border-color: #dc3545;
+    color: #dc3545;
+  }
   .delete-btn:hover {
     background-color: #dc3545;
     color: white;
@@ -30,23 +45,18 @@
   }
 
   .add-btn {
-    background: none;
-    border: 1px solid #28a745;
-    border-radius: 4px;
-    cursor: pointer;
-    padding: 4px 8px;
-    font-size: 13px;
-    transition: all 0.2s ease;
+    border-color: #28a745;
     color: #28a745;
-    background-color: transparent;
+    font-size: 13px;
+    padding: 6px 12px;
   }
-
   .add-btn:hover {
     background-color: #28a745;
     color: white;
     box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
   }
 
+  /* Состояние пустой таблицы */
   .empty-state {
     text-align: center;
     padding: 3rem;
@@ -54,144 +64,58 @@
     font-style: italic;
   }
 
-  /* Стили для модального окна */
+  /* Модальное окно (без изменений) */
   .modal-overlay {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0; width: 100%; height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 1000;
     justify-content: center;
     align-items: center;
   }
-
-  .modal-overlay.active {
-    display: flex;
-  }
-
+  .modal-overlay.active { display: flex; }
   .modal-content {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    width: 90%;
-    max-width: 500px;
+    background: white; border-radius: 8px; padding: 20px;
+    width: 90%; max-width: 500px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     animation: modalSlideIn 0.3s ease;
   }
-
   @keyframes modalSlideIn {
-    from {
-      transform: translateY(-50px);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
   }
-
   .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;
   }
-
-  .modal-header h3 {
-    margin: 0;
-    font-size: 18px;
-  }
-
+  .modal-header h3 { margin: 0; font-size: 18px; }
   .modal-close {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #6c757d;
-    padding: 0;
-    line-height: 1;
+    background: none; border: none; font-size: 24px; cursor: pointer; color: #6c757d; padding: 0; line-height: 1;
   }
-
-  .modal-close:hover {
-    color: #000;
-  }
-
   .search-input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-    margin-bottom: 10px;
+    width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; margin-bottom: 10px;
   }
-
-  .search-input:focus {
-    outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-  }
-
   .search-results {
-    max-height: 300px;
-    overflow-y: auto;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px;
   }
-
   .search-result-item {
-    padding: 10px;
-    cursor: pointer;
-    border-bottom: 1px solid #f0f0f0;
-    transition: background-color 0.2s;
+    padding: 10px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: background-color 0.2s;
   }
-
-  .search-result-item:last-child {
-    border-bottom: none;
-  }
-
-  .search-result-item:hover {
-    background-color: #f8f9fa;
-  }
-
-  .search-result-item.selected {
-    background-color: #e7f3ff;
-  }
-
-  .no-results {
-    padding: 20px;
-    text-align: center;
-    color: #6c757d;
-    font-style: italic;
-  }
-
-  .loading {
-    padding: 20px;
-    text-align: center;
-    color: #6c757d;
+  .search-result-item:last-child { border-bottom: none; }
+  .search-result-item:hover { background-color: #f8f9fa; }
+  .no-results, .loading {
+    padding: 20px; text-align: center; color: #6c757d; font-style: italic;
   }
 </style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-
+// JS логика осталась прежней, добавлены только необходимые переменные
 function delete_student_from_group(student_id, group_id) {
-    if (!confirm('Вы уверены, что хотите удалить этого ученика из группы? Это действие нельзя отменить.')) {
-        return;
-    }
+    if (!confirm('Вы уверены, что хотите удалить этого ученика из группы?')) return;
 
-    const url = `/groups/${group_id}/${student_id}`;
-
-    fetch(url, {
-        method: 'DELETE', 
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        }
-    })
+    fetch(`/groups/${group_id}/${student_id}`, { method: 'DELETE' })
     .then(response => {
         if (response.ok) {
             const row = document.getElementById(`student-row-${student_id}`);
@@ -199,24 +123,21 @@ function delete_student_from_group(student_id, group_id) {
                 row.style.opacity = '0';
                 setTimeout(() => row.remove(), 300);
             }
-            
-            const remainingRows = document.querySelectorAll('tbody tr:not(.add-student-row)');
+            // Проверка на пустоту после удаления
+            const remainingRows = document.querySelectorAll('tbody tr:not(.add-student-row):not(.empty-row)');
             if (remainingRows.length === 0) {
-                document.querySelector('tbody').innerHTML = '<tr><td colspan="3" class="empty-state">В группе пока нет участников</td></tr>';
+                document.querySelector('.student-table tbody').innerHTML = 
+                    '<tr class="empty-row"><td colspan="10" class="empty-state">В группе пока нет участников</td></tr>' +
+                    document.querySelector('.add-student-row').outerHTML;
             }
         } else {
-            alert('Произошла ошибка при удалении (код ' + response.status + ')');
+            alert('Ошибка при удалении');
         }
-    })
-    .catch(error => {
-        console.error('Ошибка запроса:', error);
-        alert('Не удалось связаться с сервером');
     });
 }
 
-// Функции для модального окна добавления участника
 let searchTimeout;
-let currentGroupId = "{{ group.id }}";
+const currentGroupId = "{{ group.id }}";
 
 function openAddStudentModal() {
     document.getElementById('addStudentModal').classList.add('active');
@@ -231,155 +152,125 @@ function closeAddStudentModal() {
 
 function searchStudents(query) {
     clearTimeout(searchTimeout);
-    
     if (!query || query.trim().length < 2) {
         document.getElementById('searchResults').innerHTML = '';
         return;
     }
-
-    // Показываем индикатор загрузки
     document.getElementById('searchResults').innerHTML = '<div class="loading">Поиск...</div>';
-
-    // Debounce для уменьшения количества запросов
+    
     searchTimeout = setTimeout(() => {
-        const url = `/students/search?q=${encodeURIComponent(query)}`;
-        
-        fetch(url)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Ошибка поиска');
-                }
-                return response.json();
-            })
-            .then(students => {
-                displaySearchResults(students);
-            })
-            .catch(error => {
-                console.error('Ошибка поиска:', error);
-                document.getElementById('searchResults').innerHTML = 
-                    '<div class="no-results">Ошибка при поиске</div>';
-            });
+        fetch(`/students/search?q=${encodeURIComponent(query)}`)
+            .then(res => res.json())
+            .then(students => displaySearchResults(students))
+            .catch(() => document.getElementById('searchResults').innerHTML = '<div class="no-results">Ошибка поиска</div>');
     }, 300);
 }
 
 function displaySearchResults(students) {
-    const resultsContainer = document.getElementById('searchResults');
-    
+    const container = document.getElementById('searchResults');
     if (!students || students.length === 0) {
-        resultsContainer.innerHTML = '<div class="no-results">Ученики не найдены</div>';
+        container.innerHTML = '<div class="no-results">Ученики не найдены</div>';
         return;
     }
-
-    let html = '';
-    students.forEach(student => {
-        const studentName = student.name_student || student.full_name || 'Без имени';
-        html += `
-            <div class="search-result-item" onclick="addStudentToGroup('${student.id}')">
-                ${studentName}
-            </div>
-        `;
-    });
-    
-    resultsContainer.innerHTML = html;
+    container.innerHTML = students.map(s => `
+        <div class="search-result-item" onclick="addStudentToGroup('${s.id}')">
+            ${s.name_student || s.full_name || 'Без имени'}
+        </div>
+    `).join('');
 }
 
 function addStudentToGroup(studentId) {
-    // Получаем токен из мета-тега
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-    
-    const url = `/group/${currentGroupId}/add/student/${studentId}`;
-    
-    fetch(url, {
+    fetch(`/group/${currentGroupId}/add/student/${studentId}`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-CSRFToken': csrfToken // <-- Добавляем токен сюда
-        },
-        body: JSON.stringify({}) 
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        body: JSON.stringify({})
     })
-    .then(response => {
-        if (response.ok) {
-            return response.json();
-        } else {
-            // Попробуем прочитать текст ошибки, если это не JSON
-            return response.text().then(text => {
-                throw new Error(`Ошибка ${response.status}: ${text}`);
-            });
-        }
-    })
-    .then(data => {
-        closeAddStudentModal();
-        window.location.reload();
-    })
-    .catch(error => {
-        console.error('Ошибка добавления:', error);
-        alert('Не удалось добавить ученика: ' + error.message);
-    });
+    .then(res => res.ok ? window.location.reload() : res.text().then(t => alert('Ошибка: ' + t)))
+    .catch(err => alert('Ошибка сети: ' + err));
 }
 
-// Закрытие модального окна при клике вне его
 document.getElementById('addStudentModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeAddStudentModal();
-    }
+    if (e.target === this) closeAddStudentModal();
 });
-
-// Обработка нажатия Escape
 document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeAddStudentModal();
-    }
+    if (e.key === 'Escape') closeAddStudentModal();
 });
 </script>
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4" style="max-width: 98%;">
+<div class="container-fluid mt-4 px-4">
     <div class="card shadow-sm">
-        <div class="card-body">
-            <table class="table table-bordered table-hover" style="width:100%; border-collapse: collapse;">
-                <thead class="table-light">
-                    <tr>
-                        <th scope="col" style="width: 50px;">#</th>
-                        <th scope="col">ФИО Ученика</th>
-                        <th scope="col" style="width: 150px; text-align: center;">Действия</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% if students %}
-                        {% for student in students %}
-                        <tr id="student-row-{{ student.id }}">
-                            <th scope="row">{{ loop.index }}</th>
-                            <td style="vertical-align: middle;">
-                                {{ student.name_student if student.name_student else student.full_name }}
-                            </td>
-                            <td style="text-align: center; vertical-align: middle;">
-                                <button class="delete-btn" 
-                                        onclick="delete_student_from_group('{{ student.id }}', '{{ group.id }}')">
-                                    <i class="bi bi-trash"></i> Удалить
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover student-table mb-0" style="width:100%;">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col" style="width: 40px;">#</th>
+                            <th scope="col">ФИО ребёнка</th>
+                            <th scope="col" style="width: 100px;">Статус</th>
+                            <th scope="col">Телефон родителей</th>
+                            <th scope="col">Телефон ученика</th>
+                            <th scope="col" style="width: 80px;">ПФДО</th>
+                            <th scope="col">Школа</th>
+                            <th scope="col" style="width: 70px;">Класс</th>
+                            <th scope="col" style="width: 70px;">Возраст</th>
+                            <th scope="col" style="width: 120px;">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if students %}
+                            {% for student in students %}
+                            <tr id="student-row-{{ student.id }}">
+                                <th scope="row">{{ loop.index }}</th>
+                                <td class="fw-bold">{{ student.name_student or student.full_name }}</td>
+                                <td>
+                                    {% if student.is_order %}
+                                        <span class="badge bg-secondary">Приказ</span>
+                                    {% elif student.is_candidate  %}
+                                        <span class="badge bg-danger">Кандидат</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ student.parent_phone or '-' }}</td>
+                                <td>{{ student.student_phone or '-' }}</td>
+                                <td class="text-center">
+                                    {% if student.PFDO %}
+                                        <i class="bi bi-check-circle-fill text-success" title="Есть ПФДО"></i> Да
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ student.school or '-' }}</td>
+                                <td class="text-center">{{ student.school_class or '-' }}</td>
+                                <td class="text-center">{{ student.age or '-' }}</td>
+                                <td class="text-center">
+                                    <button class="action-btn delete-btn" 
+                                            onclick="delete_student_from_group('{{ student.id }}', '{{ group.id }}')">
+                                        <i class="bi bi-trash"></i> Удалить
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr class="empty-row">
+                                <td colspan="10" class="empty-state">
+                                    В этой группе пока нет зарегистрированных участников
+                                </td>
+                            </tr>
+                        {% endif %}
+                        
+                        <!-- Строка с кнопкой добавления участника -->
+                        <tr class="add-student-row">
+                            <td colspan="10" class="text-center py-3">
+                                <button class="action-btn add-btn" onclick="openAddStudentModal()">
+                                    <i class="bi bi-plus-circle"></i> Добавить участника
                                 </button>
                             </td>
                         </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td colspan="3" class="empty-state">
-                                В этой группе пока нет зарегистрированных участников
-                            </td>
-                        </tr>
-                    {% endif %}
-                    
-                    <!-- Строка с кнопкой добавления участника -->
-                    <tr class="add-student-row">
-                        <td colspan="3" style="text-align: center; padding: 15px;">
-                            <button class="add-btn" onclick="openAddStudentModal()">
-                                <i class="bi bi-plus-circle"></i> Добавить участника
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -391,13 +282,8 @@ document.addEventListener('keydown', function(e) {
             <h3>Добавить участника в группу</h3>
             <button class="modal-close" onclick="closeAddStudentModal()">&times;</button>
         </div>
-        <input 
-            type="text" 
-            id="studentSearchInput" 
-            class="search-input" 
-            placeholder="Начните вводить имя ученика..."
-            oninput="searchStudents(this.value)"
-        >
+        <input type="text" id="studentSearchInput" class="search-input" 
+               placeholder="Начните вводить имя ученика..." oninput="searchStudents(this.value)">
         <div id="searchResults" class="search-results"></div>
     </div>
 </div>
