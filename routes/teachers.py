@@ -61,13 +61,25 @@ def add_teacher():
                 patronymic=form.patronymic.data,
                 phone=form.phone.data,
                 email=form.email.data,
-                status=form.status.data,
                 personal_photos=photo_filename,
+                category=form.category.data,
+                rate=float(form.rate.data),
+                work_condition=form.work_condition.data
             )
             teacher.birthday = datetime.strptime(form.birthday.data, "%d.%m.%Y").date()
 
+            if form.experience_start.data:
+                teacher.experience_start = datetime.strptime(form.experience_start.data, "%d.%m.%Y").date()
+
+            if form.hire_date.data:
+                teacher.hire_date = datetime.strptime(form.hire_date.data, "%d.%m.%Y").date()
+
+            if form.graduation_date.data:
+                teacher.graduation_date = datetime.strptime(form.graduation_date.data, "%d.%m.%Y").date()
+
             session.add(teacher)
             session.flush()
+
             if form.allow_login.data:
                 if not form.user_name.data:
                     form.user_name.errors.append("Без этого поля человек не сможет входить в систему")
@@ -95,14 +107,23 @@ def add_teacher():
             session.close()
     return render_template("add_teacher.html", form=form)
 
-
 @app.route("/teachers")
 def list_of_teachers():
     """Страница списка учителей"""
     try:
         session = db_session.create_session()
-        teachers = session.query(Teacher).all()
-        return render_template("teachers.html", teachers=teachers)
+
+        # по умолчанию 0 - только работающие
+        show_all = request.args.get('show_all', '0')
+
+        if show_all == '1':
+            # Все педагоги
+            teachers = session.query(Teacher).all()
+        else:
+            # Только работающие
+            teachers = session.query(Teacher).filter(Teacher.dismissal_date.is_(None)).all()
+
+        return render_template("teachers.html", teachers=teachers, show_all=show_all)
     finally:
         session.close()
 

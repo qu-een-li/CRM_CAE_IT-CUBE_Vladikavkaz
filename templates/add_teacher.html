@@ -34,22 +34,32 @@
     .invalid-feedback {
         display: block;
     }
-    .phone-input {
+    .required {
+        color: #dc3545;
+    }
+    .date-input-wrapper {
         position: relative;
     }
-    .phone-input input {
-        padding-left: 45px;
+    .date-input-wrapper input {
+        padding-right: 40px;
     }
-    .phone-prefix {
+    .calendar-icon {
         position: absolute;
-        left: 10px;
+        right: 12px;
         top: 50%;
         transform: translateY(-50%);
         color: #6c757d;
-        font-weight: 500;
+        cursor: pointer;
+        font-size: 18px;
+        background: white;
+        padding-left: 8px;
+    }
+    .calendar-icon:hover {
+        color: #dc3545;
     }
 </style>
 {% endblock %}
+
 {% block content %}
 <div class="container mt-4">
     <div class="teacher-container">
@@ -74,16 +84,17 @@
         <form action="/add_teacher" method="post" enctype="multipart/form-data" novalidate class="needs-validation">
             {{ form.hidden_tag() }}
 
+            <!-- ФИО -->
             <div class="row mb-3">
                 <div class="col-md-4 mb-3">
-                    <label for="surename" class="form-label">Фамилия *</label>
+                    <label for="surename" class="form-label">Фамилия <span class="required">*</span></label>
                     {{ form.surename(class="form-control", placeholder="Введите фамилию") }}
                     {% for error in form.surename.errors %}
                     <div class="invalid-feedback">{{ error }}</div>
                     {% endfor %}
                 </div>
                 <div class="col-md-4 mb-3">
-                    <label for="name" class="form-label">Имя *</label>
+                    <label for="name" class="form-label">Имя <span class="required">*</span></label>
                     {{ form.name(class="form-control", placeholder="Введите имя") }}
                     {% for error in form.name.errors %}
                     <div class="invalid-feedback">{{ error }}</div>
@@ -91,23 +102,24 @@
                 </div>
                 <div class="col-md-4 mb-3">
                     <label for="patronymic" class="form-label">Отчество</label>
-                    {{ form.patronymic(class="form-control", placeholder="Введите отчество (необязательно)") }}
+                    {{ form.patronymic(class="form-control", placeholder="Введите отчество") }}
                     {% for error in form.patronymic.errors %}
                     <div class="invalid-feedback">{{ error }}</div>
                     {% endfor %}
                 </div>
             </div>
 
+            <!-- Телефон и Email -->
             <div class="row mb-3">
                 <div class="col-md-6 mb-3">
-                    <label for="phone" class="form-label">Телефон *</label>
+                    <label for="phone" class="form-label">Телефон <span class="required">*</span></label>
                     {{ form.phone(class="form-control", type="tel", placeholder="+7 XXX XXX-XX-XX") }}
                     {% for error in form.phone.errors %}
                     <div class="invalid-feedback">{{ error }}</div>
                     {% endfor %}
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="email" class="form-label">Email *</label>
+                    <label for="email" class="form-label">Email <span class="required">*</span></label>
                     {{ form.email(class="form-control", placeholder="teacher@example.com") }}
                     {% for error in form.email.errors %}
                     <div class="invalid-feedback">{{ error }}</div>
@@ -115,9 +127,10 @@
                 </div>
             </div>
 
+            <!-- Дата рождения -->
             <div class="row mb-3">
                 <div class="col-md-6 mb-3">
-                    <label for="birthday" class="form-label">Дата рождения *</label>
+                    <label for="birthday" class="form-label">Дата рождения <span class="required">*</span></label>
                     <div class="date-input-wrapper">
                         {{ form.birthday(class="form-control", id="teacher-birthday", placeholder="ДД.ММ.ГГГГ") }}
                         <i class="bi bi-calendar3 calendar-icon" id="teacher-birthday-icon"></i>
@@ -127,14 +140,69 @@
                     {% endfor %}
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="status" class="form-label">Статус *</label>
-                    {{ form.status(class="form-control", placeholder="Введите статус") }}
-                    {% for error in form.status.errors %}
+                    <label for="graduation_date" class="form-label">Дата завершения обучения в ВУЗе</label>
+                    <div class="date-input-wrapper">
+                        {{ form.graduation_date(class="form-control", id="graduation-date", placeholder="ДД.ММ.ГГГГ") }}
+                        <i class="bi bi-calendar3 calendar-icon" id="graduation-date-icon"></i>
+                    </div>
+                    <small class="text-muted">Если не заполнено — считается студентом</small>
+                    {% for error in form.graduation_date.errors %}
                     <div class="invalid-feedback">{{ error }}</div>
                     {% endfor %}
                 </div>
             </div>
-            
+
+            <!-- Категория, Ставка, Условия работы -->
+            <div class="row mb-3">
+                <div class="col-md-4 mb-3">
+                    <label for="category" class="form-label">Категория <span class="required">*</span></label>
+                    {{ form.category(class="form-select") }}
+                    {% for error in form.category.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="rate" class="form-label">Ставка <span class="required">*</span></label>
+                    {{ form.rate(class="form-control", type="number", step="0.1", min="0", max="1.5", placeholder="0.0 - 1.5") }}
+                    <small class="text-muted">От 0 до 1.5</small>
+                    {% for error in form.rate.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="work_condition" class="form-label">Условия работы <span class="required">*</span></label>
+                    {{ form.work_condition(class="form-select") }}
+                    {% for error in form.work_condition.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Даты: опыт и прием -->
+            <div class="row mb-3">
+                <div class="col-md-6 mb-3">
+                    <label for="experience_start" class="form-label">Дата начала педагогической деятельности <span class="required">*</span></label>
+                    <div class="date-input-wrapper">
+                        {{ form.experience_start(class="form-control", id="experience-start", placeholder="ДД.ММ.ГГГГ") }}
+                        <i class="bi bi-calendar3 calendar-icon" id="experience-start-icon"></i>
+                    </div>
+                    {% for error in form.experience_start.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="hire_date" class="form-label">Дата приема на работу <span class="required">*</span></label>
+                    <div class="date-input-wrapper">
+                        {{ form.hire_date(class="form-control", id="hire-date", placeholder="ДД.ММ.ГГГГ") }}
+                        <i class="bi bi-calendar3 calendar-icon" id="hire-date-icon"></i>
+                    </div>
+                    {% for error in form.hire_date.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Фото -->
             <div class="mb-3">
                 <label for="photo" class="form-label">Фотография</label>
                 {{ form.photo(class="form-control", id="photo-input", accept="image/*") }}
@@ -142,12 +210,11 @@
                 {% for error in form.photo.errors %}
                 <div class="invalid-feedback">{{ error }}</div>
                 {% endfor %}
-                <div class="photo-preview" id="photo-preview" style="display: none;">
-                    <img id="preview-image" src="#" alt="Предпросмотр">
+                <div class="photo-preview" id="photo-preview" style="display: none; margin-top: 10px;">
+                    <img id="preview-image" src="#" alt="Предпросмотр" style="max-width: 200px; max-height: 200px; border-radius: 10px; border: 2px solid #dc3545;">
                 </div>
             </div>
 
-            <!-- БЛОК С ЧЕКБОКСОМ -->
             <div class="form-check mb-4">
                 {{ form.allow_login(class="form-check-input", id="allow-login-checkbox") }}
                 <label class="form-check-label fw-bold" for="allow-login-checkbox">
@@ -155,17 +222,17 @@
                 </label>
             </div>
 
-            <!-- ДИНАМИЧЕСКИЙ БЛОК АВТОРИЗАЦИИ (скрыт по умолчанию с помощью d-none) -->
+            <!-- Блок авторизации (скрыт по умолчанию) -->
             <div id="credentials-section" class="row mb-3 d-none">
                 <div class="col-md-6 mb-3">
-                    <label for="user_name" class="form-label">Имя пользователя *</label>
+                    <label for="user_name" class="form-label">Имя пользователя <span class="required">*</span></label>
                     {{ form.user_name(class="form-control", id="user-name-input", placeholder="Введите логин") }}
                     {% for error in form.user_name.errors %}
                     <div class="invalid-feedback d-block">{{ error }}</div>
                     {% endfor %}
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="password" class="form-label">Пароль *</label>
+                    <label for="password" class="form-label">Пароль <span class="required">*</span></label>
                     {{ form.password(class="form-control", id="password-input", placeholder="Введите пароль") }}
                     {% for error in form.password.errors %}
                     <div class="invalid-feedback d-block">{{ error }}</div>
@@ -185,6 +252,7 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Предпросмотр фото
     const photoInput = document.getElementById('photo-input');
     const photoPreview = document.getElementById('photo-preview');
     const previewImage = document.getElementById('preview-image');
@@ -204,29 +272,46 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    const teacherBirthdayInput = document.getElementById('teacher-birthday');
+    // Flatpickr для дат
+    const dateFields = [
+        { id: 'teacher-birthday', icon: 'teacher-birthday-icon' },
+        { id: 'graduation-date', icon: 'graduation-date-icon' },
+        { id: 'experience-start', icon: 'experience-start-icon' },
+        { id: 'hire-date', icon: 'hire-date-icon' }
+    ];
 
-    const teacherPicker = flatpickr(teacherBirthdayInput, {
-        locale: "ru",
-        dateFormat: "d.m.Y",
-        maxDate: "today",
-        allowInput: true,
-        clickOpens: true,
-        onClose: function(selectedDates, dateStr, instance) {
-            if (selectedDates.length > 0) {
-                const date = selectedDates[0];
-                const day = String(date.getDate()).padStart(2, '0');
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const year = date.getFullYear();
-                instance.input.value = `${day}.${month}.${year}`;
+    const pickers = {};
+    dateFields.forEach(function(field) {
+        const input = document.getElementById(field.id);
+        const icon = document.getElementById(field.icon);
+
+        if (input) {
+            const picker = flatpickr(input, {
+                locale: "ru",
+                dateFormat: "d.m.Y",
+                allowInput: true,
+                clickOpens: true,
+                onClose: function(selectedDates, dateStr, instance) {
+                    if (selectedDates.length > 0) {
+                        const date = selectedDates[0];
+                        const day = String(date.getDate()).padStart(2, '0');
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const year = date.getFullYear();
+                        instance.input.value = `${day}.${month}.${year}`;
+                    }
+                }
+            });
+            pickers[field.id] = picker;
+
+            if (icon) {
+                icon.addEventListener('click', function() {
+                    picker.open();
+                });
             }
         }
     });
-    document.getElementById('teacher-birthday-icon').addEventListener('click', function() {
-        teacherPicker.open();
-    });
 
-    // ЛОГИКА ДЛЯ ПОЛЕЙ АВТОРИЗАЦИИ
+    // Логика для полей авторизации
     const allowLoginCheckbox = document.getElementById('allow-login-checkbox');
     const credentialsSection = document.getElementById('credentials-section');
     const userNameInput = document.getElementById('user-name-input');
@@ -242,19 +327,14 @@ document.addEventListener('DOMContentLoaded', function() {
             credentialsSection.classList.add('d-none');
             userNameInput.removeAttribute('required');
             passwordInput.removeAttribute('required');
-            // Очищаем скрытые поля при выключении галочки
             userNameInput.value = '';
             passwordInput.value = '';
         }
     }
 
-    // Слушатель изменения состояния галочки
     allowLoginCheckbox.addEventListener('change', toggleCredentials);
-
-    // Проверка при загрузке страницы (если сервер вернул ошибки валидации)
     toggleCredentials();
 
-    // Скрытие секции при полном сбросе формы
     resetBtn.addEventListener('click', function() {
         setTimeout(() => {
             toggleCredentials();
