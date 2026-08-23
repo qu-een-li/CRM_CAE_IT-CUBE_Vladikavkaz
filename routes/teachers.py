@@ -36,7 +36,6 @@ def delete_old_photo(filename):
 
 @app.route("/add_teacher", methods=["GET", "POST"])
 def add_teacher():
-    """Форма добавления учителя"""
     form = TeacherForm()
 
     if form.validate_on_submit():
@@ -67,16 +66,11 @@ def add_teacher():
                 work_condition=form.work_condition.data
             )
             teacher.birthday = datetime.strptime(form.birthday.data, "%d.%m.%Y").date()
-
-            if form.experience_start.data:
-                teacher.experience_start = datetime.strptime(form.experience_start.data, "%d.%m.%Y").date()
-
-            if form.hire_date.data:
-                teacher.hire_date = datetime.strptime(form.hire_date.data, "%d.%m.%Y").date()
+            teacher.experience_start = datetime.strptime(form.experience_start.data, "%d.%m.%Y").date()
+            teacher.hire_date = datetime.strptime(form.hire_date.data, "%d.%m.%Y").date()
 
             if form.graduation_date.data:
                 teacher.graduation_date = datetime.strptime(form.graduation_date.data, "%d.%m.%Y").date()
-
             session.add(teacher)
             session.flush()
 
@@ -88,10 +82,6 @@ def add_teacher():
                 else:
                     if len(form.password.data) <= 3:
                         form.password.errors.append("Пароль должен быть больше 3-ех символов")
-                    elif not match(r'^[a-zA-Z0-9!@#$%^&*()_+=\-\[\]{}|;:\'",./<>?`~ ]+$', form.password.data):
-                        form.password.errors.append(
-                            "Пароль может содержать только английские буквы, цифры и спецсимволы"
-                        )
                 if form.user_name.errors or form.password.errors:
                     return render_template("add_teacher.html", form=form)
                 user = User(user_name=form.user_name.data)
@@ -99,12 +89,18 @@ def add_teacher():
                 user.id_in_column_of_role = teacher.id
                 user.role = UserRole.TEACHER
                 session.add(user)
-            session.commit()
 
+            session.commit()
             flash("Наставник успешно добавлен", "success")
             return redirect("/add_teacher")
+
+        except Exception as e:
+            session.rollback()
+            flash(f"Ошибка при сохранении: {str(e)}", "danger")
+            return render_template("add_teacher.html", form=form)
         finally:
             session.close()
+
     return render_template("add_teacher.html", form=form)
 
 @app.route("/teachers")
