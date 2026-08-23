@@ -7,53 +7,78 @@
     .profile-header {
         background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
         color: white;
-        padding: 2rem;
-        border-radius: 15px;
-        margin-bottom: 2rem;
+        padding: 1.2rem 2rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .profile-header-left {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
     }
     .profile-avatar {
-        width: 120px;
-        height: 120px;
+        width: 70px;
+        height: 70px;
         border-radius: 50%;
         object-fit: cover;
-        border: 4px solid white;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        border: 3px solid white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         cursor: pointer;
     }
     .profile-avatar-placeholder {
-        width: 120px;
-        height: 120px;
+        width: 70px;
+        height: 70px;
         border-radius: 50%;
         background: rgba(255,255,255,0.2);
         display: flex;
         align-items: center;
         justify-content: center;
-        border: 4px solid white;
+        border: 3px solid white;
+        cursor: pointer;
     }
     .profile-avatar-placeholder i {
-        font-size: 60px;
+        font-size: 35px;
         color: white;
     }
     .profile-name {
-        font-size: 2rem;
-        font-weight: bold;
-        margin-bottom: 0.5rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
     }
     .profile-status {
-        display: inline-block;
-        padding: 0.25rem 1rem;
-        border-radius: 20px;
         font-size: 0.85rem;
+        opacity: 0.9;
+    }
+    .btn-edit-profile {
         background: rgba(255,255,255,0.2);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.3);
+        padding: 0.4rem 1.2rem;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: 0.2s;
+        font-size: 0.9rem;
+    }
+    .btn-edit-profile:hover {
+        background: rgba(255,255,255,0.3);
+        color: white;
+        text-decoration: none;
     }
     .nav-tabs .nav-link {
         color: #495057;
         font-weight: 500;
+        font-size: 0.95rem;
     }
     .nav-tabs .nav-link.active {
         color: #dc3545;
         border-bottom: 3px solid #dc3545;
         font-weight: 600;
+    }
+    .nav-tabs .nav-link i {
+        margin-right: 6px;
     }
     .info-card {
         background: #f8f9fa;
@@ -64,53 +89,69 @@
     .info-label {
         font-weight: 600;
         color: #495057;
-        width: 140px;
+        width: 200px;
         display: inline-block;
     }
-    .qualification-card, .contest-card {
-        border-left: 4px solid #dc3545;
-        transition: transform 0.2s;
+    .badge-category {
+        display: inline-block;
+        padding: 2px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
     }
-    .qualification-card:hover, .contest-card:hover {
-        transform: translateX(5px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    .badge-category.without {
+        background-color: #e9ecef;
+        color: #6c757d;
+    }
+    .badge-category.first {
+        background-color: #cfe2ff;
+        color: #0d6efd;
+    }
+    .badge-category.highest {
+        background-color: #f8d7da;
+        color: #dc3545;
     }
     .btn-add {
         background: #dc3545;
         color: white;
-        border-radius: 30px;
-        padding: 0.5rem 1.5rem;
-        margin-bottom: 1rem;
+        border-radius: 8px;
+        padding: 0.4rem 1.2rem;
+        font-size: 0.9rem;
         display: inline-block;
         text-decoration: none;
         border: none;
+        transition: 0.2s;
     }
     .btn-add:hover {
         background: #b02a37;
         color: white;
         text-decoration: none;
     }
+    .table-actions {
+        display: flex;
+        gap: 6px;
+    }
+    .sort-link {
+        color: #6c757d;
+        text-decoration: none;
+        font-size: 0.8rem;
+        margin-left: 4px;
+    }
+    .sort-link:hover {
+        color: #dc3545;
+        text-decoration: none;
+    }
+    .sort-link.active {
+        color: #dc3545;
+        font-weight: 600;
+    }
     .doc-link {
-        word-break: break-all;
+        color: #dc3545;
+        text-decoration: none;
     }
-    .contest-status {
-        display: inline-block;
-        padding: 0.2rem 0.6rem;
-        border-radius: 20px;
-        font-size: 0.7rem;
-        font-weight: 500;
-    }
-    .status-active {
-        background: #d4edda;
-        color: #155724;
-    }
-    .status-upcoming {
-        background: #fff3cd;
-        color: #856404;
-    }
-    .status-ended {
-        background: #f8d7da;
-        color: #721c24;
+    .doc-link:hover {
+        color: #b02a37;
+        text-decoration: underline;
     }
     .modal-photo {
         display: none;
@@ -124,8 +165,6 @@
         cursor: pointer;
     }
     .modal-photo-content {
-        margin: auto;
-        display: block;
         max-width: 90%;
         max-height: 90%;
         position: absolute;
@@ -145,304 +184,423 @@
     .close-modal:hover {
         color: #dc3545;
     }
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: #6c757d;
+    }
+    .empty-state i {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        opacity: 0.5;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container mt-3">
+
+    <!-- ===== ШАПКА ПРОФИЛЯ ===== -->
     <div class="profile-header">
-        <div class="row align-items-center">
-            <div class="col-auto">
-                {% if teacher.personal_photos and teacher.personal_photos != "anonymous.jpg" %}
-                {% set photo_url = url_for('uploaded_file', filename=teacher.personal_photos) %}
-                <img src="{{ photo_url }}"
-                     class="profile-avatar"
-                     alt="Фото {{ teacher.surename }}"
-                     onclick="showPhotoModal('{{ photo_url }}')"
-                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                <div class="profile-avatar-placeholder" style="display: none;" onclick="showPhotoModal(null)">
-                    <i class="bi bi-person-fill"></i>
-                </div>
-                {% else %}
-                <div class="profile-avatar-placeholder" onclick="showPhotoModal(null)">
-                    <i class="bi bi-person-fill"></i>
-                </div>
-                {% endif %}
+        <div class="profile-header-left">
+            {% if teacher.personal_photos and teacher.personal_photos != "anonymous.jpg" %}
+            {% set photo_url = url_for('uploaded_file', filename=teacher.personal_photos) %}
+            <img src="{{ photo_url }}"
+                 class="profile-avatar"
+                 alt="Фото {{ teacher.surename }}"
+                 onclick="showPhotoModal('{{ photo_url }}')"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="profile-avatar-placeholder" style="display: none;" onclick="showPhotoModal(null)">
+                <i class="bi bi-person-fill"></i>
             </div>
-            <div class="col">
-                <h1 class="profile-name">
+            {% else %}
+            <div class="profile-avatar-placeholder" onclick="showPhotoModal(null)">
+                <i class="bi bi-person-fill"></i>
+            </div>
+            {% endif %}
+            <div>
+                <div class="profile-name">
                     {{ teacher.surename }} {{ teacher.name }}
                     {% if teacher.patronymic %}{{ teacher.patronymic }}{% endif %}
-                </h1>
-                <span class="profile-status">
-                    <i class="bi bi-person-badge"></i> {{ teacher.status or 'Преподаватель' }}
-                </span>
+                </div>
+                <div class="profile-status">
+                    <i class="bi bi-briefcase-fill"></i>
+                    {{ teacher.work_condition or 'основное место работы' }}
+                </div>
             </div>
-            <div class="col-auto">
-                <a href="/edit_teacher/{{ teacher.id }}" class="btn btn-outline-light">
-                    <i class="bi bi-pencil-fill"></i> Редактировать профиль
-                </a>
-            </div>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            {% if teacher.dismissal_date %}
+            <span class="badge"
+                  style="background: #dc3545; color: white; font-size: 1.1rem; padding: 0.4rem 1.2rem; border-radius: 8px; font-weight: 700; box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);">
+                <i class="bi bi-person-x-fill me-1"></i> УВОЛЕН
+            </span>
+            {% else %}
+            <span class="badge"
+                  style="background: #198754; color: white; font-size: 1.1rem; padding: 0.4rem 1.2rem; border-radius: 8px; font-weight: 700; box-shadow: 0 2px 8px rgba(25, 135, 84, 0.4);">
+                <i class="bi bi-person-check-fill me-1"></i> РАБОТАЕТ
+            </span>
+            {% endif %}
+            <a href="/edit_teacher/{{ teacher.id }}" class="btn-edit-profile">
+                <i class="bi bi-pencil-fill"></i> Редактировать
+            </a>
         </div>
     </div>
 
+    <!-- ===== ВКЛАДКИ ===== -->
     <ul class="nav nav-tabs" id="teacherTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info"
-                    type="button" role="tab">
+        <li class="nav-item">
+            <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button"
+                    role="tab">
                 <i class="bi bi-person-circle"></i> Личная информация
             </button>
         </li>
-        <li class="nav-item" role="presentation">
+        <li class="nav-item">
             <button class="nav-link" id="qualifications-tab" data-bs-toggle="tab" data-bs-target="#qualifications"
                     type="button" role="tab">
                 <i class="bi bi-mortarboard-fill"></i> Повышение квалификации
                 <span class="badge bg-danger ms-1">{{ qualifications|length }}</span>
             </button>
         </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="contests-tab" data-bs-toggle="tab" data-bs-target="#contests"
+        <li class="nav-item">
+            <button class="nav-link" id="teacher-contests-tab" data-bs-toggle="tab" data-bs-target="#teacher-contests"
                     type="button" role="tab">
-                <i class="bi bi-trophy-fill"></i> Конкурсы
+                <i class="bi bi-trophy-fill"></i> Конкурсы наставников
                 <span class="badge bg-danger ms-1">{{ teacher_contests|length }}</span>
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="student-contests-tab" data-bs-toggle="tab" data-bs-target="#student-contests"
+                    type="button" role="tab">
+                <i class="bi bi-award-fill"></i> Конкурсы детей
+                <span class="badge bg-danger ms-1">{{ student_contests|length }}</span>
             </button>
         </li>
     </ul>
 
-    <div class="tab-content mt-4">
+    <!-- ===== СОДЕРЖИМОЕ ВКЛАДОК ===== -->
+    <div class="tab-content mt-3">
+
+        <!-- ===== ВКЛАДКА 1: ЛИЧНАЯ ИНФОРМАЦИЯ ===== -->
         <div class="tab-pane fade show active" id="info" role="tabpanel">
             <div class="row">
                 <div class="col-md-6">
                     <div class="info-card">
-                        <h5><i class="bi bi-envelope-fill text-danger"></i> Контактная информация</h5>
+                        <h6 class="fw-bold"><i class="bi bi-envelope-fill text-danger"></i> Контактная информация</h6>
                         <hr>
                         <p><span class="info-label">Email:</span> {{ teacher.email or '—' }}</p>
                         <p><span class="info-label">Телефон:</span> {{ teacher.phone or '—' }}</p>
                         <p><span class="info-label">Дата рождения:</span>
                             {{ teacher.birthday.strftime('%d.%m.%Y') if teacher.birthday else '—' }}</p>
                     </div>
+                    <div class="info-card">
+                        <h6 class="fw-bold"><i class="bi bi-building-fill text-danger"></i> Работа</h6>
+                        <hr>
+                        <p><span class="info-label">Условия работы:</span> {{ teacher.work_condition or 'основное место
+                            работы' }}</p>
+                        <p><span class="info-label">Ставка:</span> {{ teacher.rate or 1.0 }}</p>
+                        <p><span class="info-label">Категория:</span>
+                            {% if teacher.category == '1 категория' %}
+                            <span class="badge-category first">1 категория</span>
+                            {% elif teacher.category == 'высшая категория' %}
+                            <span class="badge-category highest">высшая категория</span>
+                            {% elif teacher.category %}
+                            <span class="badge-category">{{ teacher.category }}</span>
+                            {% else %}
+                            <span class="badge-category without">без категории</span>
+                            {% endif %}
+                        </p>
+                        <p><span class="info-label">Дата приема:</span>
+                            {{ teacher.hire_date.strftime('%d.%m.%Y') if teacher.hire_date else '—' }}</p>
+                        {% if teacher.dismissal_date %}
+                        <p><span class="info-label">Дата увольнения:</span>
+                            {{ teacher.dismissal_date.strftime('%d.%m.%Y') }}</p>
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="col-md-6">
                     <div class="info-card">
-                        <h5><i class="bi bi-calendar-event text-danger"></i> Образовательная деятельность</h5>
+                        <h6 class="fw-bold"><i class="bi bi-calendar-event text-danger"></i> Образование и стаж</h6>
                         <hr>
-                        <p><span class="info-label">Статус:</span> {{ teacher.status or '—' }}</p>
+                        <p><span class="info-label">Образование:</span>
+                            {% if teacher.graduation_date %}
+                            Окончил ВУЗ {{ teacher.graduation_date.strftime('%d.%m.%Y') }}
+                            {% else %}
+                            <span class="badge bg-info text-white">Студент</span>
+                            {% endif %}
+                        </p>
+                        <p><span class="info-label">Дата начала пед. деятельности:</span>
+                            {{ teacher.experience_start.strftime('%d.%m.%Y') if teacher.experience_start else '—' }}</p>
+                        <p><span class="info-label">Стаж:</span> <strong>{{ teacher.get_experience() }}</strong></p>
                         <p><span class="info-label">Пройдено курсов:</span> {{ qualifications|length }}</p>
                         <p><span class="info-label">Участие в конкурсах:</span> {{ teacher_contests|length }}</p>
-                        <p><span class="info-label">Всего часов:</span>
-                            {% set total_hours = namespace(value=0) %}
-                            {% for q in qualifications %}
-                            {% if q.volume_hours %}
-                            {% set total_hours.value = total_hours.value + q.volume_hours %}
-                            {% elif q.course and q.course.hours %}
-                            {% set total_hours.value = total_hours.value + q.course.hours %}
-                            {% endif %}
-                            {% endfor %}
-                            {{ total_hours.value or 0 }}
-                        </p>
+                        <p><span class="info-label">Дети в конкурсах:</span> {{ student_contests|length }}</p>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- ===== ВКЛАДКА 2: ПОВЫШЕНИЕ КВАЛИФИКАЦИИ ===== -->
         <div class="tab-pane fade" id="qualifications" role="tabpanel">
             <div class="d-flex justify-content-end mb-3">
                 <a href="/add_teacher_qualification?teacher_id={{ teacher.id }}" class="btn-add">
-                    <i class="bi bi-plus-circle"></i> Добавить курс повышения квалификации
+                    <i class="bi bi-plus-circle"></i> Добавить курс
                 </a>
             </div>
-
             {% if qualifications %}
-            <div class="row">
-                {% for q in qualifications %}
-                <div class="col-md-6 mb-3">
-                    <div class="card qualification-card h-100">
-                        <div class="card-header bg-white">
-                            <strong>
-                                <i class="bi bi-book text-danger"></i>
-                                {{ q.course.program_name if q.course else q.organization or 'Курс' }}
-                            </strong>
-                        </div>
-                        <div class="card-body">
-                            <table class="table table-sm table-borderless">
-                                <tr>
-                                    <td width="40%"><strong>Организация:</strong></td>
-                                    <td>{{ q.organization or (q.course.organization if q.course else '—') }}</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Объем часов:</strong></td>
-                                    <td>{{ q.volume_hours or (q.course.hours if q.course else '—') }}</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Рег. номер:</strong></td>
-                                    <td>{{ q.registration_number or '—' }}</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Дата выдачи:</strong></td>
-                                    <td>{{ q.issue_date.strftime('%d.%m.%Y') if q.issue_date else '—' }}</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Место выдачи:</strong></td>
-                                    <td>{{ q.issued_by or '—' }}</td>
-                                </tr>
-                                {% if q.link %}
-                                <tr>
-                                    <td><strong>Документ:</strong></td>
-                                    <td class="doc-link">
-                                        <a href="{{ q.link }}" target="_blank" class="text-danger">
-                                            <i class="bi bi-file-pdf-fill"></i> Скачать/Открыть
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% endif %}
-                            </table>
-                        </div>
-                        <div class="card-footer bg-white d-flex justify-content-end gap-2">
-                            <form method="post" action="/delete_teacher_qualification/{{ q.id }}"
-                                  style="display: inline;"
-                                  onsubmit="return confirm('Удалить запись о курсе?')">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <button type="submit" class="btn btn-sm btn-danger">
-                                    <i class="bi bi-trash"></i> Удалить
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
+            <div class="table-responsive">
+                <table class="table table-hover table-sm">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Название курса</th>
+                        <th>Дата выдачи</th>
+                        <th>Часы</th>
+                        <th>Организация</th>
+                        <th>Место выдачи</th>
+                        <th style="width:50px;">Документ</th>
+                        <th style="width:80px;">Действия</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for q in qualifications|sort(attribute='issue_date', reverse=True) %}
+                    <tr>
+                        <td><strong>{{ q.course.program_name if q.course else q.organization or 'Курс' }}</strong></td>
+                        <td>{{ q.issue_date.strftime('%d.%m.%Y') if q.issue_date else '—' }}</td>
+                        <td>{{ q.volume_hours or (q.course.hours if q.course else '—') }}</td>
+                        <td>{{ q.organization or (q.course.organization if q.course else '—') }}</td>
+                        <td>{{ q.issued_by or '—' }}</td>
+                        <td>
+                            {% if q.link %}
+                            <a href="{{ q.link }}" target="_blank" class="doc-link" title="Просмотреть документ">
+                                <i class="bi bi-eye-fill"></i>
+                            </a>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="table-actions">
+                                <form method="post" action="/delete_teacher_qualification/{{ q.id }}"
+                                      style="display:inline;"
+                                      onsubmit="return confirm('Удалить запись?')">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
             {% else %}
-            <div class="text-center py-5 bg-light rounded">
-                <i class="bi bi-bookmark-x" style="font-size: 3rem; color: #6c757d;"></i>
-                <p class="mt-3 text-muted">Нет записей о повышении квалификации</p>
-                <a href="/add_teacher_qualification?teacher_id={{ teacher.id }}" class="btn btn-danger mt-2">
+            <div class="empty-state">
+                <i class="bi bi-bookmark-x"></i>
+                <p>Нет записей о повышении квалификации</p>
+                <a href="/add_teacher_qualification?teacher_id={{ teacher.id }}" class="btn-add">
                     <i class="bi bi-plus-circle"></i> Добавить первый курс
                 </a>
             </div>
             {% endif %}
         </div>
 
-        <div class="tab-pane fade" id="contests" role="tabpanel">
-            <div class="d-flex justify-content-end mb-3">
+        <!-- ===== ВКЛАДКА 3: КОНКУРСЫ НАСТАВНИКОВ ===== -->
+        <div class="tab-pane fade" id="teacher-contests" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <div>
+                    <span class="text-muted small">Сортировать: </span>
+                    <a href="?sort=date" class="sort-link active">по дате</a>
+                    <a href="?sort=level" class="sort-link">по уровню</a>
+                    <a href="?sort=result" class="sort-link">по результату</a>
+                </div>
                 <a href="/add_teacher_in_contest?teacher_id={{ teacher.id }}" class="btn-add">
-                    <i class="bi bi-plus-circle"></i> Добавить участие в конкурсе
+                    <i class="bi bi-plus-circle"></i> Добавить участие
                 </a>
             </div>
-
             {% if teacher_contests %}
-            <div class="row">
-                {% for tc in teacher_contests %}
-                <div class="col-md-6 mb-3">
-                    <div class="card contest-card h-100">
-                        <div class="card-header bg-white">
-                            <strong>
-                                <i class="bi bi-trophy text-danger"></i>
-                                {{ tc.name_contest.name if tc.name_contest else 'Конкурс' }}
-                            </strong>
-                            {% if tc.name_contest and tc.name_contest.date and tc.name_contest.end_date %}
-                            {% set today = date.today() %}
-                            {% if today >= tc.name_contest.date and today <= tc.name_contest.end_date %}
-                            <span class="contest-status status-active float-end">Активен</span>
-                            {% elif today < tc.name_contest.date %}
-                            <span class="contest-status status-upcoming float-end">Предстоит</span>
-                            {% else %}
-                            <span class="contest-status status-ended float-end">Завершен</span>
+            <div class="table-responsive">
+                <table class="table table-hover table-sm">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Название конкурса</th>
+                        <th>Уровень</th>
+                        <th>Дата проведения</th>
+                        <th>Результат</th>
+                        <th style="width:50px;">Документ</th>
+                        <th style="width:80px;">Действия</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for tc in teacher_contests|sort(attribute='name_contest.date', reverse=True) %}
+                    <tr>
+                        <td><strong>{{ tc.name_contest.name if tc.name_contest else '—' }}</strong></td>
+                        <td>{{ tc.name_contest.level.name if tc.name_contest and tc.name_contest.level else '—' }}</td>
+                        <td>
+                            {% if tc.name_contest and tc.name_contest.date %}
+                            {{ tc.name_contest.date.strftime('%d.%m.%Y') }}
+                            {% if tc.name_contest.end_date %}
+                            — {{ tc.name_contest.end_date.strftime('%d.%m.%Y') }}
                             {% endif %}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            {% if tc.place %}
+                            {% if tc.place == 1 %}1 место
+                            {% elif tc.place == 2 %}2 место
+                            {% elif tc.place == 3 %}3 место
+                            {% else %}{{ tc.place }} место
                             {% endif %}
-                        </div>
-                        <div class="card-body">
-                            <table class="table table-sm table-borderless">
-                                {% if tc.name_contest and tc.name_contest.level %}
-                                <tr>
-                                    <td width="40%"><strong>Уровень:</strong></td>
-                                    <td>{{ tc.name_contest.level.name if tc.name_contest.level else '—' }}</td>
-                                </tr>
-                                {% endif %}
-                                {% if tc.name_contest and tc.name_contest.organizer %}
-                                <tr>
-                                    <td><strong>Организатор:</strong></td>
-                                    <td>{{ tc.name_contest.organizer }}</td>
-                                </tr>
-                                {% endif %}
-                                {% if tc.name_contest and tc.name_contest.date %}
-                                <tr>
-                                    <td><strong>Дата проведения:</strong></td>
-                                    <td>{{ tc.name_contest.date.strftime('%d.%m.%Y') }}
-                                        {% if tc.name_contest.end_date %} — {{
-                                        tc.name_contest.end_date.strftime('%d.%m.%Y') }}{% endif %}
-                                    </td>
-                                </tr>
-                                {% endif %}
-                                {% if tc.place %}
-                                <tr>
-                                    <td><strong>Место:</strong></td>
-                                    <td>
-                                        {% if tc.place == 1 %}🥇 1 место
-                                        {% elif tc.place == 2 %}🥈 2 место
-                                        {% elif tc.place == 3 %}🥉 3 место
-                                        {% else %}{{ tc.place }} место
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endif %}
-                                {% if tc.rank %}
-                                <tr>
-                                    <td><strong>Результат/Звание:</strong></td>
-                                    <td>{{ tc.rank }}</td>
-                                </tr>
-                                {% endif %}
-                                {% if tc.name_contest and tc.name_contest.link %}
-                                <tr>
-                                    <td><strong>Ссылка на конкурс:</strong></td>
-                                    <td class="doc-link">
-                                        <a href="{{ tc.name_contest.link }}" target="_blank" class="text-primary">
-                                            <i class="bi bi-link"></i> Подробнее
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% endif %}
-                                {% if tc.name_contest and tc.name_contest.description %}
-                                <tr>
-                                    <td><strong>Описание:</strong></td>
-                                    <td>{{ tc.name_contest.description|truncate(100) }}</td>
-                                </tr>
-                                {% endif %}
-                            </table>
-                        </div>
-                        <div class="card-footer bg-white d-flex justify-content-end gap-2">
-                            <a href="/edit_teacher_contest/{{ tc.id }}" class="btn btn-sm btn-warning">
-                                <i class="bi bi-pencil"></i> Редактировать
+                            {% elif tc.rank %}
+                            {{ tc.rank }}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            {% if tc.name_contest and tc.name_contest.link %}
+                            <a href="{{ tc.name_contest.link }}" target="_blank" class="doc-link"
+                               title="Просмотреть документ">
+                                <i class="bi bi-eye-fill"></i>
                             </a>
-                            <form method="post" action="/delete_teacher_contest/{{ tc.id }}"
-                                  style="display: inline;"
-                                  onsubmit="return confirm('Удалить запись об участии в конкурсе?')">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <button type="submit" class="btn btn-sm btn-danger">
-                                    <i class="bi bi-trash"></i> Удалить
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="table-actions">
+                                <a href="/edit_teacher_in_contest/{{ tc.id }}" class="btn btn-sm btn-outline-warning">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form method="post" action="/delete_teacher_in_contest/{{ tc.id }}"
+                                      style="display:inline;"
+                                      onsubmit="return confirm('Удалить запись?')">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
             {% else %}
-            <div class="text-center py-5 bg-light rounded">
-                <i class="bi bi-trophy" style="font-size: 3rem; color: #6c757d;"></i>
-                <p class="mt-3 text-muted">Нет записей об участии в конкурсах</p>
-                <a href="/add_teacher_in_contest?teacher_id={{ teacher.id }}" class="btn btn-danger mt-2">
+            <div class="empty-state">
+                <i class="bi bi-trophy"></i>
+                <p>Нет записей об участии в конкурсах</p>
+                <a href="/add_teacher_in_contest?teacher_id={{ teacher.id }}" class="btn-add">
                     <i class="bi bi-plus-circle"></i> Добавить первый конкурс
                 </a>
             </div>
             {% endif %}
         </div>
+
+        <!-- ===== ВКЛАДКА 4: КОНКУРСЫ ДЕТЕЙ ===== -->
+        <div class="tab-pane fade" id="student-contests" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <div>
+                    <span class="text-muted small">Сортировать: </span>
+                    <a href="?sort=date" class="sort-link active">по дате</a>
+                    <a href="?sort=level" class="sort-link">по уровню</a>
+                    <a href="?sort=result" class="sort-link">по результату</a>
+                </div>
+                <a href="/add_student_in_contest?teacher_id={{ teacher.id }}" class="btn-add">
+                    <i class="bi bi-plus-circle"></i> Добавить участие
+                </a>
+            </div>
+            {% if student_contests %}
+            <div class="table-responsive">
+                <table class="table table-hover table-sm">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Название конкурса</th>
+                        <th>Уровень</th>
+                        <th>Дата проведения</th>
+                        <th>Результат</th>
+                        <th>ФИО учащегося</th>
+                        <th style="width:50px;">Документ</th>
+                        <th style="width:80px;">Действия</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for sc in student_contests|sort(attribute='student_contest.date', reverse=True) %}
+                    <tr>
+                        <td><strong>{{ sc.student_contest.name if sc.student_contest else '—' }}</strong></td>
+                        <td>{{ sc.student_contest.level.name if sc.student_contest and sc.student_contest.level else '—'
+                            }}
+                        </td>
+                        <td>
+                            {% if sc.student_contest and sc.student_contest.date %}
+                            {{ sc.student_contest.date.strftime('%d.%m.%Y') }}
+                            {% if sc.student_contest.end_date %}
+                            — {{ sc.student_contest.end_date.strftime('%d.%m.%Y') }}
+                            {% endif %}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            {% if sc.place %}
+                            {% if sc.place == 1 %}1 место
+                            {% elif sc.place == 2 %}2 место
+                            {% elif sc.place == 3 %}3 место
+                            {% else %}{{ sc.place }} место
+                            {% endif %}
+                            {% elif sc.rank %}
+                            {{ sc.rank }}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>{{ sc.student.surename ~ ' ' ~ sc.student.name if sc.student else '—' }}</td>
+                        <td>
+                            {% if sc.student_contest and sc.student_contest.link %}
+                            <a href="{{ sc.student_contest.link }}" target="_blank" class="doc-link"
+                               title="Просмотреть документ">
+                                <i class="bi bi-eye-fill"></i>
+                            </a>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="table-actions">
+                                <a href="/edit_student_in_contest/{{ sc.id }}" class="btn btn-sm btn-outline-warning">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form method="post" action="/delete_student_in_contest/{{ sc.id }}"
+                                      style="display:inline;"
+                                      onsubmit="return confirm('Удалить запись?')">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="bi bi-award"></i>
+                <p>Нет записей об участии детей в конкурсах</p>
+                <a href="/add_student_in_contest?teacher_id={{ teacher.id }}" class="btn-add">
+                    <i class="bi bi-plus-circle"></i> Добавить первый конкурс
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
     </div>
 </div>
 
+<!-- ===== МОДАЛКА ДЛЯ ФОТО ===== -->
 <div id="photoModal" class="modal-photo" onclick="closePhotoModal()">
     <span class="close-modal">&times;</span>
     <img class="modal-photo-content" id="modalImage">
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -450,27 +608,18 @@
     function showPhotoModal(imageUrl) {
         const modal = document.getElementById('photoModal');
         const modalImg = document.getElementById('modalImage');
-
         if (imageUrl) {
             modalImg.src = imageUrl;
             modalImg.style.display = 'block';
-        } else {
-            modalImg.src = '';
-            modalImg.alt = 'Фото отсутствует';
         }
         modal.style.display = 'block';
     }
-
     function closePhotoModal() {
-        const modal = document.getElementById('photoModal');
-        modal.style.display = 'none';
+        document.getElementById('photoModal').style.display = 'none';
         document.getElementById('modalImage').src = '';
     }
-
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closePhotoModal();
-        }
+        if (e.key === 'Escape') closePhotoModal();
     });
 </script>
 {% endblock %}

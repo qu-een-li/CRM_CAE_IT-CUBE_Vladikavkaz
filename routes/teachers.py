@@ -4,6 +4,7 @@ from flask import render_template, request, redirect, jsonify, flash, send_from_
 from data import db_session
 from data.teacher_in_contests import Teacher_in_Contests
 from data.teacher import Teacher
+from data.student_in_contest import Student_in_Contest
 from data.contest_for_teachers import Contest_for_Teachers
 from data.teacher_qualification import TeacherQualification
 from data.qualification_course import QualificationCourse
@@ -194,14 +195,15 @@ def teacher_profile(teacher_id):
             return redirect("/teachers")
 
         qualifications = session.query(TeacherQualification).filter_by(teacher_id=teacher_id).all()
-
         teacher_contests = session.query(Teacher_in_Contests).filter_by(teacher_id=teacher_id).all()
+        student_contests = session.query(Student_in_Contest).filter_by(teacher_id=teacher_id).all()
 
         return render_template(
             "teacher_profile.html",
             teacher=teacher,
             qualifications=qualifications,
             teacher_contests=teacher_contests,
+            student_contests=student_contests,
             date=date,
         )
     finally:
