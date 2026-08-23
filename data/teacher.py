@@ -53,32 +53,22 @@ class Teacher(SqlAlchemyBase, DictConvertable):
         today = date.today()
         years = today.year - self.experience_start.year
         months = today.month - self.experience_start.month
+
         if months < 0:
             years -= 1
-            months += 12
         elif months == 0 and today.day < self.experience_start.day:
             years -= 1
-            months = 11
-
-        if 11 <= years % 100 <= 14:
-            year_word = "л."
-        elif years % 10 == 1:
-            year_word = "г."
-        elif 2 <= years % 10 <= 4:
-            year_word = "г."
-        else:
-            year_word = "л."
 
         if years == 0:
-            if months == 0:
-                days = (today - self.experience_start).days
-                if days < 30:
-                    return f"{days} дн."
-                else:
-                    return f"{months} мес."
-            return f"{months} мес."
+            return "Менее года"
 
-        if months > 0:
-            return f"{years} {year_word} {months} мес."
+        if 11 <= years % 100 <= 14:
+            year_word = "лет"
+        elif years % 10 == 1:
+            year_word = "год"
+        elif 2 <= years % 10 <= 4:
+            year_word = "года"
         else:
-            return f"{years} {year_word}"
+            year_word = "лет"
+
+        return f"{years} {year_word}"
