@@ -26,12 +26,14 @@ def create_past_schedule_if_doesnt_exist_and_redirect():
     past_date = date.fromisoformat(date_str)
     if not schedule.is_schedule_at_date(past_date):
         abort(404, message="schedule is not exist for that date.")
-    past_schedule: dict = api_request(f"v1/past_schedules/schedule/{schedule_id}/date/{date_str}", retries=1)
+    past_schedule: dict = api_request(
+        f"v1/past_schedules/schedule/{schedule_id}/date/{date_str}", retries=1)
     if isinstance(past_schedule, tuple) and past_schedule[0] is None:
         past_schedule = PastSchedule(schedule_id=schedule_id, date=past_date)
         new_past_schedule_dict = past_schedule.to_dict()
         del new_past_schedule_dict["id"]
-        new_past_schedule_dict = api_request("v1/past_schedules/", data=new_past_schedule_dict, method="POST")
+        new_past_schedule_dict = api_request(
+            "v1/past_schedules/", data=new_past_schedule_dict, method="POST")
         past_schedule_id = new_past_schedule_dict["id"]
     else:
         past_schedule_id = past_schedule["id"]
@@ -65,7 +67,8 @@ def add_or_change_students_check_in(past_schedule_id: int, str_date: str):
 @app.route("/update_students_check_in/<int:past_schedule_id>", methods=["POST"])
 def update_students_check_in(past_schedule_id):
     """Получаем все данные из формы, где мы отмечаем присутствие ученика на занятии и меняем данные, если ученик был"""
-    data = request.get_json()  # { "student_id": false/true, "student_id": false/true ... }
+    data = request.get_json(
+    )  # { "student_id": false/true, "student_id": false/true ... }
     print(data)
     if not data:
         return jsonify({"error": "No data provided"}), 400

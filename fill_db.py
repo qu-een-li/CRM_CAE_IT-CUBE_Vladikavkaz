@@ -164,7 +164,8 @@ STREETS = [
     "Вокзальная",
 ]
 MAIL_TEMPLATES = (
-    ["yandex", "bestteacher", "justanothermailbox", "mouseman", "personalmineone", "hacker"],
+    ["yandex", "bestteacher", "justanothermailbox",
+        "mouseman", "personalmineone", "hacker"],
     ["mail.ru", "gmail.ru", "it-cube.ru", "yandex.ru", "vladikavkaz.edu"],
 )
 
@@ -205,7 +206,8 @@ def generate_school_name():
 
     types = ["Академия", "Гимназия", "Лицей", "Школа", "Центр"]
 
-    specializations = ["программирования", "дизайна", "языков", "бизнеса", "творчества"]
+    specializations = ["программирования",
+                       "дизайна", "языков", "бизнеса", "творчества"]
 
     # Шаблоны структур названий
     structures = [
@@ -244,7 +246,19 @@ for i in range(N_OF_TEACHER):
     birth_month = randint(1, 12)
     birth_year = randint(1946, 2006)
     first_weekday, last_day = calendar.monthrange(birth_year, birth_month)
-    teacher.birthday = date(year=birth_year, month=birth_month, day=randint(1, last_day))
+    teacher.birthday = date(
+        year=birth_year, month=birth_month, day=randint(1, last_day))
+    teacher.graduation_date = date(
+        year=birth_year, month=birth_month, day=randint(1, last_day))
+    teacher.work_condition = 'Good'
+    teacher.hire_date = date(
+        year=birth_year, month=birth_month, day=randint(1, last_day))
+    teacher.dismissal_date = date(
+        year=birth_year, month=birth_month, day=randint(1, last_day))
+    teacher.experience_start = date(
+        year=birth_year, month=birth_month, day=randint(1, last_day))
+    teacher.category = 'Not bad'
+
     generated_teachers.append(teacher)
     db_sess.add(teacher)
 # крэш тест для групп и проверки отображения их таблицы
@@ -270,9 +284,11 @@ for i in range(N_OF_GROUPS):
     #                        f" {choice(['09:30-11:30', '11:00-12:30', '13:00-15:00', '17:00-18:30', '12:00:13:00'])};"
     #                        f"{choice(['6-9', '9-12', '12-18'])}")
     if teacher.patronymic:
-        formatted_teacher_name = f"{teacher.surename} {teacher.name[0]}.{teacher.patronymic[0]}.".title()
+        formatted_teacher_name = f"{teacher.surename} {teacher.name[0]}.{teacher.patronymic[0]}.".title(
+        )
     else:
-        formatted_teacher_name = f"{teacher.surename} {teacher.name[0]}.".title()
+        formatted_teacher_name = f"{teacher.surename} {teacher.name[0]}.".title(
+        )
     group.name_of_group = f"{group.direction.name}; {choice(['6-9', '9-12', '12-18'])} лет"
 
     generated_groups.append(group)
@@ -284,7 +300,8 @@ for i in range(N_OF_STUDENTS):
     birth_month = randint(1, 12)
     birth_year = 2026 - student.school_class - 12
     first_weekday, last_day = calendar.monthrange(birth_year, birth_month)
-    student.birthday = date(year=birth_year, month=birth_month, day=randint(1, last_day))
+    student.birthday = date(
+        year=birth_year, month=birth_month, day=randint(1, last_day))
     student.adres_of_living = f"{choice(STREETS)} {randint(1, 60)}"
     student.city = choice(CITIES)
     student.document = 1

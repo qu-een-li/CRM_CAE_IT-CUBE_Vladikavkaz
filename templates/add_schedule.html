@@ -92,15 +92,55 @@
                         <i class="bi bi-clock"></i> Длительность занятий в группе - <span id="duration_value"></span>
                     </div>
                 </div>
+            <div class="mb-3">
+                <label for="frequency" class="form-label">Периодичность</label>
+                {{ form.frequency(class="form-select", id="frequency_select")}}
+                {% for error in form.frequency.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
             </div>
-            <div class="row mb-3">
-                <div class="mb-3">
-                    <label for="datetime" class="form-label">Дата и время начала</label>
-                    {{ form.datetime(class="form-control") }}
-                    {% for error in form.datetime.errors %}
-                    <div class="invalid-feedback">{{ error }}</div>
-                    {% endfor %}
-                </div>
+
+            <!-- Контейнер для datetime (single и year) -->
+            <div class="mb-3" id="datetime_container">
+                <label for="datetime" class="form-label">Дата и время начала</label>
+                {{ form.datetime(class="form-control") }}
+                {% for error in form.datetime.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <!-- Контейнер для weekday (week) -->
+            <div class="mb-3" id="weekday_container" style="display: none;">
+                <label for="weekday" class="form-label">День недели</label>
+                {{ form.weekday(class="form-select") }}
+                {% for error in form.weekday.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
+                
+                <label for="start_time" class="form-label mt-2">Время начала</label>
+                {{ form.start_time(class="form-control") }}
+                {% for error in form.start_time.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <!-- Контейнер для day_of_month (month) -->
+            <div class="mb-3" id="month_container" style="display: none;">
+                <label for="day_of_month" class="form-label">День месяца</label>
+                {{ form.day_of_month(class="form-control", placeholder="1-31") }}
+                <small class="text-muted">
+                    <i class="bi bi-info-circle"></i> 
+                    Если в месяце меньше указанного количества дней, занятие пропускается
+                </small>
+                {% for error in form.day_of_month.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
+                
+                <label for="start_time" class="form-label mt-2">Время начала</label>
+                {{ form.start_time(class="form-control") }}
+                {% for error in form.start_time.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
             </div>
             <div class="d-flex justify-content-between pt-3">
                 <button type="reset" class="btn btn-outline-secondary">Сбросить</button>
@@ -127,11 +167,38 @@ document.getElementById('group_select').addEventListener('change', function() {
     }
 });
 
-// Проверяем начальное значение (если форма была отправлена с ошибкой)
+// Управление видимостью полей в зависимости от периодичности
+document.getElementById('frequency_select').addEventListener('change', function() {
+    const frequency = this.value;
+    const datetimeContainer = document.getElementById('datetime_container');
+    const weekdayContainer = document.getElementById('weekday_container');
+    const monthContainer = document.getElementById('month_container');
+    
+    // Скрываем все контейнеры
+    datetimeContainer.style.display = 'none';
+    weekdayContainer.style.display = 'none';
+    monthContainer.style.display = 'none';
+    
+    // Показываем нужный
+    if (frequency === 'single' || frequency === 'year') {
+        datetimeContainer.style.display = 'block';
+    } else if (frequency === 'week') {
+        weekdayContainer.style.display = 'block';
+    } else if (frequency === 'month') {
+        monthContainer.style.display = 'block';
+    }
+});
+
+// Проверяем начальное значение
 window.addEventListener('DOMContentLoaded', function() {
     const groupSelect = document.getElementById('group_select');
     if (groupSelect.value) {
         groupSelect.dispatchEvent(new Event('change'));
+    }
+    
+    const frequencySelect = document.getElementById('frequency_select');
+    if (frequencySelect.value) {
+        frequencySelect.dispatchEvent(new Event('change'));
     }
 });
 </script>
