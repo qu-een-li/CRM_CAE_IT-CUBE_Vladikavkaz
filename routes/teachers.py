@@ -92,7 +92,7 @@ def add_teacher():
 
             session.commit()
             flash("Наставник успешно добавлен", "success")
-            return redirect("/add_teacher")
+            return redirect("/teachers")
 
         except Exception as e:
             session.rollback()
