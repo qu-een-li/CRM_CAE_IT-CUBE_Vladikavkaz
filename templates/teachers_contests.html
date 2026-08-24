@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}Конкурсы для наставников | IT-Куб Владикавказ{% endblock %}
+{% block title %}Конкурсы наставников | IT-Куб Владикавказ{% endblock %}
 
-{% block page_title %}Конкурсы для наставников{% endblock %}
-{% block page_subtitle %}Актуальные конкурсы и мероприятия{% endblock %}
+{% block page_title %}Конкурсы наставников{% endblock %}
+{% block page_subtitle %}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -25,27 +25,35 @@
         vertical-align: middle;
     }
     .table-hover tbody tr:hover {
-        background-color: rgba(220, 53, 69, 0.1);
+        background-color: rgba(220, 53, 69, 0.05);
     }
     .table-container {
         max-height: 70vh;
         overflow-y: auto;
     }
-    .edit-icon, .details-icon {
-        color: #6c757d;
-        font-size: 1.1rem;
-        cursor: pointer;
-        margin: 0 5px;
+    .btn-add {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #dc3545;
+        color: white;
+        border-radius: 8px;
+        padding: 0.5rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 500;
+        text-decoration: none;
+        border: none;
+        transition: 0.2s;
+        gap: 4px;
+        min-width: 160px;
     }
-    .edit-icon:hover {
-        color: #dc3545;
-    }
-    .details-icon:hover {
-        color: #0d6efd;
+    .btn-add:hover {
+        background: #b02a37;
+        color: white;
+        text-decoration: none;
     }
     .status-badge {
-        display: inline-block;
-        padding: 0.25rem 0.75rem;
+        padding: 0.2rem 0.7rem;
         border-radius: 20px;
         font-size: 0.75rem;
         font-weight: 500;
@@ -62,88 +70,121 @@
         background: #f8d7da;
         color: #721c24;
     }
-    .btn-add {
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         margin-bottom: 20px;
+        width: 98%;
+        margin-left: auto;
+        margin-right: auto;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .header-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .header-title h2 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+        color: #333;
+    }
+    .header-icon {
+        color: #dc3545;
+        font-size: 24px;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4" style="max-width: 98%;">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">Список конкурсов</h4>
-        <a href="/add_teacher_contest" class="btn btn-danger btn-add">
-            <i class="bi bi-plus-circle"></i> Добавить конкурс
+<div class="container-fluid mt-3">
+
+    <div class="page-header">
+        <div class="header-title">
+            <i class="bi bi-trophy-fill header-icon"></i>
+            <h2>Конкурсы наставников</h2>
+        </div>
+        <a href="/add_teacher_contest" class="btn-add">
+            <i class="bi bi-plus-circle me-1"></i> Добавить конкурс
         </a>
     </div>
 
     <div class="contests-table">
         <div class="table-container">
-            <table class="table table-hover">
+            <table class="table table-hover table-sm mb-0">
                 <thead>
-                    <tr>
-                        <th>Наименование конкурса</th>
-                        <th>Дата начала</th>
-                        <th>Дата окончания</th>
-                        <th>Уровень</th>
-                        <th>Организатор</th>
-                        <th>Статус</th>
-                        <th style="width: 80px;">Действия</th>
-                    </tr>
+                <tr>
+                    <th>Название</th>
+                    <th>Уровень</th>
+                    <th>Дата проведения</th>
+                    <th>Организатор</th>
+                    <th>Статус</th>
+                    <th style="width:50px;">Ссылка</th>
+                    <th style="width:80px;">Действия</th>
+                </tr>
                 </thead>
                 <tbody>
-                    {% for contest in contests %}
-                    {% set today = today if today else date.today() %}
-                    {% set status = '' %}
-                    {% set status_class = '' %}
-
-                    {% if contest.date and contest.end_date %}
-                        {% if today >= contest.date and today <= contest.end_date %}
-                            {% set status = 'Активен' %}
-                            {% set status_class = 'status-active' %}
+                {% for contest in contests %}
+                <tr>
+                    <td>
+                        <a href="/teachers_contests/{{ contest.id }}" class="text-danger fw-bold text-decoration-none">
+                            {{ contest.name }}
+                        </a>
+                    </td>
+                    <td>{{ contest.level.name if contest.level else '—' }}</td>
+                    <td>
+                        {{ contest.date.strftime('%d.%m.%Y') if contest.date else '—' }}
+                        {% if contest.end_date %}
+                        — {{ contest.end_date.strftime('%d.%m.%Y') }}
+                        {% endif %}
+                    </td>
+                    <td>{{ contest.organizer or '—' }}</td>
+                    <td>
+                        {% if today >= contest.date and (not contest.end_date or today <= contest.end_date) %}
+                        <span class="status-badge status-active">Активен</span>
                         {% elif today < contest.date %}
-                            {% set status = 'Предстоит' %}
-                            {% set status_class = 'status-upcoming' %}
+                        <span class="status-badge status-upcoming">Предстоит</span>
                         {% else %}
-                            {% set status = 'Завершен' %}
-                            {% set status_class = 'status-ended' %}
+                        <span class="status-badge status-ended">Завершен</span>
                         {% endif %}
-                    {% elif contest.date %}
-                        {% if today < contest.date %}
-                            {% set status = 'Предстоит' %}
-                            {% set status_class = 'status-upcoming' %}
+                    </td>
+                    <td>
+                        {% if contest.link %}
+                        <a href="{{ contest.link }}" target="_blank" class="text-danger" title="Открыть ссылку">
+                            <i class="bi bi-eye-fill"></i>
+                        </a>
                         {% else %}
-                            {% set status = 'Активен' %}
-                            {% set status_class = 'status-active' %}
+                        <span class="text-muted">—</span>
                         {% endif %}
-                    {% else %}
-                        {% set status = 'Даты не указаны' %}
-                        {% set status_class = 'status-ended' %}
-                    {% endif %}
-
-                    <tr>
-                        <td><strong>{{ contest.name }}</strong></td>
-                        <td>{{ contest.date.strftime('%d.%m.%Y') if contest.date else 'Не указана' }}</td>
-                        <td>{{ contest.end_date.strftime('%d.%m.%Y') if contest.end_date else 'Не указана' }}</td>\
-                        <td>{{ contest.level.name if contest.level else 'Не указан' }}</td>
-                        <td>{{ contest.organizer if contest.organizer else 'Не указан' }}</td>
-                        <td><span class="status-badge {{ status_class }}">{{ status }}</span></td>
-                        <td>
-                            <a href="/teachers_contests/{{ contest.id }}" class="details-icon" title="Подробнее">
-                                <i class="bi bi-eye-fill"></i>
+                    </td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a href="/edit_teacher_contest/{{ contest.id }}" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-pencil"></i>
                             </a>
-                            <a href="/edit_teacher_contest/{{ contest.id }}" class="edit-icon" title="Редактировать">
-                                <i class="bi bi-pencil-fill"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="6" class="text-center py-4">
-                            <i class="bi bi-info-circle"></i> Пока нет добавленных конкурсов
-                        </td>
-                    </tr>
-                    {% endfor %}
+                            <form method="post" action="/delete_teacher_contest/{{ contest.id }}"
+                                  style="display:inline;"
+                                  onsubmit="return confirm('Удалить конкурс?')">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center py-4 text-muted">
+                        <i class="bi bi-trophy"
+                           style="font-size: 2rem; opacity: 0.5; display: block; margin-bottom: 0.5rem;"></i>
+                        Нет конкурсов
+                    </td>
+                </tr>
+                {% endfor %}
                 </tbody>
             </table>
         </div>

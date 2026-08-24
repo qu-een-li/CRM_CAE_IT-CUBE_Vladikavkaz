@@ -22,8 +22,11 @@ def add_teacher_in_contest():
         place = request.form.get('place')
         if place:
             teacher_contest.place = int(place)
+        else:
+            teacher_contest.place = None
 
         teacher_contest.rank = request.form.get('rank')
+        teacher_contest.link = request.form.get('link')
 
         db_sess.add(teacher_contest)
         db_sess.commit()
@@ -45,7 +48,7 @@ def edit_teacher_in_contest(contest_link_id):
 
     if not teacher_contest:
         flash("Запись не найдена", "danger")
-        return redirect(url_for("teachers_list"))
+        return redirect(url_for("list_of_teachers"))
 
     teachers = db_sess.query(Teacher).all()
     contests = db_sess.query(Contest_for_Teachers).all()
@@ -61,12 +64,13 @@ def edit_teacher_in_contest(contest_link_id):
             teacher_contest.place = None
 
         teacher_contest.rank = request.form.get('rank')
+        teacher_contest.link = request.form.get('link')
 
         db_sess.commit()
         flash('Участие в конкурсе обновлено!', 'success')
         return redirect(url_for('teacher_profile', teacher_id=teacher_contest.teacher_id))
 
-    return render_template('add_teacher_contest.html',
+    return render_template('edit_teacher_in_contest.html',
                            teachers=teachers,
                            contests=contests,
                            title='Редактировать участие в конкурсе',
@@ -81,7 +85,7 @@ def delete_teacher_in_contest(contest_link_id):
 
     if not teacher_contest:
         flash("Запись не найдена", "danger")
-        return redirect(url_for("teachers_list"))
+        return redirect(url_for("list_of_teachers"))
 
     teacher_id = teacher_contest.teacher_id
 

@@ -1,37 +1,23 @@
 {% extends "base.html" %}
 
-{% block title %}{{ contest.name }} | IT-Куб Владикавказ{% endblock %}
-
-{% block page_title %}Информация о конкурсе{% endblock %}
-{% block page_subtitle %}{% endblock %}
+{% block title %}{{ contest.name }} | Детали конкурса{% endblock %}
 
 {% block extra_css %}
 <style>
     .contest-detail {
-        background-color: white;
+        background: white;
         border-radius: 10px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         padding: 2rem;
-        max-width: 900px;
-        margin: 0 auto;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
-    .info-row {
-        display: flex;
-        padding: 12px 0;
-        border-bottom: 1px solid #e9ecef;
-    }
-    .info-label {
-        width: 180px;
+    .detail-label {
         font-weight: 600;
         color: #495057;
-    }
-    .info-value {
-        flex: 1;
-        color: #212529;
+        width: 150px;
+        display: inline-block;
     }
     .status-badge {
-        display: inline-block;
-        padding: 0.25rem 0.75rem;
+        padding: 0.25rem 1rem;
         border-radius: 20px;
         font-size: 0.85rem;
         font-weight: 500;
@@ -48,51 +34,82 @@
         background: #f8d7da;
         color: #721c24;
     }
-    .btn-back {
-        margin-top: 20px;
-    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container mt-4">
     <div class="contest-detail">
-        <h2 class="text-center mb-4">{{ contest.name }}</h2>
-
-        <div class="info-row">
-            <div class="info-label">Дата начала:</div>
-            <div class="info-value">{{ contest.date.strftime('%d.%m.%Y') if contest.date else 'Не указана' }}</div>
-        </div>
-
-        <div class="info-row">
-            <div class="info-label">Дата окончания:</div>
-            <div class="info-value">{{ contest.end_date.strftime('%d.%m.%Y') if contest.end_date else 'Не указана' }}</div>
-        </div>
-
-        <div class="info-row">
-            <div class="info-label">Организатор:</div>
-            <div class="info-value">{{ contest.contest_organizer if contest.contest_organizer else 'Не указан' }}</div>
-        </div>
-
-        <div class="info-row">
-            <div class="info-label">Уровень конкурса:</div>
-            <div class="info-value">{{ contest.level.name if contest.level else 'Не указан' }}</div>
-        </div>
-
-        <div class="info-row">
-            <div class="info-label">Описание конкурса:</div>
-            <div class="info-value">{{ contest.description if contest.description else 'Не указано' }}</div>
-        </div>
-
-        <div class="info-row">
-            <div class="info-label">Ссылка на конкурс:</div>
-            <div class="info-value">{{ contest.link if contest.link else "Не указано" }}</div>
-        </div>
-
-        <div class="d-flex justify-content-between btn-back">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold m-0">
+                <i class="bi bi-trophy-fill text-danger me-2"></i>
+                {{ contest.name }}
+            </h2>
             <a href="/teachers_contests" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i> Назад к списку
             </a>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="mb-3">
+                    <span class="detail-label">Уровень:</span>
+                    {{ contest.level.name if contest.level else '—' }}
+                </div>
+                <div class="mb-3">
+                    <span class="detail-label">Дата проведения:</span>
+                    {{ contest.date.strftime('%d.%m.%Y') if contest.date else '—' }}
+                    {% if contest.end_date %}
+                    — {{ contest.end_date.strftime('%d.%m.%Y') }}
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    <span class="detail-label">Организатор:</span>
+                    {{ contest.organizer or 'Не указан' }}
+                </div>
+                <div class="mb-3">
+                    <span class="detail-label">Статус:</span>
+                    {% if today >= contest.date and (not contest.end_date or today <= contest.end_date) %}
+                    <span class="status-badge status-active">Активен</span>
+                    {% elif today < contest.date %}
+                    <span class="status-badge status-upcoming">Предстоит</span>
+                    {% else %}
+                    <span class="status-badge status-ended">Завершен</span>
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    <span class="detail-label">Ссылка:</span>
+                    {% if contest.link %}
+                    <a href="{{ contest.link }}" target="_blank" class="text-danger">
+                        <i class="bi bi-link"></i> {{ contest.link }}
+                    </a>
+                    {% else %}
+                    Не указана
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% if contest.description %}
+        <div class="mt-3">
+            <h6 class="fw-bold"><i class="bi bi-info-circle text-danger"></i> Описание</h6>
+            <hr>
+            <p class="text-muted">{{ contest.description }}</p>
+        </div>
+        {% endif %}
+
+        <div class="mt-4 d-flex gap-2">
+            <a href="/edit_teacher_contest/{{ contest.id }}" class="btn btn-danger">
+                <i class="bi bi-pencil-fill"></i> Редактировать
+            </a>
+            <form method="post" action="/delete_teacher_contest/{{ contest.id }}"
+                  style="display:inline;"
+                  onsubmit="return confirm('Удалить конкурс?')">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-trash"></i> Удалить
+                </button>
+            </form>
         </div>
     </div>
 </div>

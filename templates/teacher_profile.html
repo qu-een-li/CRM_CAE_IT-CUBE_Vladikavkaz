@@ -393,8 +393,7 @@
                         </td>
                         <td>
                             <div class="table-actions">
-                                <a href="/edit_teacher_qualification/{{ q.id }}" class="btn btn-sm btn-outline-warning"
-                                   title="Редактировать">
+                                <a href="/edit_teacher_qualification/{{ q.id }}" class="btn btn-sm btn-outline-danger">
                                     <i class="bi bi-pencil"></i>
                                 </a>
                                 <form method="post" action="/delete_teacher_qualification/{{ q.id }}"
@@ -425,6 +424,7 @@
             {% endif %}
         </div>
 
+        <!-- ===== ВКЛАДКА 3: КОНКУРСЫ НАСТАВНИКОВ ===== -->
         <div class="tab-pane fade" id="teacher-contests" role="tabpanel">
             <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                 <div>
@@ -445,6 +445,7 @@
                         <th>Название конкурса</th>
                         <th>Уровень</th>
                         <th>Дата проведения</th>
+                        <th>Место</th>
                         <th>Результат</th>
                         <th style="width:50px;">Документ</th>
                         <th style="width:80px;">Действия</th>
@@ -453,7 +454,18 @@
                     <tbody>
                     {% for tc in teacher_contests|sort(attribute='name_contest.date', reverse=True) %}
                     <tr>
-                        <td><strong>{{ tc.name_contest.name if tc.name_contest else '—' }}</strong></td>
+                        <td>
+                            <strong>
+                                {% if tc.name_contest %}
+                                <a href="/teachers_contests/{{ tc.name_contest.id }}"
+                                   class="text-danger fw-bold text-decoration-none">
+                                    {{ tc.name_contest.name }}
+                                </a>
+                                {% else %}
+                                —
+                                {% endif %}
+                            </strong>
+                        </td>
                         <td>{{ tc.name_contest.level.name if tc.name_contest and tc.name_contest.level else '—' }}</td>
                         <td>
                             {% if tc.name_contest and tc.name_contest.date %}
@@ -465,12 +477,15 @@
                         </td>
                         <td>
                             {% if tc.place %}
-                            {% if tc.place == 1 %}🥇 1 место
-                            {% elif tc.place == 2 %}🥈 2 место
-                            {% elif tc.place == 3 %}🥉 3 место
-                            {% else %}{{ tc.place }} место
+                            {% if tc.place == 1 %}1
+                            {% elif tc.place == 2 %}2
+                            {% elif tc.place == 3 %}3
+                            {% else %}{{ tc.place }}
                             {% endif %}
-                            {% elif tc.rank %}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            {% if tc.rank %}
                             {{ tc.rank }}
                             {% else %}—{% endif %}
                         </td>
@@ -486,7 +501,7 @@
                         </td>
                         <td>
                             <div class="table-actions">
-                                <a href="/edit_teacher_in_contest/{{ tc.id }}" class="btn btn-sm btn-outline-warning">
+                                <a href="/edit_teacher_in_contest/{{ tc.id }}" class="btn btn-sm btn-outline-danger">
                                     <i class="bi bi-pencil"></i>
                                 </a>
                                 <form method="post" action="/delete_teacher_in_contest/{{ tc.id }}"
@@ -578,7 +593,7 @@
                         </td>
                         <td>
                             <div class="table-actions">
-                                <a href="/edit_student_in_contest/{{ sc.id }}" class="btn btn-sm btn-outline-warning">
+                                <a href="/edit_student_in_contest/{{ sc.id }}" class="btn btn-sm btn-outline-danger">
                                     <i class="bi bi-pencil"></i>
                                 </a>
                                 <form method="post" action="/delete_student_in_contest/{{ sc.id }}"
