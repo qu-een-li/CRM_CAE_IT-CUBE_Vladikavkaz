@@ -13,6 +13,8 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
     }
     .profile-header-left {
         display: flex;
@@ -49,7 +51,7 @@
         margin: 0;
     }
     .profile-status {
-        font-size: 0.85rem;
+        font-size: 0.9rem;
         opacity: 0.9;
     }
     .btn-edit-profile {
@@ -61,6 +63,7 @@
         text-decoration: none;
         transition: 0.2s;
         font-size: 0.9rem;
+        white-space: nowrap;
     }
     .btn-edit-profile:hover {
         background: rgba(255,255,255,0.3);
@@ -112,15 +115,20 @@
         color: #dc3545;
     }
     .btn-add {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         background: #dc3545;
         color: white;
         border-radius: 8px;
-        padding: 0.4rem 1.2rem;
-        font-size: 0.9rem;
-        display: inline-block;
+        padding: 0.5rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 500;
         text-decoration: none;
         border: none;
         transition: 0.2s;
+        gap: 4px;
+        min-width: 160px;
     }
     .btn-add:hover {
         background: #b02a37;
@@ -200,7 +208,6 @@
 {% block content %}
 <div class="container mt-3">
 
-    <!-- ===== ШАПКА ПРОФИЛЯ ===== -->
     <div class="profile-header">
         <div class="profile-header-left">
             {% if teacher.personal_photos and teacher.personal_photos != "anonymous.jpg" %}
@@ -233,13 +240,13 @@
             {% if teacher.dismissal_date %}
             <span class="badge"
                   style="background: #dc3545; color: white; font-size: 1.1rem; padding: 0.4rem 1.2rem; border-radius: 8px; font-weight: 700; box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);">
-                <i class="bi bi-person-x-fill me-1"></i> УВОЛЕН
-            </span>
+                    <i class="bi bi-person-x-fill me-1"></i> УВОЛЕН
+                </span>
             {% else %}
             <span class="badge"
                   style="background: #198754; color: white; font-size: 1.1rem; padding: 0.4rem 1.2rem; border-radius: 8px; font-weight: 700; box-shadow: 0 2px 8px rgba(25, 135, 84, 0.4);">
-                <i class="bi bi-person-check-fill me-1"></i> РАБОТАЕТ
-            </span>
+                    <i class="bi bi-person-check-fill me-1"></i> РАБОТАЕТ
+                </span>
             {% endif %}
             <a href="/edit_teacher/{{ teacher.id }}" class="btn-edit-profile">
                 <i class="bi bi-pencil-fill"></i> Редактировать
@@ -247,7 +254,6 @@
         </div>
     </div>
 
-    <!-- ===== ВКЛАДКИ ===== -->
     <ul class="nav nav-tabs" id="teacherTabs" role="tablist">
         <li class="nav-item">
             <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button"
@@ -278,10 +284,8 @@
         </li>
     </ul>
 
-    <!-- ===== СОДЕРЖИМОЕ ВКЛАДОК ===== -->
     <div class="tab-content mt-3">
 
-        <!-- ===== ВКЛАДКА 1: ЛИЧНАЯ ИНФОРМАЦИЯ ===== -->
         <div class="tab-pane fade show active" id="info" role="tabpanel">
             <div class="row">
                 <div class="col-md-6">
@@ -342,12 +346,12 @@
 
         <!-- ===== ВКЛАДКА 2: ПОВЫШЕНИЕ КВАЛИФИКАЦИИ ===== -->
         <div class="tab-pane fade" id="qualifications" role="tabpanel">
+            {% if qualifications %}
             <div class="d-flex justify-content-end mb-3">
                 <a href="/add_teacher_qualification?teacher_id={{ teacher.id }}" class="btn-add">
-                    <i class="bi bi-plus-circle"></i> Добавить курс
+                    <i class="bi bi-plus-circle me-1"></i> Добавить курс
                 </a>
             </div>
-            {% if qualifications %}
             <div class="table-responsive">
                 <table class="table table-hover table-sm">
                     <thead class="table-light">
@@ -358,13 +362,22 @@
                         <th>Организация</th>
                         <th>Место выдачи</th>
                         <th style="width:50px;">Документ</th>
-                        <th style="width:80px;">Действия</th>
+                        <th style="width:120px;">Действия</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for q in qualifications|sort(attribute='issue_date', reverse=True) %}
                     <tr>
-                        <td><strong>{{ q.course.program_name if q.course else q.organization or 'Курс' }}</strong></td>
+                        <td>
+                            {% if q.course %}
+                            <a href="/qualification_courses/{{ q.course.id }}"
+                               class="text-danger fw-bold text-decoration-none">
+                                {{ q.course.program_name }}
+                            </a>
+                            {% else %}
+                            <span class="fw-bold">{{ q.organization or 'Курс' }}</span>
+                            {% endif %}
+                        </td>
                         <td>{{ q.issue_date.strftime('%d.%m.%Y') if q.issue_date else '—' }}</td>
                         <td>{{ q.volume_hours or (q.course.hours if q.course else '—') }}</td>
                         <td>{{ q.organization or (q.course.organization if q.course else '—') }}</td>
@@ -380,11 +393,15 @@
                         </td>
                         <td>
                             <div class="table-actions">
+                                <a href="/edit_teacher_qualification/{{ q.id }}" class="btn btn-sm btn-outline-warning"
+                                   title="Редактировать">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
                                 <form method="post" action="/delete_teacher_qualification/{{ q.id }}"
                                       style="display:inline;"
                                       onsubmit="return confirm('Удалить запись?')">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Удалить">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
@@ -396,17 +413,18 @@
                 </table>
             </div>
             {% else %}
+            <div class="d-flex justify-content-center mb-3">
+                <a href="/add_teacher_qualification?teacher_id={{ teacher.id }}" class="btn-add">
+                    <i class="bi bi-plus-circle me-1"></i> Добавить курс
+                </a>
+            </div>
             <div class="empty-state">
                 <i class="bi bi-bookmark-x"></i>
                 <p>Нет записей о повышении квалификации</p>
-                <a href="/add_teacher_qualification?teacher_id={{ teacher.id }}" class="btn-add">
-                    <i class="bi bi-plus-circle"></i> Добавить первый курс
-                </a>
             </div>
             {% endif %}
         </div>
 
-        <!-- ===== ВКЛАДКА 3: КОНКУРСЫ НАСТАВНИКОВ ===== -->
         <div class="tab-pane fade" id="teacher-contests" role="tabpanel">
             <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                 <div>
@@ -416,7 +434,7 @@
                     <a href="?sort=result" class="sort-link">по результату</a>
                 </div>
                 <a href="/add_teacher_in_contest?teacher_id={{ teacher.id }}" class="btn-add">
-                    <i class="bi bi-plus-circle"></i> Добавить участие
+                    <i class="bi bi-plus-circle me-1"></i> Добавить участие
                 </a>
             </div>
             {% if teacher_contests %}
@@ -447,9 +465,9 @@
                         </td>
                         <td>
                             {% if tc.place %}
-                            {% if tc.place == 1 %}1 место
-                            {% elif tc.place == 2 %}2 место
-                            {% elif tc.place == 3 %}3 место
+                            {% if tc.place == 1 %}🥇 1 место
+                            {% elif tc.place == 2 %}🥈 2 место
+                            {% elif tc.place == 3 %}🥉 3 место
                             {% else %}{{ tc.place }} место
                             {% endif %}
                             {% elif tc.rank %}
@@ -490,14 +508,10 @@
             <div class="empty-state">
                 <i class="bi bi-trophy"></i>
                 <p>Нет записей об участии в конкурсах</p>
-                <a href="/add_teacher_in_contest?teacher_id={{ teacher.id }}" class="btn-add">
-                    <i class="bi bi-plus-circle"></i> Добавить первый конкурс
-                </a>
             </div>
             {% endif %}
         </div>
 
-        <!-- ===== ВКЛАДКА 4: КОНКУРСЫ ДЕТЕЙ ===== -->
         <div class="tab-pane fade" id="student-contests" role="tabpanel">
             <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                 <div>
@@ -507,7 +521,7 @@
                     <a href="?sort=result" class="sort-link">по результату</a>
                 </div>
                 <a href="/add_student_in_contest?teacher_id={{ teacher.id }}" class="btn-add">
-                    <i class="bi bi-plus-circle"></i> Добавить участие
+                    <i class="bi bi-plus-circle me-1"></i> Добавить участие
                 </a>
             </div>
             {% if student_contests %}
@@ -525,35 +539,36 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for sc in student_contests|sort(attribute='student_contest.date', reverse=True) %}
+                    {% for sc in student_contests %}
                     <tr>
-                        <td><strong>{{ sc.student_contest.name if sc.student_contest else '—' }}</strong></td>
-                        <td>{{ sc.student_contest.level.name if sc.student_contest and sc.student_contest.level else '—'
-                            }}
-                        </td>
+                        <td><strong>{{ sc.contest.name if sc.contest else '—' }}</strong></td>
+                        <td>{{ sc.contest.level.name if sc.contest and sc.contest.level else '—' }}</td>
                         <td>
-                            {% if sc.student_contest and sc.student_contest.date %}
-                            {{ sc.student_contest.date.strftime('%d.%m.%Y') }}
-                            {% if sc.student_contest.end_date %}
-                            — {{ sc.student_contest.end_date.strftime('%d.%m.%Y') }}
+                            {% if sc.contest and sc.contest.date %}
+                            {{ sc.contest.date.strftime('%d.%m.%Y') }}
+                            {% if sc.contest.end_date %}
+                            — {{ sc.contest.end_date.strftime('%d.%m.%Y') }}
                             {% endif %}
                             {% else %}—{% endif %}
                         </td>
                         <td>
-                            {% if sc.place %}
-                            {% if sc.place == 1 %}1 место
-                            {% elif sc.place == 2 %}2 место
-                            {% elif sc.place == 3 %}3 место
-                            {% else %}{{ sc.place }} место
+                            {% if sc.result %}
+                            {% if sc.result == 'победитель' %}🥇 Победитель
+                            {% elif sc.result == 'призер' %}🥈 Призер
+                            {% elif sc.result == 'участник' %}📋 Участник
+                            {% else %}{{ sc.result }}
                             {% endif %}
-                            {% elif sc.rank %}
-                            {{ sc.rank }}
                             {% else %}—{% endif %}
                         </td>
-                        <td>{{ sc.student.surename ~ ' ' ~ sc.student.name if sc.student else '—' }}</td>
                         <td>
-                            {% if sc.student_contest and sc.student_contest.link %}
-                            <a href="{{ sc.student_contest.link }}" target="_blank" class="doc-link"
+                            {% if sc.student %}
+                            {{ sc.student.surename }} {{ sc.student.name }}
+                            {% if sc.student.patronymic %}{{ sc.student.patronymic }}{% endif %}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            {% if sc.link_to_document %}
+                            <a href="{{ sc.link_to_document }}" target="_blank" class="doc-link"
                                title="Просмотреть документ">
                                 <i class="bi bi-eye-fill"></i>
                             </a>
@@ -585,9 +600,6 @@
             <div class="empty-state">
                 <i class="bi bi-award"></i>
                 <p>Нет записей об участии детей в конкурсах</p>
-                <a href="/add_student_in_contest?teacher_id={{ teacher.id }}" class="btn-add">
-                    <i class="bi bi-plus-circle"></i> Добавить первый конкурс
-                </a>
             </div>
             {% endif %}
         </div>
@@ -595,7 +607,6 @@
     </div>
 </div>
 
-<!-- ===== МОДАЛКА ДЛЯ ФОТО ===== -->
 <div id="photoModal" class="modal-photo" onclick="closePhotoModal()">
     <span class="close-modal">&times;</span>
     <img class="modal-photo-content" id="modalImage">
