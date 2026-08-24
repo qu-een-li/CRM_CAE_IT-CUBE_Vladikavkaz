@@ -293,14 +293,24 @@
                         <h6 class="fw-bold"><i class="bi bi-envelope-fill text-danger"></i> Контактная информация</h6>
                         <hr>
                         <p><span class="info-label">Email:</span> {{ teacher.email or '—' }}</p>
-                        <p><span class="info-label">Телефон:</span> {{ teacher.phone or '—' }}</p>
+                        <p><span class="info-label">Телефон:</span>
+                            {% if teacher.phone %}
+                            {% set phone_str = teacher.phone|string %}
+                            {% if phone_str|length == 11 %}
+                            +7 {{ phone_str[1:4] }} {{ phone_str[4:7] }}-{{ phone_str[7:9] }}-{{ phone_str[9:11] }}
+                            {% else %}
+                            {{ phone_str }}
+                            {% endif %}
+                            {% else %}—{% endif %}
+                        </p>
                         <p><span class="info-label">Дата рождения:</span>
                             {{ teacher.birthday.strftime('%d.%m.%Y') if teacher.birthday else '—' }}</p>
                     </div>
                     <div class="info-card">
                         <h6 class="fw-bold"><i class="bi bi-building-fill text-danger"></i> Работа</h6>
                         <hr>
-                        <p><span class="info-label">Условия работы:</span> {{ teacher.work_condition or 'основное место работы' }}</p>
+                        <p><span class="info-label">Условия работы:</span> {{ teacher.work_condition or 'основное место
+                            работы' }}</p>
                         <p><span class="info-label">Ставка:</span> {{ teacher.rate or 1.0 }}</p>
                         <p><span class="info-label">Категория:</span>
                             {% if teacher.category == '1 категория' %}
@@ -427,9 +437,12 @@
             <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                 <div>
                     <span class="text-muted small">Сортировать: </span>
-                    <a href="?sort=date#teacher-contests" class="sort-link {% if sort_by == 'date' %}active{% endif %}">по дате</a>
-                    <a href="?sort=level#teacher-contests" class="sort-link {% if sort_by == 'level' %}active{% endif %}">по уровню</a>
-                    <a href="?sort=result#teacher-contests" class="sort-link {% if sort_by == 'result' %}active{% endif %}">по результату</a>
+                    <a href="?sort=date#teacher-contests" class="sort-link {% if sort_by == 'date' %}active{% endif %}">по
+                        дате</a>
+                    <a href="?sort=level#teacher-contests"
+                       class="sort-link {% if sort_by == 'level' %}active{% endif %}">по уровню</a>
+                    <a href="?sort=result#teacher-contests"
+                       class="sort-link {% if sort_by == 'result' %}active{% endif %}">по результату</a>
                 </div>
                 <a href="/add_teacher_in_contest?teacher_id={{ teacher.id }}" class="btn-add">
                     <i class="bi bi-plus-circle me-1"></i> Добавить участие
@@ -455,7 +468,8 @@
                         <td>
                             <strong>
                                 {% if tc.name_contest %}
-                                <a href="/teachers_contests/{{ tc.name_contest.id }}" class="text-danger fw-bold text-decoration-none">
+                                <a href="/teachers_contests/{{ tc.name_contest.id }}"
+                                   class="text-danger fw-bold text-decoration-none">
                                     {{ tc.name_contest.name }}
                                 </a>
                                 {% else %}
@@ -492,7 +506,8 @@
                                 <i class="bi bi-eye-fill"></i>
                             </a>
                             {% elif tc.name_contest and tc.name_contest.link %}
-                            <a href="{{ tc.name_contest.link }}" target="_blank" class="doc-link" title="Просмотреть документ">
+                            <a href="{{ tc.name_contest.link }}" target="_blank" class="doc-link"
+                               title="Просмотреть документ">
                                 <i class="bi bi-eye-fill"></i>
                             </a>
                             {% else %}

@@ -377,14 +377,15 @@
 
 {% block content %}
 {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        {% for category, message in messages %}
-            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert" style="width: 98%; margin: 0 auto 15px auto;">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
+{% if messages %}
+{% for category, message in messages %}
+<div class="alert alert-{{ category }} alert-dismissible fade show" role="alert"
+     style="width: 98%; margin: 0 auto 15px auto;">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endfor %}
+{% endif %}
 {% endwith %}
 <div class="container-fluid teachers-page">
 
@@ -408,8 +409,8 @@
 
                     <label class="switch">
                         <input type="checkbox" id="filterToggle"
-                               {% if show_all == '1' %}checked{% endif %}
-                               onchange="toggleFilter(this)">
+                               {% if show_all== '1' %}checked{% endif %}
+                        onchange="toggleFilter(this)">
                         <span class="slider"></span>
                     </label>
 
@@ -424,66 +425,75 @@
         <div class="table-container">
             <table class="table table-hover table-sm mb-0">
                 <thead>
-                    <tr>
-                        <th style="width: 60px;">Фото</th>
-                        <th>ФИО наставника</th>
-                        <th>Телефон</th>
-                        <th>Email</th>
-                        <th>Категория</th>
-                        <th style="width: 80px;">Ставка</th>
-                        <th style="width: 80px;">Стаж</th>
-                    </tr>
+                <tr>
+                    <th style="width: 60px;">Фото</th>
+                    <th>ФИО наставника</th>
+                    <th>Телефон</th>
+                    <th>Email</th>
+                    <th>Категория</th>
+                    <th style="width: 80px;">Ставка</th>
+                    <th style="width: 80px;">Стаж</th>
+                </tr>
                 </thead>
                 <tbody>
-                    {% for teacher in teachers %}
-                    <tr>
-                        <td>
-                            {% if teacher.personal_photos and teacher.personal_photos != "anonymous.jpg" %}
-                                {% set photo_url = url_for('uploaded_file', filename=teacher.personal_photos) %}
-                                <img src="{{ photo_url }}"
-                                     class="teacher-photo"
-                                     alt="Фото {{ teacher.surename }}"
-                                     onclick="showPhotoModal('{{ photo_url }}')"
-                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                <div class="no-photo" style="display: none;" onclick="showPhotoModal(null)">
-                                    <i class="bi bi-person-circle"></i>
-                                </div>
-                            {% else %}
-                                <div class="no-photo" onclick="showPhotoModal(null)">
-                                    <i class="bi bi-person-circle"></i>
-                                </div>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <a href="/teachers/{{ teacher.id }}" title="Профиль" class="teacher-name-link">
-                                {{ teacher.surename }} {{ teacher.name }}
-                                {% if teacher.patronymic %}{{ teacher.patronymic }}{% endif %}
-                            </a>
-                        </td>
-                        <td>{{ teacher.phone }}</td>
-                        <td>{{ teacher.email }}</td>
-                        <td>
-                            {% if teacher.category == '1 категория' %}
-                                <span class="badge-category first">1 категория</span>
-                            {% elif teacher.category == 'высшая категория' %}
-                                <span class="badge-category highest">высшая категория</span>
-                            {% elif teacher.category %}
-                                <span class="badge-category">{{ teacher.category }}</span>
-                            {% else %}
-                                <span class="badge-category without">без категории</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ teacher.rate or 1.0 }}</td>
-                        <td>{{ teacher.get_experience() }}</td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="7" class="text-center py-4" style="color: #6c757d;">
-                            <i class="bi bi-inbox" style="font-size: 28px;"></i><br>
-                            Нет наставников
-                        </td>
-                    </tr>
-                    {% endfor %}
+                {% for teacher in teachers %}
+                <tr>
+                    <td>
+                        {% if teacher.personal_photos and teacher.personal_photos != "anonymous.jpg" %}
+                        {% set photo_url = url_for('uploaded_file', filename=teacher.personal_photos) %}
+                        <img src="{{ photo_url }}"
+                             class="teacher-photo"
+                             alt="Фото {{ teacher.surename }}"
+                             onclick="showPhotoModal('{{ photo_url }}')"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="no-photo" style="display: none;" onclick="showPhotoModal(null)">
+                            <i class="bi bi-person-circle"></i>
+                        </div>
+                        {% else %}
+                        <div class="no-photo" onclick="showPhotoModal(null)">
+                            <i class="bi bi-person-circle"></i>
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="/teachers/{{ teacher.id }}" title="Профиль" class="teacher-name-link">
+                            {{ teacher.surename }} {{ teacher.name }}
+                            {% if teacher.patronymic %}{{ teacher.patronymic }}{% endif %}
+                        </a>
+                    </td>
+                    <td>
+                        {% if teacher.phone %}
+                        {% set phone_str = teacher.phone|string %}
+                        {% if phone_str|length == 11 %}
+                        +7 {{ phone_str[1:4] }} {{ phone_str[4:7] }}-{{ phone_str[7:9] }}-{{ phone_str[9:11] }}
+                        {% else %}
+                        {{ phone_str }}
+                        {% endif %}
+                        {% else %}—{% endif %}
+                    </td>
+                    <td>{{ teacher.email }}</td>
+                    <td>
+                        {% if teacher.category == '1 категория' %}
+                        <span class="badge-category first">1 категория</span>
+                        {% elif teacher.category == 'высшая категория' %}
+                        <span class="badge-category highest">высшая категория</span>
+                        {% elif teacher.category %}
+                        <span class="badge-category">{{ teacher.category }}</span>
+                        {% else %}
+                        <span class="badge-category without">без категории</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ teacher.rate or 1.0 }}</td>
+                    <td>{{ teacher.get_experience() }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center py-4" style="color: #6c757d;">
+                        <i class="bi bi-inbox" style="font-size: 28px;"></i><br>
+                        Нет наставников
+                    </td>
+                </tr>
+                {% endfor %}
                 </tbody>
             </table>
         </div>
