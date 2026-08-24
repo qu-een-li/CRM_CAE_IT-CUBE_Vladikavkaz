@@ -592,8 +592,7 @@
                         </td>
                         <td>
                             {% if sc.student %}
-                            {{ sc.student.surename }} {{ sc.student.name }}
-                            {% if sc.student.patronymic %}{{ sc.student.patronymic }}{% endif %}
+                            {{ sc.student.name_student }}
                             {% else %}—{% endif %}
                         </td>
                         <td>
