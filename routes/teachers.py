@@ -104,6 +104,7 @@ def add_teacher():
 
     return render_template("add_teacher.html", form=form)
 
+
 @app.route("/teachers")
 def list_of_teachers():
     """Страница списка учителей"""
@@ -185,7 +186,6 @@ def uploaded_file(filename):
 
 @app.route("/teachers/<int:teacher_id>")
 def teacher_profile(teacher_id):
-    """Страница профиля учителя"""
     try:
         session = db_session.create_session()
         teacher = session.query(Teacher).get(teacher_id)
@@ -198,6 +198,17 @@ def teacher_profile(teacher_id):
         teacher_contests = session.query(Teacher_in_Contests).filter_by(teacher_id=teacher_id).all()
         student_contests = session.query(Student_in_Contest).filter_by(teacher_id=teacher_id).all()
 
+        sort_by = request.args.get('sort', 'date')  # по умолчанию date
+
+        if sort_by == 'level':
+            teacher_contests = sorted(teacher_contests, key=lambda
+                x: x.name_contest.level.name if x.name_contest and x.name_contest.level else '')
+        elif sort_by == 'result':
+            teacher_contests = sorted(teacher_contests, key=lambda x: (x.place or 999, x.rank or ''))
+        else:
+            teacher_contests = sorted(teacher_contests,
+                                      key=lambda x: x.name_contest.date if x.name_contest else date.min, reverse=True)
+
         return render_template(
             "teacher_profile.html",
             teacher=teacher,
@@ -205,6 +216,7 @@ def teacher_profile(teacher_id):
             teacher_contests=teacher_contests,
             student_contests=student_contests,
             date=date,
+            sort_by=sort_by,
         )
     finally:
         session.close()
