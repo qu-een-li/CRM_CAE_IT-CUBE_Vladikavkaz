@@ -14,6 +14,11 @@ def add_teacher_qualification():
     courses = db_sess.query(QualificationCourse).all()
     preselected_teacher_id = request.args.get("teacher_id", type=int)
 
+    teacher_course_ids_map = {
+        t.id: {q.course_id for q in db_sess.query(TeacherQualification).filter_by(teacher_id=t.id).all()}
+        for t in teachers
+    }
+
     if request.method == 'POST':
         qualification = TeacherQualification()
 
@@ -29,8 +34,17 @@ def add_teacher_qualification():
             return render_template('add_teacher_qualification.html',
                                    teachers=teachers,
                                    courses=courses,
+                                   teacher_course_ids_map=teacher_course_ids_map,
                                    title='Добавить запись о повышении квалификации',
                                    preselected_teacher_id=preselected_teacher_id)
+
+        existing = db_sess.query(TeacherQualification).filter_by(
+            teacher_id=qualification.teacher_id,
+            course_id=qualification.course_id
+        ).first()
+        if existing:
+            flash('Этот курс уже добавлен преподавателю', 'warning')
+            return redirect(url_for('teacher_profile', teacher_id=qualification.teacher_id))
 
         qualification.registration_number = request.form.get('registration_number')
         qualification.certificate_number = request.form.get('certificate_number')
@@ -54,6 +68,7 @@ def add_teacher_qualification():
     return render_template('add_teacher_qualification.html',
                            teachers=teachers,
                            courses=courses,
+                           teacher_course_ids_map=teacher_course_ids_map,
                            title='Добавить запись о повышении квалификации',
                            preselected_teacher_id=preselected_teacher_id)
 

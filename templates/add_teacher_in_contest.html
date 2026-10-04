@@ -55,6 +55,14 @@
     .contest-info i {
         color: #dc3545;
     }
+    .section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 20px 0 15px 0;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #dee2e6;
+        color: #dc3545;
+    }
 </style>
 {% endblock %}
 
@@ -86,8 +94,7 @@
                     <option value="">Выберите преподавателя</option>
                     {% for teacher in teachers %}
                     <option value="{{ teacher.id }}"
-                            {% if preselected_teacher_id and preselected_teacher_id== teacher.id %}selected
-                            {% elif teacher_contest and teacher_contest.teacher_id== teacher.id %}selected{% endif %}>
+                            {% if preselected_teacher_id and preselected_teacher_id == teacher.id %}selected{% endif %}>
                         {{ teacher.surename }} {{ teacher.name }}
                         {% if teacher.patronymic %}{{ teacher.patronymic }}{% endif %}
                     </option>
@@ -98,16 +105,9 @@
             <div class="mb-4">
                 <label for="contest_id" class="form-label required-field">Конкурс</label>
                 <select class="form-select" id="contest_id" name="contest_id" required>
-                    <option value="">Выберите конкурс</option>
-                    {% for contest in contests %}
-                    <option value="{{ contest.id }}"
-                            {% if teacher_contest and teacher_contest.contest_id== contest.id %}selected{% endif %}>
-                        {{ contest.name }}
-                        {% if contest.date %} ({{ contest.date.strftime('%d.%m.%Y') }}){% endif %}
-                    </option>
-                    {% endfor %}
+                    <option value="">Сначала выберите преподавателя</option>
                 </select>
-                <div class="help-text">Выберите конкурс из списка</div>
+                <div class="help-text">Уже добавленные конкурсы отмечены серым и недоступны для выбора</div>
             </div>
 
             <div id="contestInfo" class="contest-info" style="display: none;">
@@ -124,28 +124,17 @@
                     <label for="place" class="form-label">Место</label>
                     <select class="form-select" id="place" name="place">
                         <option value="">Выберите место</option>
-                        <option value="1" {% if teacher_contest and teacher_contest.place== 1 %}selected{% endif %}>🥇 1
-                            место
-                        </option>
-                        <option value="2" {% if teacher_contest and teacher_contest.place== 2 %}selected{% endif %}>🥈 2
-                            место
-                        </option>
-                        <option value="3" {% if teacher_contest and teacher_contest.place== 3 %}selected{% endif %}>🥉 3
-                            место
-                        </option>
-                        <option value="4" {% if teacher_contest and teacher_contest.place== 4 %}selected{% endif %}>4
-                            место
-                        </option>
-                        <option value="5" {% if teacher_contest and teacher_contest.place== 5 %}selected{% endif %}>5
-                            место
-                        </option>
+                        <option value="1">🥇 1 место</option>
+                        <option value="2">🥈 2 место</option>
+                        <option value="3">🥉 3 место</option>
+                        <option value="4">4 место</option>
+                        <option value="5">5 место</option>
                     </select>
                     <div class="help-text">Занятое место в конкурсе</div>
                 </div>
                 <div class="col-md-6">
                     <label for="rank" class="form-label">Результат / Звание</label>
                     <input type="text" class="form-control" id="rank" name="rank"
-                           value="{{ teacher_contest.rank if teacher_contest else '' }}"
                            placeholder="Победитель, Лауреат, Дипломант, Участник">
                     <div class="help-text">Статус или звание</div>
                 </div>
@@ -154,8 +143,7 @@
             <div class="mb-3">
                 <label for="link" class="form-label">Ссылка на документ</label>
                 <input type="url" class="form-control" id="link" name="link"
-                       placeholder="https://example.com/document"
-                       value="{{ teacher_contest.link if teacher_contest else '' }}">
+                       placeholder="https://example.com/document">
                 <small class="text-muted">Ссылка на сертификат, диплом или другой документ</small>
             </div>
 
@@ -174,59 +162,89 @@
 
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const contestSelect = document.getElementById('contest_id');
-        const contestInfo = document.getElementById('contestInfo');
-        const contestInfoText = document.getElementById('contestInfoText');
+document.addEventListener('DOMContentLoaded', function() {
+    const teacherSelect = document.getElementById('teacher_id');
+    const contestSelect = document.getElementById('contest_id');
+    const contestInfo = document.getElementById('contestInfo');
+    const contestInfoText = document.getElementById('contestInfoText');
 
-        const contestsData = {
-            {% for contest in contests %}
-            {{ contest.id }}: {
-                name: "{{ contest.name|escape }}",
-                organizer: "{{ contest.organizer|escape }}",
-                date: "{{ contest.date.strftime('%d.%m.%Y') if contest.date else '' }}",
-                level: "{{ contest.level.name if contest.level else '' }}"
-            },
-            {% endfor %}
-        };
+    const allContests = [
+        {% for contest in contests %}
+        {
+            id: {{ contest.id }},
+            name: "{{ contest.name|escape }}",
+            organizer: "{{ contest.organizer|escape if contest.organizer else '' }}",
+            date: "{{ contest.date.strftime('%d.%m.%Y') if contest.date else '' }}",
+            level: "{{ contest.level.name if contest.level else '' }}"
+        },
+        {% endfor %}
+    ];
 
-        function showContestInfo() {
-            const contestId = contestSelect.value;
-            if (contestId && contestsData[contestId]) {
-                const contest = contestsData[contestId];
-                let info = contest.name;
-                if (contest.organizer) info += ` (${contest.organizer})`;
-                if (contest.date) info += `, ${contest.date}`;
-                if (contest.level) info += `, уровень: ${contest.level}`;
-                contestInfoText.textContent = info;
-                contestInfo.style.display = 'block';
-            } else {
-                contestInfo.style.display = 'none';
+    const teacherContestIds = {
+        {% for tid, cids in teacher_contest_ids_map.items() %}
+        "{{ tid }}": [{{ cids|join(',') }}],
+        {% endfor %}
+    };
+
+    function renderContests() {
+        const teacherId = teacherSelect.value;
+        const busy = teacherId ? (teacherContestIds[teacherId] || []) : [];
+
+        contestSelect.innerHTML = '<option value="">Выберите конкурс</option>';
+
+        allContests.forEach(function(c) {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.textContent = c.name + (c.date ? ` (${c.date})` : '');
+
+            if (busy.includes(c.id)) {
+                opt.disabled = true;
+                opt.style.color = '#adb5bd';
+                opt.style.backgroundColor = '#f8f9fa';
+                opt.textContent += ' — уже участвует';
             }
-        }
-
-        contestSelect.addEventListener('change', showContestInfo);
-        
-        if (contestSelect.value) {
-            showContestInfo();
-        }
-
-        const form = document.querySelector('form');
-        form.addEventListener('submit', function(e) {
-            const teacherSelect = document.getElementById('teacher_id');
-            if (!teacherSelect.value) {
-                e.preventDefault();
-                alert('Выберите преподавателя');
-                teacherSelect.focus();
-            }
-            
-            const contestSelect = document.getElementById('contest_id');
-            if (!contestSelect.value) {
-                e.preventDefault();
-                alert('Выберите конкурс');
-                contestSelect.focus();
-            }
+            contestSelect.appendChild(opt);
         });
+    }
+
+    function showContestInfo() {
+        const contestId = contestSelect.value;
+        const c = allContests.find(x => x.id == contestId);
+        if (c) {
+            let info = c.name;
+            if (c.organizer) info += ` (${c.organizer})`;
+            if (c.date) info += `, ${c.date}`;
+            if (c.level) info += `, уровень: ${c.level}`;
+            contestInfoText.textContent = info;
+            contestInfo.style.display = 'block';
+        } else {
+            contestInfo.style.display = 'none';
+        }
+    }
+
+    teacherSelect.addEventListener('change', function() {
+        renderContests();
+        contestInfo.style.display = 'none';
     });
+
+    contestSelect.addEventListener('change', showContestInfo);
+
+    if (teacherSelect.value) renderContests();
+
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        if (!teacherSelect.value) {
+            e.preventDefault();
+            alert('Выберите преподавателя');
+            teacherSelect.focus();
+            return;
+        }
+        if (!contestSelect.value) {
+            e.preventDefault();
+            alert('Выберите конкурс');
+            contestSelect.focus();
+        }
+    });
+});
 </script>
 {% endblock %}
