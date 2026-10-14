@@ -2,8 +2,6 @@ from flask import render_template, flash, redirect, url_for, request
 from data import db_session
 from data.level_contest import Level_contest
 from data.qualification_course import QualificationCourse
-from data.teacher_qualification import TeacherQualification
-from data.teacher import Teacher
 from datetime import date, datetime
 from app import app
 
@@ -56,7 +54,10 @@ def add_qualification_course():
         course.organization = request.form.get('organization')
         course.link = request.form.get('link')
         course.place = request.form.get('place')
-        course.level_id = int(request.form.get("level_id"))
+
+        level_id = request.form.get('level_id')
+        if level_id:
+            course.level_id = int(level_id)
 
         db_sess.add(course)
         db_sess.commit()
@@ -109,7 +110,10 @@ def edit_qualification_course(course_id):
         course.place = request.form.get('place')
         course.link = request.form.get('link')
         course.description = request.form.get('description')
-        course.level_id = int(request.form.get("level_id"))
+
+        level_id = request.form.get('level_id')
+        if level_id:
+            course.level_id = int(level_id)
 
         db_sess.commit()
         flash('Курс успешно обновлен!', 'success')
@@ -119,3 +123,22 @@ def edit_qualification_course(course_id):
                            title='Редактировать курс',
                            levels=levels,
                            course=course)
+
+
+@app.route('/delete_qualification_course/<int:course_id>', methods=['POST'])
+def delete_qualification_course(course_id):
+    db_sess = db_session.create_session()
+    course = db_sess.query(QualificationCourse).get(course_id)
+    if not course:
+        flash('Курс не найден', 'danger')
+        return redirect(url_for('qualification_courses'))
+
+    try:
+        db_sess.delete(course)
+        db_sess.commit()
+        flash('Курс успешно удален!', 'success')
+    except Exception as e:
+        db_sess.rollback()
+        flash(f'Ошибка при удалении: {str(e)}', 'danger')
+
+    return redirect(url_for('qualification_courses'))

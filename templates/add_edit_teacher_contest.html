@@ -2,9 +2,6 @@
 
 {% block title %}{{ title }} | IT-Куб Владикавказ{% endblock %}
 
-{% block page_title %}{{ title }}{% endblock %}
-{% block page_subtitle %}Заполните информацию о конкурсе{% endblock %}
-
 {% block extra_css %}
 <style>
     .contest-container {
@@ -124,17 +121,17 @@
                 </div>
 
                 <div class="col-md-6 mb-3">
-                    <label for="link_contest" class="form-label">Ссылка на конкурс</label>
-                <input type="url" class="form-control" id="link_contest" name="link_contest"
-                       value="{{ contest.link_contest if contest else '' }}"
-                       placeholder="https://example.com/contest" required>
+                    <label for="link" class="form-label">Ссылка на конкурс</label>
+                    <input type="url" class="form-control" id="link" name="link"
+                           value="{{ contest.link if contest else '' }}"
+                           placeholder="https://example.com/contest">
                 </div>
             </div>
 
             <div class="mb-3">
-                <label for="contest_organizer" class="form-label">Организатор</label>
-                <input type="text" class="form-control" id="contest_organizer" name="contest_organizer"
-                       value="{{ contest.contest_organizer if contest else '' }}"
+                <label for="organizer" class="form-label">Организатор</label>
+                <input type="text" class="form-control" id="organizer" name="organizer"
+                       value="{{ contest.organizer if contest else '' }}"
                        placeholder="Введите организатора" required>
             </div>
 
@@ -159,7 +156,6 @@
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Календарь для даты начала
         const startDateInput = document.getElementById('start_date');
         if (startDateInput) {
             const startPicker = flatpickr(startDateInput, {
@@ -182,7 +178,6 @@
             });
         }
 
-        // Календарь для даты окончания
         const endDateInput = document.getElementById('end_date');
         if (endDateInput) {
             const endPicker = flatpickr(endDateInput, {
@@ -205,7 +200,6 @@
             });
         }
 
-        // Валидация: дата окончания не может быть раньше даты начала
         if (startDateInput && endDateInput) {
             function parseDate(dateStr) {
                 const parts = dateStr.split('.');
@@ -219,14 +213,12 @@
                 if (startDateInput.value && endDateInput.value) {
                     const startDate = parseDate(startDateInput.value);
                     const endDate = parseDate(endDateInput.value);
-
                     if (startDate && endDate && endDate < startDate) {
                         alert('Дата окончания не может быть раньше даты начала!');
                         endDateInput.value = '';
                     }
                 }
             }
-
             endDateInput.addEventListener('change', validateDates);
             startDateInput.addEventListener('change', validateDates);
         }

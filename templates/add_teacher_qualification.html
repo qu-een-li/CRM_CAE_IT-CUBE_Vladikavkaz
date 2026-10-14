@@ -10,7 +10,7 @@
     .form-container {
         background-color: white;
         border-radius: 10px;
-padding: 2rem;
+        padding: 2rem;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         margin-bottom: 2rem;
         max-width: 700px;
@@ -88,7 +88,6 @@ padding: 2rem;
         <form method="post" novalidate>
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-            <!-- Выбор преподавателя -->
             <div class="mb-4">
                 <label for="teacher_id" class="form-label required-field">Преподаватель</label>
                 <select class="form-select" id="teacher_id" name="teacher_id" required>
@@ -103,19 +102,12 @@ padding: 2rem;
                 </select>
             </div>
 
-            <!-- Выбор курса -->
             <div class="mb-3">
                 <label for="course_id" class="form-label required-field">Курс повышения квалификации</label>
                 <select class="form-select" id="course_id" name="course_id" required>
-                    <option value="">Выберите курс</option>
-                    {% for course in courses %}
-                    <option value="{{ course.id }}">
-                        {{ course.program_name }}
-                        {% if course.hours %} ({{ course.hours }} ч.){% endif %}
-                        {% if course.organization %} — {{ course.organization }}{% endif %}
-                    </option>
-                    {% endfor %}
+                    <option value="">Сначала выберите преподавателя</option>
                 </select>
+                <div class="help-text">Уже добавленные курсы отмечены серым и недоступны для выбора</div>
             </div>
 
             <div class="section-title">
@@ -171,24 +163,68 @@ padding: 2rem;
 
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Валидация формы
-        const form = document.querySelector('form');
-        form.addEventListener('submit', function(e) {
-            const teacherSelect = document.getElementById('teacher_id');
-            if (!teacherSelect.value) {
-                e.preventDefault();
-                alert('Выберите преподавателя');
-                teacherSelect.focus();
-            }
+document.addEventListener('DOMContentLoaded', function() {
+    const teacherSelect = document.getElementById('teacher_id');
+    const courseSelect = document.getElementById('course_id');
 
-            const courseSelect = document.getElementById('course_id');
-            if (!courseSelect.value) {
-                e.preventDefault();
-                alert('Выберите курс');
-                courseSelect.focus();
+    const allCourses = [
+        {% for course in courses %}
+        {
+            id: {{ course.id }},
+            name: "{{ course.program_name|escape }}",
+            hours: {{ course.hours if course.hours else 'null' }},
+            organization: "{{ course.organization|escape if course.organization else '' }}"
+        },
+        {% endfor %}
+    ];
+
+    const teacherCourseIds = {
+        {% for tid, cids in teacher_course_ids_map.items() %}
+        "{{ tid }}": [{{ cids|join(',') }}],
+        {% endfor %}
+    };
+
+    function renderCourses() {
+        const teacherId = teacherSelect.value;
+        const busy = teacherId ? (teacherCourseIds[teacherId] || []) : [];
+
+        courseSelect.innerHTML = '<option value="">Выберите курс</option>';
+
+        allCourses.forEach(function(c) {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            let label = c.name;
+            if (c.hours) label += ` (${c.hours} ч.)`;
+            if (c.organization) label += ` — ${c.organization}`;
+            opt.textContent = label;
+
+            if (busy.includes(c.id)) {
+                opt.disabled = true;
+                opt.style.color = '#adb5bd';
+                opt.style.backgroundColor = '#f8f9fa';
+                opt.textContent += ' — уже добавлен';
             }
+            courseSelect.appendChild(opt);
         });
+    }
+
+    teacherSelect.addEventListener('change', renderCourses);
+    if (teacherSelect.value) renderCourses();
+
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        if (!teacherSelect.value) {
+            e.preventDefault();
+            alert('Выберите преподавателя');
+            teacherSelect.focus();
+            return;
+        }
+        if (!courseSelect.value) {
+            e.preventDefault();
+            alert('Выберите курс');
+            courseSelect.focus();
+        }
     });
+});
 </script>
 {% endblock %}

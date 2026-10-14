@@ -15,6 +15,7 @@ class Teacher_in_Contests(SqlAlchemyBase):
     teacher_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("teachers.id"), nullable=False)
     place = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
     rank = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    link = sqlalchemy.Column(sqlalchemy.String, nullable=True)
 
     name_contest = relationship("Contest_for_Teachers", back_populates="teachers")
     name_teacher = relationship("Teacher", back_populates="contests")

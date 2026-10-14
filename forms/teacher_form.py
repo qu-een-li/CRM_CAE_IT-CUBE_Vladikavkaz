@@ -40,6 +40,7 @@ class TeacherForm(FlaskForm):
     experience_start = StringField("Дата начала педагогической деятельности", validators=[DataRequired()])
     hire_date = StringField("Дата приема на работу", validators=[DataRequired()])
     graduation_date = StringField("Дата завершения обучения в ВУЗе", validators=[Optional()])
+    dismissal_date = StringField("Дата увольнения", validators=[Optional()])
 
     photo = FileField(
         "Фотография",

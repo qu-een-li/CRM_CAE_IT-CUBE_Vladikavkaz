@@ -14,6 +14,7 @@ class TeacherQualification(SqlAlchemyBase):
     issue_date = sqlalchemy.Column(sqlalchemy.Date, nullable=True)
     link = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     certificate_number = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    issued_by = sqlalchemy.Column(sqlalchemy.String, nullable=True)  # ← ДОБАВЛЕНО!
 
     teacher = relationship("Teacher", back_populates="qualifications")
     course = relationship("QualificationCourse", back_populates="teacher_qualifications")

@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} | IT-Куб Владикавказ{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        background-color: white;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+    }
+    .btn-save {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white;
+    }
+    .btn-save:hover {
+        background-color: #bb2d3b;
+        border-color: #b02a37;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="form-container">
+        <h2 class="mb-4 text-center">
+            <i class="bi bi-pencil-fill me-2 text-danger"></i>
+            Редактирование участия в конкурсе
+        </h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="mb-3">
+                <label for="teacher_id" class="form-label">Наставник</label>
+                <select class="form-select" id="teacher_id" name="teacher_id" required>
+                    {% for teacher in teachers %}
+                    <option value="{{ teacher.id }}" {% if preselected_teacher_id == teacher.id or teacher_contest.teacher_id == teacher.id %}selected{% endif %}>
+                        {{ teacher.surename }} {{ teacher.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="contest_id" class="form-label">Конкурс</label>
+                <select class="form-select" id="contest_id" name="contest_id" required>
+                    <option value="">Выберите конкурс</option>
+                    {% for contest in contests %}
+                    <option value="{{ contest.id }}" {% if teacher_contest.contest_id == contest.id %}selected{% endif %}>
+                        {{ contest.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="place" class="form-label">Место</label>
+                    <input type="number" class="form-control" id="place" name="place"
+                           value="{{ teacher_contest.place if teacher_contest.place else '' }}"
+                           placeholder="1, 2, 3...">
+                    <small class="text-muted">Только число (1, 2, 3)</small>
+                </div>
+                <div class="col-md-6">
+                    <label for="rank" class="form-label">Результат</label>
+                    <input type="text" class="form-control" id="rank" name="rank"
+                           value="{{ teacher_contest.rank if teacher_contest.rank else '' }}"
+                           placeholder="Победитель, призер, участник...">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="link" class="form-label">Ссылка на документ</label>
+                <input type="url" class="form-control" id="link" name="link"
+                       value="{{ teacher_contest.link if teacher_contest.link else '' }}"
+                       placeholder="https://example.com/diplom.pdf">
+                <small class="text-muted">Ссылка на сертификат, диплом или другой документ</small>
+            </div>
+
+            <div class="d-flex justify-content-between pt-3">
+                <a href="{{ url_for('teacher_profile', teacher_id=teacher_contest.teacher_id) }}" class="btn btn-outline-secondary">Отмена</a>
+                <button type="submit" class="btn btn-save"><i class="bi bi-save"></i> Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
