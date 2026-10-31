@@ -21,9 +21,8 @@ class Group(SqlAlchemyBase, DictConvertable):
     level_of_education = sqlalchemy.Column(
         sqlalchemy.String, sqlalchemy.Enum("вводный", "углубленный", "проектный"), nullable=False
     )
-    group_type = sqlalchemy.Column(
-        sqlalchemy.String, sqlalchemy.Enum("семестровый", "интенсив", "мастер-класс"), nullable=False
-    )
+    # список типов задаётся в base_values.json (страница /settings), в каждом центре он свой
+    group_type = sqlalchemy.Column(sqlalchemy.String, nullable=False)
 
     description = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     duration = sqlalchemy.Column(sqlalchemy.Time, nullable=False)

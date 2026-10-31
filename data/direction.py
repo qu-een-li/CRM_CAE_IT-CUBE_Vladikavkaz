@@ -17,17 +17,10 @@ class Direction(SqlAlchemyBase, DictConvertable):
 
     @staticmethod
     def init_data(db_session):
-        directions = [
-            "Программирование на Python",
-            "Мобильная разработка",
-            "VR/AR",
-            "Системное администрирование",
-            "Основы логики и алгоритмики",
-            "Робототехника",
-        ]
+        from data.base_values import load_base_values
 
-        for direction_name in directions:
-            if not db_session.query(Direction).filter_by(name=direction_name).first():
-                direction = Direction(name=direction_name)
+        for d in load_base_values()["directions"]:
+            if not db_session.query(Direction).filter_by(name=d["name"]).first():
+                direction = Direction(name=d["name"], icon_bootstrap=d.get("icon") or "bi-code-slash")
                 db_session.add(direction)
         db_session.commit()

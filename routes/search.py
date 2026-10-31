@@ -6,14 +6,17 @@ from data.student import Student
 from api.api_cities import get_cities_data
 from api.api_schools import get_schools_data
 from datetime import datetime
+from routes.students import get_target_group
 
 
 @app.route("/search", methods=["POST", "GET"])
 def search():
     """Форма поиска ученика"""
     form = SearchForm()
+    session = db_session.create_session()
+    # если поиск открыт со страницы группы — в результатах будет кнопка "Добавить в группу"
+    target_group = get_target_group(session)
     if request.method == "POST":
-        session = db_session.create_session()
         query = session.query(Student)
         if form.name_student.data:
             query = query.filter(Student.name_student.ilike(f"%{form.name_student.data}%"))
@@ -51,5 +54,6 @@ def search():
         if form.adres_of_living.data:
             query = query.filter(Student.adres_of_living.ilike(f"%{form.adres_of_living.data}%"))
         students = query.all()
-        return render_template("students.html", students=students)
-    return render_template("search.html", form=form)
+        in_group_ids = {s.id for s in target_group.students} if target_group else set()
+        return render_template("students.html", students=students, target_group=target_group, in_group_ids=in_group_ids)
+    return render_template("search.html", form=form, target_group=target_group)

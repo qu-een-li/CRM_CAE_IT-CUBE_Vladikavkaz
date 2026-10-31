@@ -223,6 +223,8 @@ def get_more_days():
     #     schedules = [s for s in schedules if s.group_id == int(group_id)]
     sess = create_session()
     stmt = select(Schedule)
+    if group_id:
+        stmt = stmt.where(Schedule.group_id == int(group_id))
     schedules = sess.scalars(stmt).all()
     unique_times = sorted(
         list(set(

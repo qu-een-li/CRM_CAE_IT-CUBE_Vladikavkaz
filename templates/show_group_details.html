@@ -106,38 +106,85 @@
   .no-results, .loading {
     padding: 20px; text-align: center; color: #6c757d; font-style: italic;
   }
+
+  /* Панель кнопок над таблицей */
+  .group-toolbar {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    padding: 12px 16px; border-bottom: 1px solid #dee2e6;
+  }
+  .group-toolbar .count { margin-left: auto; color: #6c757d; font-size: 0.9rem; }
+
+  .edit-btn { border-color: #0d6efd; color: #0d6efd; }
+  .edit-btn:hover { background-color: #0d6efd; color: white; }
+  .settings-btn { border-color: #6c757d; color: #6c757d; }
+  .settings-btn:hover, .settings-btn.show { background-color: #6c757d; color: white; }
+
+  .other-groups { font-size: 0.75rem; color: #6c757d; font-weight: normal; }
+  .other-groups a { color: #6c757d; }
+  .candidate-row { background-color: #fff8e1; }
 </style>
 {% endblock %}
 
+
 {% block extra_js %}
 <script>
-// JS логика осталась прежней, добавлены только необходимые переменные
-function delete_student_from_group(student_id, group_id) {
-    if (!confirm('Вы уверены, что хотите удалить этого ученика из группы?')) return;
+const currentGroupId = "{{ group.id }}";
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-    fetch(`/groups/${group_id}/${student_id}`, { method: 'DELETE' })
-    .then(response => {
-        if (response.ok) {
-            const row = document.getElementById(`student-row-${student_id}`);
-            if (row) {
-                row.style.opacity = '0';
-                setTimeout(() => row.remove(), 300);
-            }
-            // Проверка на пустоту после удаления
-            const remainingRows = document.querySelectorAll('tbody tr:not(.add-student-row):not(.empty-row)');
-            if (remainingRows.length === 0) {
-                document.querySelector('.student-table tbody').innerHTML = 
-                    '<tr class="empty-row"><td colspan="10" class="empty-state">В группе пока нет участников</td></tr>' +
-                    document.querySelector('.add-student-row').outerHTML;
-            }
-        } else {
-            alert('Ошибка при удалении');
-        }
-    });
+// общий POST/DELETE-запрос с CSRF-токеном; при ошибке показываем текст с сервера
+function groupRequest(url, method, body) {
+    return fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        body: body ? JSON.stringify(body) : undefined
+    }).then(res => res.json().catch(() => ({})).then(data => {
+        if (!res.ok) throw new Error(data.error || 'Ошибка сервера');
+        return data;
+    }));
 }
 
+// выпадающее меню "Настройки" не обрезается рамкой таблицы
+document.querySelectorAll('.settings-btn[data-bs-toggle="dropdown"]').forEach(el => {
+    new bootstrap.Dropdown(el, { popperConfig: { strategy: 'fixed' } });
+});
+
+function delete_student_from_group(student_id, group_id, name) {
+    if (!confirm(`Удалить ученика «${name}» из группы? Сам ученик останется в базе.`)) return;
+    groupRequest(`/groups/${group_id}/${student_id}`, 'DELETE')
+        .then(() => window.location.reload())
+        .catch(err => alert(err.message));
+}
+
+function changeStatus(student_id, status) {
+    groupRequest(`/groups/${currentGroupId}/${student_id}/status`, 'POST', { status: status })
+        .then(() => window.location.reload())
+        .catch(err => alert(err.message));
+}
+
+// ---- Перевод в другую группу ----
+let transferStudentId = null;
+
+function openTransferModal(student_id, name) {
+    transferStudentId = student_id;
+    document.getElementById('transferStudentName').textContent = name;
+    document.getElementById('transferGroupSelect').value = '';
+    document.getElementById('transferError').textContent = '';
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('transferModal')).show();
+}
+
+function confirmTransfer() {
+    const to_group_id = document.getElementById('transferGroupSelect').value;
+    if (!to_group_id) {
+        document.getElementById('transferError').textContent = 'Выберите группу';
+        return;
+    }
+    groupRequest(`/groups/${currentGroupId}/${transferStudentId}/transfer`, 'POST', { to_group_id: to_group_id })
+        .then(() => window.location.reload())
+        .catch(err => document.getElementById('transferError').textContent = err.message);
+}
+
+// ---- Быстрое добавление уже существующего ученика (поиск по имени без перехода на /search) ----
 let searchTimeout;
-const currentGroupId = "{{ group.id }}";
 
 function openAddStudentModal() {
     document.getElementById('addStudentModal').classList.add('active');
@@ -157,7 +204,7 @@ function searchStudents(query) {
         return;
     }
     document.getElementById('searchResults').innerHTML = '<div class="loading">Поиск...</div>';
-    
+
     searchTimeout = setTimeout(() => {
         fetch(`/students/search?q=${encodeURIComponent(query)}`)
             .then(res => res.json())
@@ -172,22 +219,20 @@ function displaySearchResults(students) {
         container.innerHTML = '<div class="no-results">Ученики не найдены</div>';
         return;
     }
-    container.innerHTML = students.map(s => `
-        <div class="search-result-item" onclick="addStudentToGroup('${s.id}')">
-            ${s.name_student || s.full_name || 'Без имени'}
-        </div>
-    `).join('');
+    container.innerHTML = '';
+    students.forEach(s => {
+        const item = document.createElement('div');
+        item.className = 'search-result-item';
+        item.textContent = s.name_student || s.full_name || 'Без имени';
+        item.onclick = () => addStudentToGroup(s.id);
+        container.appendChild(item);
+    });
 }
 
 function addStudentToGroup(studentId) {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-    fetch(`/group/${currentGroupId}/add/student/${studentId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
-        body: JSON.stringify({})
-    })
-    .then(res => res.ok ? window.location.reload() : res.text().then(t => alert('Ошибка: ' + t)))
-    .catch(err => alert('Ошибка сети: ' + err));
+    groupRequest(`/group/${currentGroupId}/add/student/${studentId}`, 'POST', {})
+        .then(() => window.location.reload())
+        .catch(err => alert(err.message));
 }
 
 document.getElementById('addStudentModal').addEventListener('click', function(e) {
@@ -201,7 +246,37 @@ document.addEventListener('keydown', function(e) {
 
 {% block content %}
 <div class="container-fluid mt-4 px-4">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
+            </div>
+        {% endfor %}
+    {% endwith %}
+
     <div class="card shadow-sm">
+        <!-- Кнопки добавления учеников в группу -->
+        <div class="group-toolbar">
+            <a href="/search?group_id={{ group.id }}" class="action-btn add-btn" title="Ученик уже добавлялся ранее — найти его и добавить в группу">
+                <i class="bi bi-search"></i> Найти ученика
+            </a>
+            <a href="/add?group_id={{ group.id }}" class="action-btn add-btn">
+                <i class="bi bi-person-plus"></i> Новый ученик
+            </a>
+            <a href="/add?group_id={{ group.id }}&status=candidate" class="action-btn add-btn">
+                <i class="bi bi-person-dash"></i> Новый кандидат
+            </a>
+            <button class="action-btn settings-btn" style="border-style: dashed;" onclick="openAddStudentModal()" title="Быстрый поиск по ФИО без перехода на страницу поиска">
+                <i class="bi bi-lightning"></i> Быстро добавить
+            </button>
+            <span class="count">
+                Всего: {{ students|length }}
+                {% set candidates = students|selectattr('group_status', 'equalto', statuses[1])|list %}
+                {% if candidates %} · кандидатов: {{ candidates|length }}{% endif %}
+            </span>
+        </div>
+
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-bordered table-hover student-table mb-0" style="width:100%;">
@@ -216,20 +291,34 @@ document.addEventListener('keydown', function(e) {
                             <th scope="col">Школа</th>
                             <th scope="col" style="width: 70px;">Класс</th>
                             <th scope="col" style="width: 70px;">Возраст</th>
-                            <th scope="col" style="width: 120px;">Действия</th>
+                            <th scope="col" style="width: 200px;">Действия</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% if students %}
                             {% for student in students %}
-                            <tr id="student-row-{{ student.id }}">
+                            {% set is_candidate = student.group_status == statuses[1] %}
+                            <tr id="student-row-{{ student.id }}" class="{{ 'candidate-row' if is_candidate }}">
                                 <th scope="row">{{ loop.index }}</th>
-                                <td class="fw-bold">{{ student.name_student or student.full_name }}</td>
+                                <td class="fw-bold">
+                                    {{ student.name_student or student.full_name }}
+                                    {% if student.is_candidate %}
+                                        <i class="bi bi-exclamation-circle text-warning" title="Заполнены не все данные ученика"></i>
+                                    {% endif %}
+                                    {% if student.other_groups %}
+                                        <div class="other-groups">
+                                            Также в:
+                                            {% for g in student.other_groups %}
+                                                <a href="/groups/{{ g.id }}">{{ g.name_of_group }}</a>{{ ", " if not loop.last }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </td>
                                 <td>
                                     {% if student.is_order %}
                                         <span class="badge bg-secondary">Приказ</span>
-                                    {% elif student.is_candidate  %}
-                                        <span class="badge bg-danger">Кандидат</span>
+                                    {% elif is_candidate %}
+                                        <span class="badge bg-warning text-dark">Кандидат</span>
                                     {% endif %}
                                 </td>
                                 <td>{{ student.parent_phone or '-' }}</td>
@@ -245,10 +334,37 @@ document.addEventListener('keydown', function(e) {
                                 <td class="text-center">{{ student.school_class or '-' }}</td>
                                 <td class="text-center">{{ student.age or '-' }}</td>
                                 <td class="text-center">
-                                    <button class="action-btn delete-btn" 
-                                            onclick="delete_student_from_group('{{ student.id }}', '{{ group.id }}')">
-                                        <i class="bi bi-trash"></i> Удалить
-                                    </button>
+                                    <a href="/edit_student/{{ student.id }}?next=/groups/{{ group.id }}" class="action-btn edit-btn">
+                                        <i class="bi bi-pencil"></i> Редактировать
+                                    </a>
+                                    <div class="dropdown d-inline-block">
+                                        <button class="action-btn settings-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Настройки">
+                                            <i class="bi bi-gear"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><h6 class="dropdown-header">Статус в группе</h6></li>
+                                            {% for st in statuses %}
+                                                <li>
+                                                    <button class="dropdown-item {{ 'active' if st == student.group_status }}"
+                                                            {% if st == student.group_status %}disabled{% endif %}
+                                                            onclick="changeStatus({{ student.id }}, {{ st.value }})">
+                                                        {{ st.title }}
+                                                    </button>
+                                                </li>
+                                            {% endfor %}
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <button class="dropdown-item" onclick="openTransferModal({{ student.id }}, {{ student.name_student|tojson|forceescape }})">
+                                                    <i class="bi bi-arrow-left-right"></i> Перевести в другую группу
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <button class="dropdown-item text-danger" onclick="delete_student_from_group({{ student.id }}, {{ group.id }}, {{ student.name_student|tojson|forceescape }})">
+                                                    <i class="bi bi-trash"></i> Удалить из группы
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -259,15 +375,6 @@ document.addEventListener('keydown', function(e) {
                                 </td>
                             </tr>
                         {% endif %}
-                        
-                        <!-- Строка с кнопкой добавления участника -->
-                        <tr class="add-student-row">
-                            <td colspan="10" class="text-center py-3">
-                                <button class="action-btn add-btn" onclick="openAddStudentModal()">
-                                    <i class="bi bi-plus-circle"></i> Добавить участника
-                                </button>
-                            </td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -275,16 +382,47 @@ document.addEventListener('keydown', function(e) {
     </div>
 </div>
 
-<!-- Модальное окно для добавления участника -->
+<!-- Модальное окно быстрого добавления участника -->
 <div id="addStudentModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
             <h3>Добавить участника в группу</h3>
             <button class="modal-close" onclick="closeAddStudentModal()">&times;</button>
         </div>
-        <input type="text" id="studentSearchInput" class="search-input" 
+        <input type="text" id="studentSearchInput" class="search-input"
                placeholder="Начните вводить имя ученика..." oninput="searchStudents(this.value)">
         <div id="searchResults" class="search-results"></div>
+    </div>
+</div>
+
+<!-- Модальное окно перевода в другую группу -->
+<div class="modal fade" id="transferModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="animation: none; padding: 0;">
+            <div class="modal-header px-3 pt-3 mb-0">
+                <h5 class="modal-title">Перевод в другую группу</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2">Ученик: <b id="transferStudentName"></b></p>
+                <select id="transferGroupSelect" class="form-select">
+                    <option value="">Выберите группу</option>
+                    {% for direction_name, groups_list in transfer_groups.items() %}
+                        <optgroup label="{{ direction_name }}">
+                            {% for g in groups_list %}
+                                <option value="{{ g.id }}">{{ g.name }}</option>
+                            {% endfor %}
+                        </optgroup>
+                    {% endfor %}
+                </select>
+                <small class="text-muted">Статус (ученик/кандидат) сохранится. Из текущей группы ученик будет убран.</small>
+                <div class="text-danger small mt-2" id="transferError"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-danger" onclick="confirmTransfer()">Перевести</button>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

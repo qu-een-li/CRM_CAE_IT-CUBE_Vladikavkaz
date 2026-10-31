@@ -12,16 +12,9 @@ class Auditorium(SqlAlchemyBase):
 
     @staticmethod
     def init_data(db_session):
-        auditoriums = [
-            "Программирование на Python",
-            "VR/AR разработка",
-            "Системное администрирование",
-            "Мобильная разработка",
-            "Программирование роботов",
-            "Основы логики и алгоритмики",
-        ]
+        from data.base_values import load_base_values
 
-        for name in auditoriums:
+        for name in load_base_values()["auditoriums"]:
             if not db_session.query(Auditorium).filter_by(name=name).first():
                 aud = Auditorium(name=name)
                 db_session.add(aud)

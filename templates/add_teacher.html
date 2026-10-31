@@ -82,6 +82,9 @@
         {% endwith %}
 
         <form action="/add_teacher" method="post" enctype="multipart/form-data" novalidate class="needs-validation">
+            {% if request.args.get('next') == 'add_group' or request.form.get('next') == 'add_group' %}
+            <input type="hidden" name="next" value="add_group">
+            {% endif %}
             {{ form.hidden_tag() }}
 
             <!-- ФИО -->

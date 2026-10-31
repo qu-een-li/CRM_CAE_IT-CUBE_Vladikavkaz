@@ -17,8 +17,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Обновление времени
     function updateTime() {
         const now = new Date();
-        const timeElement = document.querySelector('.time');
-        const dateElement = document.querySelector('.date');
+        const timeElement = document.getElementById('current-time');
+        const dateElement = document.getElementById('current-date');
+        if (!timeElement || !dateElement) return;
 
         const options = {
             hour: '2-digit',
@@ -89,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     updateTime();
-    setInterval(updateTime, 60000); // Обновление времени каждую минуту
+    setInterval(updateTime, 1000); // Обновление каждую секунду, чтобы минута менялась вовремя
 
     window.addEventListener('scroll', animateOnScroll);
     animateOnScroll(); // Запуск при загрузке

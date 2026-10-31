@@ -1,5 +1,8 @@
 from app import app
 from flask import render_template, request, redirect, flash
+from data.group import Group
+from data.student_in_group import StudentGroupStatus
+from routes.groups import parse_group_status, put_student_in_group
 from forms.registrationform import RegistrationForm
 from data import db_session
 from data.student import Student
@@ -18,12 +21,31 @@ def students():
 
 # routes/students.py
 
+def get_target_group(session):
+    """Группа, из которой открыли страницу (?group_id=...), чтобы после действия добавить ученика туда"""
+    group_id = request.values.get("group_id", type=int)
+    return session.get(Group, group_id) if group_id else None
+
+
+def safe_next_url(default):
+    """Адрес возврата из ?next=... — только внутренние ссылки этого сайта"""
+    next_url = request.values.get("next", "")
+    if next_url.startswith("/") and not next_url.startswith("//"):
+        return next_url
+    return default
+
+
 @app.route("/add", methods=["POST", "GET"])
 def add():
     form = RegistrationForm()
     session = db_session.create_session()
 
     try:
+        # если пришли со страницы группы — после регистрации сразу добавляем ученика в неё
+        target_group = get_target_group(session)
+        group_status = parse_group_status(request.values.get("status")) or StudentGroupStatus.STUDENT
+        page_args = dict(target_group=target_group, group_status=group_status)
+
         if request.method == "POST":
             region_id = request.form.get("region")
             if region_id:
@@ -54,16 +76,20 @@ def add():
             is_full_data = all(optional_fields)
 
             # Если данные неполные и нет подтверждения
-            if not is_full_data and not form.confirm_candidate.data:
+            # (при добавлении кандидата в группу неполные данные — это нормально, подтверждение не нужно)
+            if not is_full_data and not form.confirm_candidate.data and group_status != StudentGroupStatus.CANDIDATE:
                 flash(
                     "Заполнены не все поля. Ученик будет добавлен как КАНДИДАТ. Подтвердите действие галочкой ниже.", "warning")
-                return render_template("registration.html", form=form, show_confirm=True)
+                return render_template("registration.html", form=form, show_confirm=True, **page_args)
 
             # Проверка на дубликат по ПФДО
             existing_student = session.query(Student).filter(
                 Student.PFDO == form.PFDO.data).first()
             if existing_student:
-                return render_template("registration.html", form=form, message="Ученик с таким номером ПФДО уже существует")
+                message = f"Ученик с таким номером ПФДО уже существует: {existing_student.name_student}"
+                if target_group:
+                    message += ". Чтобы добавить его в группу, воспользуйтесь кнопкой «Найти ученика»"
+                return render_template("registration.html", form=form, message=message, **page_args)
 
             # Получаем названия города и школы безопасно
             city_title = ""
@@ -96,7 +122,7 @@ def add():
                         form.birthday.data, "%d.%m.%Y").date()
                 except ValueError:
                     flash("Неверный формат даты рождения", "danger")
-                    return render_template("registration.html", form=form)
+                    return render_template("registration.html", form=form, **page_args)
 
             user = Student(
                 name_student=form.name_student.data,
@@ -114,13 +140,20 @@ def add():
             )
 
             session.add(user)
-            session.commit()
+            session.flush()
 
+            if target_group:
+                put_student_in_group(session, target_group.id, user.id, group_status)
+                session.commit()
+                flash(f"{group_status.title} {user.name_student} добавлен в группу «{target_group.name_of_group}»", "success")
+                return redirect(f"/groups/{target_group.id}")
+
+            session.commit()
             status = "Кандидат" if not is_full_data else "Ученик"
             flash(f"{status} успешно зарегистрирован!", "success")
             return redirect("/add")
 
-        return render_template("registration.html", form=form)
+        return render_template("registration.html", form=form, **page_args)
     finally:
         session.close()
 
@@ -136,7 +169,10 @@ def edit_student(student_id):
 
         # Инициализируем форму данными из базы
         form = RegistrationForm(obj=student)
-        form.birthday.data = student.birthday.strftime("%d.%m.%Y")
+        if request.method == "GET":
+            # у кандидатов даты рождения может не быть
+            form.birthday.data = student.birthday.strftime("%d.%m.%Y") if student.birthday else ""
+
 
         # Сохраняем текущие значения для отображения в JS (для выпадающих списков)
         curr_city = student.city
@@ -233,7 +269,7 @@ def edit_student(student_id):
 
             db_sess.commit()
             flash("Данные ученика успешно обновлены", "success")
-            return redirect("/students")
+            return redirect(safe_next_url("/students"))
 
         # При GET-запросе или ошибке валидации рендерим шаблон
         # ВАЖНО: передаем student, чтобы в шаблоне работала проверка {% if student.is_candidate %}
@@ -243,7 +279,8 @@ def edit_student(student_id):
             student_id=student_id,
             current_city=curr_city,
             current_school=curr_school,
-            student=student
+            student=student,
+            next_url=safe_next_url("")
         )
     finally:
         db_sess.close()

@@ -64,6 +64,9 @@
 
         <form action="/edit_student/{{ student_id }}" method="post" novalidate class="needs-validation">
             {{ form.hidden_tag() }}
+            {% if next_url %}
+            <input type="hidden" name="next" value="{{ next_url }}">
+            {% endif %}
 
             <div class="row mb-3">
                 <div class="col-md-6 mb-3">

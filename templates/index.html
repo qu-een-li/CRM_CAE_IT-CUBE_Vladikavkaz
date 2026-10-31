@@ -7,6 +7,15 @@
         <span class="text-muted small d-none d-md-block">Направления, группы и количество записанных детей</span>
     </div>
 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
+            </div>
+        {% endfor %}
+    {% endwith %}
+
     <div class="row g-4">
         {% for dir_id, dir_data in directions.items() %}
         <div class="col-lg-4 col-md-6 animate__animated animate__fadeInUp" data-delay="{{ loop.index0 * 100 }}">

@@ -27,6 +27,7 @@
 #     SqlAlchemyBase.metadata.create_all(engine)
 
 
+import os
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
 from sqlalchemy.orm import Session, scoped_session
@@ -47,6 +48,11 @@ def global_init(db_file):
 
     if not db_file or not db_file.strip():
         raise Exception("Необходимо указать файл базы данных.")
+
+    # если файл БД удалили — создаём папку под него, таблицы создаст create_all ниже
+    db_dir = os.path.dirname(db_file.strip())
+    if db_dir:
+        os.makedirs(db_dir, exist_ok=True)
 
     conn_str = f"sqlite:///{db_file.strip()}?check_same_thread=False"
     print(f"Подключение к базе данных по адресу {conn_str}")
@@ -70,6 +76,14 @@ def global_init(db_file):
     from . import __all_models
 
     SqlAlchemyBase.metadata.create_all(engine)
+
+    # пустые таблицы (новая база) заполняем базовыми значениями из base_values.json
+    from .base_values import seed_database
+    session = __factory()
+    try:
+        seed_database(session)
+    finally:
+        __factory.remove()
 
 
 def create_session() -> Session:

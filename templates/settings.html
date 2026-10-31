@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Настройки | IT-Куб Владикавказ{% endblock %}
+
+{% block extra_css %}
+<style>
+    .settings-card { border-radius: 10px; }
+    .settings-card .card-header {
+        background: white; border-bottom: 2px solid #dc3545;
+        font-weight: 600; color: #dc3545; font-size: 1.1rem;
+    }
+    .settings-card .list-group-item { display: flex; align-items: center; gap: 8px; }
+    .settings-card .item-name { flex: 1; }
+    .btn-icon { padding: 2px 8px; }
+    .extra-block { background: #f8f9fa; border-top: 1px dashed #ced4da; font-size: 0.85rem; }
+</style>
+{% endblock %}
+
+{% macro delete_form(section, name, confirm_text) %}
+    <form method="post" action="/settings/{{ section }}/delete" class="m-0"
+          onsubmit="return confirm({{ confirm_text|tojson|forceescape }})">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="name" value="{{ name }}">
+        <button class="btn btn-sm btn-outline-danger btn-icon" title="Удалить"><i class="bi bi-trash"></i></button>
+    </form>
+{% endmacro %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold m-0"><i class="bi bi-gear-fill text-danger me-2"></i>Настройки</h2>
+    </div>
+    <p class="text-muted">
+        Базовые значения центра хранятся в файле <code>base_values.json</code>. Если удалить файл базы данных,
+        при следующем запуске она создастся заново и направления и аудитории заполнятся из этого списка.
+        Добавленное здесь сразу появляется и в текущей базе.
+    </p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
+            </div>
+        {% endfor %}
+    {% endwith %}
+
+    <div class="row g-4">
+        <!-- Типы групп -->
+        <div class="col-lg-4" id="group_types">
+            <div class="card shadow-sm settings-card h-100">
+                <div class="card-header"><i class="bi bi-collection me-2"></i>Типы групп</div>
+                <ul class="list-group list-group-flush">
+                    {% for t in values.group_types %}
+                    <li class="list-group-item">
+                        <span class="item-name">
+                            {{ t.title }}
+                            {% if groups_by_type.get(t.value) %}
+                                <span class="badge bg-light text-muted border">{{ groups_by_type[t.value] }} гр.</span>
+                            {% endif %}
+                        </span>
+                        <form method="post" action="/settings/group_types/weekly" class="m-0">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="value" value="{{ t.value }}">
+                            <button class="btn btn-sm {{ 'btn-success' if t.weekly else 'btn-outline-secondary' }} btn-icon"
+                                    title="{{ 'Занятия повторяются каждую неделю — нажмите, чтобы сделать разовыми' if t.weekly else 'Разовое занятие — нажмите, чтобы повторять каждую неделю' }}">
+                                <i class="bi bi-arrow-repeat"></i> {{ 'еженедельно' if t.weekly else 'разово' }}
+                            </button>
+                        </form>
+                        {{ delete_form('group_types', t.title, 'Удалить тип группы «' ~ t.title ~ '»?') }}
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-muted">Список пуст</li>
+                    {% endfor %}
+                </ul>
+                <div class="card-body">
+                    <form method="post" action="/settings/group_types/add">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="input-group input-group-sm mb-2">
+                            <input type="text" name="name" class="form-control" placeholder="Новый тип группы" required>
+                            <button class="btn btn-danger"><i class="bi bi-plus-lg"></i> Добавить</button>
+                        </div>
+                        <div class="form-check small">
+                            <input class="form-check-input" type="checkbox" name="weekly" id="newTypeWeekly">
+                            <label class="form-check-label" for="newTypeWeekly">занятия каждую неделю</label>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Направления -->
+        <div class="col-lg-4" id="directions">
+            <div class="card shadow-sm settings-card h-100">
+                <div class="card-header"><i class="bi bi-grid me-2"></i>Направления</div>
+                <ul class="list-group list-group-flush">
+                    {% for d in values.directions %}
+                    <li class="list-group-item">
+                        <i class="bi {{ d.icon }} text-danger"></i>
+                        <span class="item-name">
+                            {{ d.name }}
+                            {% if d.name not in db_directions %}
+                                <span class="badge bg-light text-muted border" title="Появится в новой базе">нет в текущей базе</span>
+                            {% endif %}
+                        </span>
+                        {{ delete_form('directions', d.name, 'Удалить направление «' ~ d.name ~ '»? Если в нём есть группы, в текущей базе оно останется.') }}
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-muted">Список пуст</li>
+                    {% endfor %}
+                </ul>
+                <div class="card-body">
+                    <form method="post" action="/settings/directions/add">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="text" name="name" class="form-control form-control-sm mb-2" placeholder="Новое направление" required>
+                        <div class="input-group input-group-sm">
+                            <input type="text" name="icon" class="form-control" placeholder="иконка, например bi-cpu">
+                            <button class="btn btn-danger"><i class="bi bi-plus-lg"></i> Добавить</button>
+                        </div>
+                        <small class="text-muted">Иконки: <a href="https://icons.getbootstrap.com/" target="_blank" rel="noopener">Bootstrap Icons</a></small>
+                    </form>
+                </div>
+                {% if extra_directions %}
+                <div class="card-body extra-block">
+                    <div class="text-muted mb-1">Есть в текущей базе, но не в базовых значениях:</div>
+                    {% for d in extra_directions %}
+                    <form method="post" action="/settings/directions/add" class="d-flex align-items-center gap-2 mb-1">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="name" value="{{ d.name }}">
+                        <input type="hidden" name="icon" value="{{ d.icon_bootstrap }}">
+                        <span class="flex-grow-1"><i class="bi {{ d.icon_bootstrap }}"></i> {{ d.name }}</span>
+                        <button class="btn btn-sm btn-outline-secondary btn-icon" title="Добавить в базовые значения"><i class="bi bi-plus-lg"></i></button>
+                    </form>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Аудитории -->
+        <div class="col-lg-4" id="auditoriums">
+            <div class="card shadow-sm settings-card h-100">
+                <div class="card-header"><i class="bi bi-door-open me-2"></i>Аудитории</div>
+                <ul class="list-group list-group-flush">
+                    {% for name in values.auditoriums %}
+                    <li class="list-group-item">
+                        <span class="item-name">
+                            {{ name }}
+                            {% if name not in db_auditoriums %}
+                                <span class="badge bg-light text-muted border" title="Появится в новой базе">нет в текущей базе</span>
+                            {% endif %}
+                        </span>
+                        {{ delete_form('auditoriums', name, 'Удалить аудиторию «' ~ name ~ '»? Если в ней есть занятия, в текущей базе она останется.') }}
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-muted">Список пуст</li>
+                    {% endfor %}
+                </ul>
+                <div class="card-body">
+                    <form method="post" action="/settings/auditoriums/add">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="input-group input-group-sm">
+                            <input type="text" name="name" class="form-control" placeholder="Новая аудитория" required>
+                            <button class="btn btn-danger"><i class="bi bi-plus-lg"></i> Добавить</button>
+                        </div>
+                    </form>
+                </div>
+                {% if extra_auditoriums %}
+                <div class="card-body extra-block">
+                    <div class="text-muted mb-1">Есть в текущей базе, но не в базовых значениях:</div>
+                    {% for a in extra_auditoriums %}
+                    <form method="post" action="/settings/auditoriums/add" class="d-flex align-items-center gap-2 mb-1">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="name" value="{{ a.name }}">
+                        <span class="flex-grow-1">{{ a.name }}</span>
+                        <button class="btn btn-sm btn-outline-secondary btn-icon" title="Добавить в базовые значения"><i class="bi bi-plus-lg"></i></button>
+                    </form>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

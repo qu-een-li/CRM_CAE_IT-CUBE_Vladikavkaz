@@ -91,22 +91,28 @@
         <form method="POST" action="" novalidate>
             {{ form.hidden_tag() }}
 
+            {% macro field_errors(field) %}
+                {% for error in field.errors %}
+                    <div class="invalid-feedback-custom">{{ error }}</div>
+                {% endfor %}
+            {% endmacro %}
+            {% macro css(field, base) %}{{ base ~ (" is-invalid" if field.errors else "") }}{% endmacro %}
+
             <!-- Основная информация -->
             <div class="form-section">
                 <h3 class="form-section-title">Основная информация</h3>
-                
+
                 <div class="alert-info">
                     <i class="bi bi-info-circle"></i> Заполните все обязательные поля для создания новой учебной группы
                 </div>
-                
+
                 <!-- Название группы -->
                 <div class="row mb-3">
                     <div class="col-12">
                         {{ form.name.label(class="form-label") }}
-                        {{ form.name(class="form-control" ~ (" is-invalid" if form.name.errors else ""), placeholder="Введите название группы") }}
-                        {% for error in form.name.errors %}
-                            <div class="invalid-feedback-custom">{{ error }}</div>
-                        {% endfor %}
+                        {{ form.name(class=css(form.name, "form-control")) }}
+                        <small class="text-muted">Шаблон: <b>Название группы (Пегас, 9-12 лет)</b> — название и возраст детей</small>
+                        {{ field_errors(form.name) }}
                     </div>
                 </div>
 
@@ -114,68 +120,87 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         {{ form.teachers.label(class="form-label") }}
-                        {{ form.teachers(class="form-select" ~ (" is-invalid" if form.teachers.errors else "")) }}
-                        {% for error in form.teachers.errors %}
-                            <div class="invalid-feedback-custom">{{ error }}</div>
-                        {% endfor %}
+                        <div class="input-group">
+                            {{ form.teachers(class=css(form.teachers, "form-select")) }}
+                            <a href="/add_teacher?next=add_group" class="btn btn-outline-danger" id="addTeacherBtn"
+                               title="Наставника нет в списке — добавить нового">
+                                <i class="bi bi-plus-lg"></i>
+                            </a>
+                        </div>
+                        {{ field_errors(form.teachers) }}
                     </div>
                     <div class="col-md-6">
                         {{ form.directions.label(class="form-label") }}
-                        {{ form.directions(class="form-select" ~ (" is-invalid" if form.directions.errors else "")) }}
-                        {% for error in form.directions.errors %}
-                            <div class="invalid-feedback-custom">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                </div>
-                
-                <!-- Период обучения и Аудитория -->
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        {{ form.study_periods.label(class="form-label") }}
-                        {{ form.study_periods(class="form-select" ~ (" is-invalid" if form.study_periods.errors else "")) }}
-                        {% for error in form.study_periods.errors %}
-                            <div class="invalid-feedback-custom">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                    <div class="col-md-6">
-                        {{ form.auditories.label(class="form-label") }}
-                        {{ form.auditories(class="form-select" ~ (" is-invalid" if form.auditories.errors else "")) }}
-                        {% for error in form.auditories.errors %}
-                            <div class="invalid-feedback-custom">{{ error }}</div>
-                        {% endfor %}
+                        {{ form.directions(class=css(form.directions, "form-select")) }}
+                        {{ field_errors(form.directions) }}
                     </div>
                 </div>
 
-                <!-- Глубина знаний -->
+                <!-- Тип группы и Глубина знаний -->
                 <div class="row mb-3">
+                    <div class="col-md-6">
+                        {{ form.group_type.label(class="form-label") }}
+                        {{ form.group_type(class=css(form.group_type, "form-select")) }}
+                        {{ field_errors(form.group_type) }}
+                    </div>
                     <div class="col-md-6">
                         {{ form.levels_of_education.label(class="form-label") }}
                         {{ form.levels_of_education(class="form-select") }}
-                        {% for error in form.levels_of_education.errors %}
-                            <div class="invalid-feedback-custom">{{ error }}</div>
-                        {% endfor %}
+                        {{ field_errors(form.levels_of_education) }}
+                    </div>
+                </div>
+
+                <!-- Период обучения -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        {{ form.study_periods.label(class="form-label") }}
+                        <div class="input-group">
+                            {{ form.study_periods(class=css(form.study_periods, "form-select")) }}
+                            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal"
+                                    data-bs-target="#addPeriodModal" title="Добавить учебный период">
+                                <i class="bi bi-plus-lg"></i>
+                            </button>
+                        </div>
+                        <small class="text-muted">По умолчанию выбран текущий (последний добавленный) период</small>
+                        {{ field_errors(form.study_periods) }}
                     </div>
                 </div>
 
                 <!-- Описание -->
                 <div class="mb-3">
                     {{ form.description.label(class="form-label") }}
-                    {{ form.description(class="form-control", rows="4", placeholder="Опишите предназначение группы") }}
-                    {% for error in form.description.errors %}
-                        <div class="invalid-feedback-custom">{{ error }}</div>
-                    {% endfor %}
+                    {{ form.description(class="form-control", rows="4", placeholder="Для кого группа: возраст, что нужно уметь, нужен ли свой ноутбук и т.п.") }}
+                    {{ field_errors(form.description) }}
                 </div>
             </div>
-            
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    {{ form.duration.label(class="form-label") }}
-                    <!-- Добавляем класс is-invalid если есть ошибки -->
-                    {{ form.duration(class="form-control" ~ (" is-invalid" if form.duration.errors else "")) }}
-                    {% for error in form.duration.errors %}
-                        <div class="invalid-feedback-custom">{{ error }}</div>
-                    {% endfor %}
-                    <small class="text-muted">Формат: ЧЧ:ММ</small>
+
+            <!-- Первое занятие (событие в расписании) -->
+            <div class="form-section">
+                <h3 class="form-section-title">Первое занятие</h3>
+
+                <div class="alert-info">
+                    <i class="bi bi-calendar-event"></i> По этим данным в расписании сразу появится занятие группы.
+                    Для типов групп с еженедельными занятиями (например, полугодовая) оно повторяется каждую неделю
+                    в этот день и время; для остальных создаётся одно занятие, следующие можно добавить в «Добавить событие».
+                    Список типов групп настраивается в <a href="/settings">Настройках</a>.
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        {{ form.start_datetime.label(class="form-label") }}
+                        {{ form.start_datetime(class=css(form.start_datetime, "form-control")) }}
+                        {{ field_errors(form.start_datetime) }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.duration.label(class="form-label") }}
+                        {{ form.duration(class=css(form.duration, "form-select")) }}
+                        {{ field_errors(form.duration) }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.auditories.label(class="form-label") }}
+                        {{ form.auditories(class=css(form.auditories, "form-select")) }}
+                        {{ field_errors(form.auditories) }}
+                    </div>
                 </div>
             </div>
 
@@ -188,4 +213,135 @@
         </form>
     </div>
 </div>
+
+<!-- Модальное окно добавления учебного периода -->
+<div class="modal fade" id="addPeriodModal" tabindex="-1" aria-labelledby="addPeriodModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addPeriodModalLabel">Новый учебный период</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <label for="periodStart" class="form-label">Дата начала</label>
+                        <input type="date" class="form-control" id="periodStart">
+                    </div>
+                    <div class="col-6">
+                        <label for="periodEnd" class="form-label">Дата конца</label>
+                        <input type="date" class="form-control" id="periodEnd">
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <label for="periodName" class="form-label">Название периода</label>
+                    <input type="text" class="form-control" id="periodName" placeholder="сентябрь 2026 - февраль 2027">
+                    <small class="text-muted">Заполняется автоматически по датам, можно изменить</small>
+                </div>
+                <div class="invalid-feedback-custom" id="periodError" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-submit" id="savePeriodBtn">
+                    <i class="bi bi-check-lg"></i> Сохранить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const months = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь',
+                    'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'];
+    const startInput = document.getElementById('periodStart');
+    const endInput = document.getElementById('periodEnd');
+    const nameInput = document.getElementById('periodName');
+    const errorBox = document.getElementById('periodError');
+    const modalEl = document.getElementById('addPeriodModal');
+    // пока пользователь сам не правил название — генерируем его по датам
+    let nameEdited = false;
+
+    function monthYear(value) {
+        const [y, m] = value.split('-');
+        return `${months[parseInt(m, 10) - 1]} ${y}`;
+    }
+
+    function updateName() {
+        if (nameEdited || !startInput.value || !endInput.value) return;
+        nameInput.value = `${monthYear(startInput.value)} - ${monthYear(endInput.value)}`;
+    }
+
+    function showError(text) {
+        errorBox.textContent = text;
+        errorBox.style.display = text ? 'block' : 'none';
+    }
+
+    startInput.addEventListener('change', updateName);
+    endInput.addEventListener('change', updateName);
+    nameInput.addEventListener('input', () => { nameEdited = nameInput.value.trim() !== ''; });
+
+    modalEl.addEventListener('hidden.bs.modal', () => {
+        startInput.value = endInput.value = nameInput.value = '';
+        nameEdited = false;
+        showError('');
+    });
+
+    // ---- черновик формы при переходе по "+" к добавлению наставника ----
+    const groupForm = document.querySelector('.form-card form');
+    const DRAFT_KEY = 'add_group_draft';
+    const draftFields = ['name', 'directions', 'group_type', 'levels_of_education', 'study_periods',
+                         'description', 'start_datetime', 'duration', 'auditories'];
+
+    document.getElementById('addTeacherBtn').addEventListener('click', () => {
+        const draft = {};
+        draftFields.forEach(n => { if (groupForm.elements[n]) draft[n] = groupForm.elements[n].value; });
+        try { sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft)); } catch (e) {}
+    });
+
+    if (new URLSearchParams(location.search).has('teacher_id')) {
+        try {
+            const draft = JSON.parse(sessionStorage.getItem(DRAFT_KEY) || '{}');
+            Object.entries(draft).forEach(([n, v]) => { if (groupForm.elements[n] && v) groupForm.elements[n].value = v; });
+        } catch (e) {}
+    }
+    try { sessionStorage.removeItem(DRAFT_KEY); } catch (e) {}
+
+    document.getElementById('savePeriodBtn').addEventListener('click', () => {
+        if (!startInput.value || !endInput.value) {
+            showError('Укажите дату начала и дату конца периода');
+            return;
+        }
+        if (endInput.value <= startInput.value) {
+            showError('Дата конца должна быть позже даты начала');
+            return;
+        }
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        fetch('/study_periods/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+            body: JSON.stringify({
+                date_start: startInput.value,
+                date_end: endInput.value,
+                reporting_period: nameInput.value.trim()
+            })
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (!data.success) {
+                    showError(data.error || 'Не удалось сохранить период');
+                    return;
+                }
+                // добавляем новый период в список и сразу выбираем его
+                const select = document.getElementById('study_periods');
+                select.add(new Option(data.reporting_period, data.id, true, true));
+                select.classList.remove('is-invalid');
+                bootstrap.Modal.getInstance(modalEl).hide();
+            })
+            .catch(() => showError('Ошибка соединения с сервером'));
+    });
+})();
+</script>
 {% endblock %}

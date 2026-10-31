@@ -9,7 +9,6 @@ from api.api_schools import schools_api
 from data.user import User
 from flask_wtf.csrf import CSRFProtect
 from flask_login import current_user
-from flask_socketio import join_room, SocketIO
 from data.notification import Notification
 
 app = Flask(__name__)

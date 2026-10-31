@@ -18,7 +18,8 @@ from routes import (
     qualification_courses,
     teachers_qualifications,
     teachers_in_contests,
-    notification
+    notification,
+    settings
 )
 import os
 from config import UPLOAD_FOLDER, PORT, HOST

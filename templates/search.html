@@ -43,6 +43,12 @@
     <div class="search-container">
         <h2 class="mb-4 text-center"><i class="bi bi-search me-2 text-danger"></i>Форма поиска учеников</h2>
 
+        {% if target_group %}
+        <div class="alert alert-info d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-people-fill me-1"></i> Найденного ученика можно будет добавить в группу <b>«{{ target_group.name_of_group }}»</b></span>
+            <a href="/groups/{{ target_group.id }}" class="btn btn-sm btn-outline-secondary">Вернуться к группе</a>
+        </div>
+        {% endif %}
         {% with messages = get_flashed_messages() %}
         {% if messages %}
         <div class="alert alert-warning">
@@ -55,6 +61,9 @@
 
         <form action="/search" method="post" novalidate class="needs-validation">
             {{ form.hidden_tag() }}
+            {% if target_group %}
+            <input type="hidden" name="group_id" value="{{ target_group.id }}">
+            {% endif %}
 
             <div class="row mb-3">
                 <div class="col-md-6 mb-3">

@@ -177,8 +177,8 @@
         </li>
 
         <!-- Настройки -->
-        <li class="mb-1 {% if request.path == '/under_construction' %}active{% endif %}">
-            <a href="/under_construction" class="menu-link d-flex align-items-center py-2 px-3 rounded text-decoration-none">
+        <li class="mb-1 {% if request.path == '/settings' %}active{% endif %}">
+            <a href="/settings" class="menu-link d-flex align-items-center py-2 px-3 rounded text-decoration-none">
                 <i class="bi bi-gear-fill me-3 fs-5"></i>
                 <span class="fw-medium">Настройки</span>
             </a>
@@ -204,8 +204,8 @@
 
             <!-- Центральная часть: Время и Дата -->
             <div class="d-none d-lg-flex align-items-center mx-auto">
-                <div class="h3 fw-bold text-danger m-0 me-3" id="current-time" style="min-width: 80px;">16:08</div>
-                <div class="text-muted small" id="current-date">понедельник, 17 августа 2026 г.</div>
+                <div class="h3 fw-bold text-danger m-0 me-3" id="current-time" style="min-width: 80px;">--:--</div>
+                <div class="text-muted small" id="current-date"></div>
             </div>
 
             <!-- Правая часть: Кнопки -->

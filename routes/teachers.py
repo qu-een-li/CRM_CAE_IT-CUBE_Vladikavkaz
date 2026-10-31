@@ -93,6 +93,9 @@ def add_teacher():
 
             session.commit()
             flash("Наставник успешно добавлен", "success")
+            # если наставника добавляли со страницы создания группы — возвращаемся туда и выбираем его
+            if request.values.get("next") == "add_group":
+                return redirect(f"/add_group?teacher_id={teacher.id}")
             return redirect("/teachers")
 
         except Exception as e:

@@ -44,6 +44,16 @@
 
 {% block content %}
 <div class="container mt-4" style="max-width: 98%;">
+    {% if target_group %}
+    <div class="alert alert-info d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-people-fill me-1"></i> Добавление в группу <b>«{{ target_group.name_of_group }}»</b>
+            — найдено: {{ students|length }}</span>
+        <span>
+            <a href="/search?group_id={{ target_group.id }}" class="btn btn-sm btn-outline-secondary">Искать снова</a>
+            <a href="/groups/{{ target_group.id }}" class="btn btn-sm btn-outline-secondary">Вернуться к группе</a>
+        </span>
+    </div>
+    {% endif %}
     <div class="students-table">
         <div class="table-container">
             <table class="table table-hover">
@@ -59,6 +69,7 @@
                         <th>Класс</th>
                         <th>Адрес</th>
                         <th style="width: 30px;"></th>
+                        {% if target_group %}<th style="width: 200px;"></th>{% endif %}
                     </tr>
                 </thead>
                 <tbody>
@@ -84,6 +95,22 @@
                             <td>{{ student.adres_of_living if student.adres_of_living else '—' }}</td>
 
                             <td><a href="/edit_student/{{ student.id }}"><i class="bi bi-pencil edit-icon"></i></a></td>
+                            {% if target_group %}
+                            <td>
+                                {% if student.id in in_group_ids %}
+                                    <span class="text-muted small"><i class="bi bi-check2"></i> Уже в группе</span>
+                                {% else %}
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-success" onclick="addToTargetGroup({{ student.id }}, 0)" title="Добавить как ученика">
+                                            <i class="bi bi-plus-lg"></i> В группу
+                                        </button>
+                                        <button class="btn btn-outline-warning" onclick="addToTargetGroup({{ student.id }}, 1)" title="Добавить как кандидата">
+                                            Кандидатом
+                                        </button>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -91,4 +118,24 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+{% if target_group %}
+<script>
+function addToTargetGroup(studentId, status) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    fetch(`/group/{{ target_group.id }}/add/student/${studentId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        body: JSON.stringify({ status: status })
+    })
+        .then(res => res.json().catch(() => ({})).then(data => {
+            if (!res.ok) throw new Error(data.error || 'Ошибка сервера');
+            window.location.href = '/groups/{{ target_group.id }}';
+        }))
+        .catch(err => alert(err.message));
+}
+</script>
+{% endif %}
 {% endblock %}
